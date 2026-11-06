@@ -42,7 +42,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #app {
   max-width: 720px;
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top, 0px) + 10px) var(--gap) calc(env(safe-area-inset-bottom, 0px) + 24px);
+  padding-block: calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 24px);
+  padding-left: max(var(--gap), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gap), env(safe-area-inset-right, 0px));
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -270,7 +272,7 @@ h1, h2, h3 { font-family: 'Lobster', Georgia, serif; font-weight: normal; margin
   position: fixed; inset: 0; z-index: 50;
   background: rgba(10, 7, 4, .82);
   display: flex; align-items: center; justify-content: center;
-  padding: var(--gap);
+  padding: max(var(--gap), env(safe-area-inset-top, 0px)) max(var(--gap), env(safe-area-inset-right, 0px)) max(var(--gap), env(safe-area-inset-bottom, 0px)) max(var(--gap), env(safe-area-inset-left, 0px));
   animation: fadeIn .25s ease both;
 }
 .dialog {
