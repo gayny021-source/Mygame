@@ -9,6 +9,7 @@ android/captures/
 *.apk
 *.aab
 *.keystore
+!android/debug.keystore
 *.jks
 
 # OS / editors

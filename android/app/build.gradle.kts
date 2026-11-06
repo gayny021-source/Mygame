@@ -14,6 +14,18 @@ android {
         versionName = "1.0"
     }
 
+    // Постоянный отладочный ключ (стандартный пароль «android»): все сборки
+    // подписаны одинаково, и новая версия ставится поверх старой с сохранениями.
+    // Ключ публичный — для Google Play нужен свой, секретный.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = rootProject.file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
