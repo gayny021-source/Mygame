@@ -32,3 +32,44 @@ project:
 modes:
   rigor: standard
   automation: guided
+
+engine:
+  name: "Godot"
+  version: "4.7.2"
+  language: "GDScript"
+  rendering: "Compatibility"
+  physics: "Godot Physics 2D"
+
+specialists:
+  code: "godot-gdscript-specialist"
+  shader: "godot-shader-specialist"
+  ui: "godot-specialist"
+  additional: ["godot-gdextension-specialist"]
+
+naming:
+  classes: PascalCase
+  variables: snake_case
+  constants: SCREAMING_SNAKE
+  signals: past_tense
+  files: snake_case
+  scenes: snake_case
+
+commands:
+  # TODO: godot is not on PATH in the cloud container where /setup-engine ran
+  # (install was not permitted) — set the editor's full path via /settings, or
+  # put `godot` on PATH, before these commands will run.
+  # build: no Android export preset exists yet — set it once export_presets.cfg
+  # has one (the preset name is project-defined).
+  build: "[TO BE CONFIGURED]"
+  test: "godot --headless -s -d --remote-debug tcp://127.0.0.1:0 res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode"
+  # Portrait resolution: the game is a portrait-orientation phone game.
+  run: "godot --path . --windowed --resolution 720x1280"
+  smoke: "godot --headless --quit-after 5"
+
+testing:
+  framework: gdunit4
+
+performance:
+  target_framerate: 60
+  frame_budget_ms: 16.6
+  draw_call_limit: 100
