@@ -1,0 +1,12 @@
+{
+  "name": "Смерть в отпуске",
+  "short_name": "Смерть в отпуске",
+  "description": "Мрачная сказка-квест с кубиком d20 и иллюстрациями в духе мультфильмов 1930-х.",
+  "lang": "ru",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#120d09",
+  "theme_color": "#120d09",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
