@@ -20,7 +20,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(godot --headless *)
 ## 1. Порядок секций (строгий)
 
 ```
-[gd_scene format=3]          ← заголовок (или [gd_resource type="…" format=3] у .tres)
+[gd_scene format=3]          ← заголовок без load_steps (у .tres: [gd_resource type="…" format=3])
 [ext_resource …]             ← все внешние ресурсы: скрипты, текстуры, сцены
 [sub_resource …]             ← все встроенные ресурсы: StyleBox, Shape, Gradient…
 [node …]                     ← дерево: сначала корень, потом дети, родитель выше ребёнка
@@ -30,10 +30,11 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(godot --headless *)
 - **Нарушил порядок — сцена не грузится.** Проверено: `[connection]` перед `[node]`
   или `[ext_resource]` после нод даёт `Parse Error`. То же со ссылкой на
   `SubResource`, которого нет выше по файлу.
-- **Заголовок.** Godot 4.7.2 сам пишет `[gd_scene format=3]`, без `load_steps`.
-  Форма `[gd_scene load_steps=X format=3]` тоже загружается (проверено). Если её
-  используешь, то X = число `[ext_resource]` + число `[sub_resource]` + 1. Редактор
-  при пересохранении `load_steps` убирает.
+- **Заголовок — `[gd_scene format=3]`, без `load_steps`** (решение пользователя
+  2026-11-07, `USER_PREFERENCES.md`). Так пишет и сам Godot 4.7.2.
+  - Старая форма `[gd_scene load_steps=X format=3]` тоже загружается (проверено), но
+    в новых файлах её не пиши.
+  - Встретил её в существующем файле — можно убрать при правке.
 - **`format=` не меняй никогда:** `format=3` — это Godot 4.
 - **`.tres` устроен так же.** Сначала `[gd_resource type="StyleBoxFlat" format=3]`,
   затем ext и sub, а в конце `[resource]` со свойствами самого ресурса.

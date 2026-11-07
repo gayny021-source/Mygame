@@ -1,6 +1,7 @@
-# Variant A (as requested): barichello/godot-ci container + firebelley/godot-export.
-# Copy to .github/workflows/build-apk.yml only after the prerequisites in SKILL.md.
-# NOT YET RUN on GitHub: the first run (workflow_dispatch) is the real check.
+# Main template (user decision 2026-11-07): barichello/godot-ci only. The image
+# already holds Godot 4.7.2, the export templates, JDK 17 and the Android SDK, so
+# nothing is downloaded per run. Copy to .github/workflows/build-apk.yml after the
+# prerequisites in SKILL.md. NOT YET RUN on GitHub.
 name: Build Android APK
 
 on:
@@ -28,15 +29,15 @@ jobs:
         with:
           lfs: true
 
-      # GitHub sets HOME=/github/home inside container jobs; the image keeps its
-      # editor settings (Android SDK and JDK paths) under /root.
-      - name: Copy the image's editor settings to the job HOME
+      # GitHub sets HOME=/github/home inside container jobs; the image keeps
+      # its editor settings and export templates under /root.
+      - name: Move the image's settings and templates to the job HOME
         run: |
-          mkdir -p "$HOME/.config"
+          mkdir -p "$HOME/.config" "$HOME/.local/share/godot/export_templates"
           cp -r /root/.config/godot "$HOME/.config/godot"
+          mv "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
+             "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
 
-      # A fresh debug keystore per run. Godot 4.7.2 reads these variables
-      # (names checked in the 4.7.2 binary); no password is stored in the repo.
       - name: Generate a debug keystore
         run: |
           keytool -genkeypair -v -keystore "$RUNNER_TEMP/debug.keystore" \
@@ -49,28 +50,24 @@ jobs:
             echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android"
           } >> "$GITHUB_ENV"
 
-      # firebelley downloads Godot and the 1.19 GB export templates itself;
-      # `cache: true` keeps them in the Actions cache between runs.
-      - name: Export with godot-export
-        id: export
-        uses: firebelley/godot-export@v8.0.0
-        with:
-          godot_executable_download_url: https://github.com/godotengine/godot-builds/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_linux.x86_64.zip
-          godot_export_templates_download_url: https://github.com/godotengine/godot-builds/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_export_templates.tpz
-          relative_project_path: ./
-          presets_to_export: ${{ env.EXPORT_PRESET }}
-          export_debug: true
-          cache: true
+      - name: Import the project
+        run: godot --headless --path . --import
+
+      - name: Export debug APK
+        run: |
+          mkdir -p build/android
+          godot --headless --path . --export-debug "$EXPORT_PRESET" "build/android/$APK_NAME.apk"
+          test -s "build/android/$APK_NAME.apk"
 
       - name: Upload APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APK_NAME }}-debug
-          path: ${{ steps.export.outputs.build_directory }}/**/*.apk
+          path: build/android/*.apk
           if-no-files-found: error
 
       - name: Attach APK to the Release (tags v* only)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ steps.export.outputs.build_directory }}/**/*.apk
+          files: build/android/*.apk

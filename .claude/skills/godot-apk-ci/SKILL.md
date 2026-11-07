@@ -11,8 +11,9 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(godot --headless *)
 Справочник для агентов. Шаблоны лежат в `templates/`:
 
 - `export_presets.cfg` — пресет экспорта Android;
-- `build-apk.yml` — вариант A: контейнер + `firebelley/godot-export`;
-- `build-apk-container-only.yml` — вариант B: только контейнер.
+- `build-apk.yml` — **основной** (решение пользователя 2026-11-07): только контейнер
+  `barichello/godot-ci`;
+- `build-apk-firebelley.yml` — альтернатива: контейнер + `firebelley/godot-export`.
 
 > **Что проверено (2026-11-07), а что нет.**
 >
@@ -21,7 +22,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(godot --headless *)
 > | Пресет | Godot 4.7.2 его разбирает: экспорт остановился только на отсутствии шаблонов экспорта и Android SDK в контейнере разработки |
 > | Имена опций пресета, переменные `GODOT_ANDROID_KEYSTORE_*` | найдены в бинарнике 4.7.2 |
 > | Образ `barichello/godot-ci:4.7.2` | есть на Docker Hub; состав — по его Dockerfile: JDK 17, Android SDK `/usr/lib/android-sdk`, build-tools 33.0.2, `/root/debug.keystore`, `~/.config/godot/editor_settings-<major.minor>.tres` |
-> | `firebelley/godot-export@v8.0.0` | входы взяты из его README и кода |
+> | `firebelley/godot-export@v8.0.0` (только запасной шаблон) | входы взяты из его README и кода |
 > | Сами workflow | **на GitHub не запускались.** Первый запуск через `workflow_dispatch` и есть проверка |
 >
 > Пока он не прошёл, не называй сборку рабочей.
@@ -40,8 +41,8 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(godot --headless *)
    - Раздела `[display]` сейчас нет: портретную ориентацию и растяжение задай до сборки
      (скилл `tscn-handcrafter`, раздел 5).
    - Нужна и главная сцена `run/main_scene`, иначе APK запустится в пустоту.
-4. **Workflow.** Скопируй выбранный шаблон в `.github/workflows/build-apk.yml`. Он
-   запускается на каждый push в `main`, поэтому сначала договорись с пользователем.
+4. **Workflow.** Скопируй `templates/build-apk.yml` в `.github/workflows/build-apk.yml`.
+   Он запускается на каждый push в `main`, поэтому сначала договорись с пользователем.
 
 ## 2. Пресет `export_presets.cfg` (главное)
 
@@ -63,7 +64,11 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(godot --headless *)
 в `docs/engine-reference/godot/` не описано: `NOT SOURCEABLE`. Требования Google Play к
 целевому SDK проверять перед публикацией, не по памяти.
 
-## 3. Workflow: два варианта
+## 3. Workflow
+
+**Основной — `build-apk.yml`: только контейнер** (решение пользователя 2026-11-07,
+`USER_PREFERENCES.md`). `build-apk-firebelley.yml` — запасной вариант, его не берут без
+причины, названной в задаче.
 
 Общее у обоих:
 
@@ -76,17 +81,13 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(godot --headless *)
 - в контейнерной задаче GitHub ставит `HOME=/github/home`, а образ хранит настройки под
   `/root`, поэтому первым шагом настройки переносятся.
 
-| | A: `build-apk.yml` (как просил пользователь) | B: `build-apk-container-only.yml` (рекомендация) |
+| | `build-apk.yml` (основной) | `build-apk-firebelley.yml` (запасной) |
 |---|---|---|
-| Экспорт | `firebelley/godot-export@v8.0.0` внутри контейнера | `godot --headless --export-debug` прямо в контейнере |
-| Загрузки за прогон | Godot (74 МБ) и **шаблоны экспорта 1,19 ГБ** — их уже содержит образ; `cache: true` смягчает | ничего |
-| Настройки редактора | firebelley кладёт свой `editor_settings-4.tres`, только если файла нет; Godot 4.7 читает `editor_settings-4.7.tres` из образа | из образа |
-| Где APK | `steps.export.outputs.build_directory` | `build/android/` |
-| Лишние зависимости | ещё одно действие со своей версией | нет |
-
-Пока пользователь не выбрал иначе, рабочий шаблон — вариант A (его просили). Вариант B
-предложен как более простой. Решение за пользователем
-(`CLAUDE.md`, «CEO & Devil's Advocate»).
+| Экспорт | `godot --headless --export-debug` прямо в контейнере | `firebelley/godot-export@v8.0.0` внутри контейнера |
+| Загрузки за прогон | ничего | Godot (74 МБ) и **шаблоны экспорта 1,19 ГБ**, которые уже есть в образе; `cache: true` смягчает |
+| Настройки редактора | из образа | firebelley кладёт свой `editor_settings-4.tres`, только если файла нет; Godot 4.7 читает `editor_settings-4.7.tres` из образа |
+| Где APK | `build/android/` | `steps.export.outputs.build_directory` |
+| Лишние зависимости | нет | ещё одно действие со своей версией |
 
 ## 4. Release-ключ (когда понадобится публикация)
 
@@ -104,11 +105,11 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(godot --headless *)
 
 | Сообщение | Причина | Что делать |
 |---|---|---|
-| `No export template found at …/export_templates/4.7.2.stable/` | шаблоны не там, где ищет Godot | вариант B: проверь шаг переноса `/root/.local/share/godot/export_templates` в `$HOME`; вариант A: не стоит `godot_export_templates_download_url` |
+| `No export template found at …/export_templates/4.7.2.stable/` | шаблоны не там, где ищет Godot | основной: проверь шаг переноса `/root/.local/share/godot/export_templates` в `$HOME`; запасной: не задан `godot_export_templates_download_url` |
 | `Invalid Android SDK path in Editor Settings` | настройки редактора не в `$HOME/.config/godot` | шаг копирования `/root/.config/godot` |
 | `Invalid export preset name` | `EXPORT_PRESET` ≠ `name=` в пресете | сверь имена |
 | `Cannot export … configuration errors` без строки про шаблоны или SDK | ошибка в пресете | `godot --headless --path . --export-debug "Android" build/x.apk` локально покажет ту же ошибку |
-| пустой APK или его нет | экспорт тихо не прошёл | вариант B ловит это шагом `test -s`; смотри лог Godot выше |
+| пустой APK или его нет | экспорт тихо не прошёл | основной шаблон ловит это шагом `test -s`; смотри лог Godot выше |
 
 Правки CI проверяет `technical-director`. Первую рабочую сборку стоит установить на
 телефон и снять скриншоты для `mobile-ux-validator`.
