@@ -55,9 +55,8 @@ naming:
   scenes: snake_case
 
 commands:
-  # TODO: godot is not on PATH in the cloud container where /setup-engine ran
-  # (install was not permitted) — set the editor's full path via /settings, or
-  # put `godot` on PATH, before these commands will run.
+  # `godot` is on PATH in the cloud container (/usr/local/bin/godot, 4.7.2).
+  # On another machine, put `godot` on PATH or set the full path via /settings.
   # build: no Android export preset exists yet — set it once export_presets.cfg
   # has one (the preset name is project-defined).
   build: "[TO BE CONFIGURED]"
