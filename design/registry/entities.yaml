@@ -54,7 +54,7 @@
 #   in any other shape is reported as unsupported layout, with its number.
 
 version: 1
-last_updated: ""
+last_updated: "2026-11-07"
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -65,7 +65,22 @@ last_updated: ""
 # Attribute fields: any key stats that could appear in another GDD
 #   (health, damage, drops, faction, etc.)
 
-entities: []
+entities:
+  - name: rovend
+    status: active
+    source: design/gdd/heroes.md
+    referenced_by:
+      - design/gdd/heroes.md
+      - design/gdd/game-concept.md
+    display_name: "сэр Ровенд Непоколебимый"
+    scale: серьёзный
+    strength: 4
+    charisma: 2
+    mind: 0
+    own_stat: faith
+    faith: -1
+    added: 2026-11-07
+    revised: ""
 
 # Example (remove when first real entry is added):
 #
@@ -123,7 +138,20 @@ items: []
 #   output_range[min, max], added
 # Optional: expression (the actual formula), notes
 
-formulas: []
+formulas:
+  - name: stat_bonus
+    status: active
+    source: design/gdd/heroes.md
+    referenced_by:
+      - design/gdd/heroes.md
+    variables:
+      - hero_id
+      - stat_id
+    output_range: [-1, 5]
+    expression: "heroes_data[hero_id].stats[stat_id].bonus"
+    notes: "Read by the d20 checks GDD (not written yet). Constant over a run; a debuff closes a stat but never changes the number."
+    added: 2026-11-07
+    revised: ""
 
 # Example:
 #
@@ -156,7 +184,87 @@ formulas: []
 #
 # Required fields: name, status, source, referenced_by, value, unit, added
 
-constants: []
+constants:
+  - name: stat_bonus_min
+    status: active
+    source: design/gdd/heroes.md
+    referenced_by:
+      - design/gdd/heroes.md
+    value: -1
+    unit: bonus
+    notes: "B_min, heroes.md formula 2; derived from dc_max and chance_window_low."
+    added: 2026-11-07
+    revised: ""
+  - name: stat_bonus_max
+    status: active
+    source: design/gdd/heroes.md
+    referenced_by:
+      - design/gdd/heroes.md
+    value: 5
+    unit: bonus
+    notes: "B_max, heroes.md formula 2; derived from dc_min and chance_window_high."
+    added: 2026-11-07
+    revised: ""
+  - name: profile_gap_min
+    status: active
+    source: design/gdd/heroes.md
+    referenced_by:
+      - design/gdd/heroes.md
+    value: 4
+    unit: bonus
+    notes: "G_min, heroes.md formula 3. The d20 checks GDD must keep the DC spread at or below (P_hi - P_lo)/5 - G_min = 6."
+    added: 2026-11-07
+    revised: ""
+  - name: profile_floor_max
+    status: active
+    source: design/gdd/heroes.md
+    referenced_by:
+      - design/gdd/heroes.md
+    value: 0
+    unit: bonus
+    notes: "F_max, heroes.md formula 3. Forces dc_max <= 16 while chance_window_low is 25."
+    added: 2026-11-07
+    revised: ""
+  - name: dc_min
+    status: active
+    source: design/gdd/heroes.md
+    referenced_by:
+      - design/gdd/heroes.md
+    value: 11
+    unit: dc
+    notes: "Provisional (prototype). Ownership moves to the d20 checks GDD when it is written."
+    added: 2026-11-07
+    revised: ""
+  - name: dc_max
+    status: active
+    source: design/gdd/heroes.md
+    referenced_by:
+      - design/gdd/heroes.md
+    value: 15
+    unit: dc
+    notes: "Provisional (prototype); allowed up to 16 by heroes.md formula 2. Ownership moves to the d20 checks GDD."
+    added: 2026-11-07
+    revised: ""
+  - name: chance_window_low
+    status: active
+    source: design/gdd/heroes.md
+    referenced_by:
+      - design/gdd/heroes.md
+    value: 25
+    unit: percent
+    notes: "P_lo, single roll without a token. Proposal for the d20 checks GDD."
+    added: 2026-11-07
+    revised: ""
+  - name: chance_window_high
+    status: active
+    source: design/gdd/heroes.md
+    referenced_by:
+      - design/gdd/heroes.md
+    value: 75
+    unit: percent
+    notes: "P_hi = 100 - P_lo. Proposal for the d20 checks GDD."
+    added: 2026-11-07
+    revised: ""
 
 # Example:
 #

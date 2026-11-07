@@ -69,9 +69,9 @@
 | 1 | Состояние прохождения | Core | MVP | Designed | [run-state.md](run-state.md) | — |
 | 2 | Ветвящаяся история | Core | MVP | Not Started | — | Состояние прохождения |
 | 3 | Проверки d20 | Gameplay | MVP | Not Started | — | Герои |
-| 4 | Система выбора | Gameplay | MVP | Not Started | — | Ветвящаяся история, Состояние прохождения, Проверки d20 |
+| 4 | Система выбора | Gameplay | MVP | Not Started | — | Ветвящаяся история, Состояние прохождения, Проверки d20, Герои |
 | 5 | Цель главы и маркер прогресса | Gameplay | MVP | Not Started | — | Ветвящаяся история, Состояние прохождения |
-| 6 | Герои | Gameplay | MVP | Not Started | — | — |
+| 6 | Герои | Gameplay | MVP | Designed | [heroes.md](heroes.md) | Состояние прохождения (мягко: схема флагов) |
 | 7 | Жетоны вдохновения | Gameplay | Vertical Slice | Not Started | — | Проверки d20 |
 | 8 | Концовки и эпилог | Narrative | Vertical Slice | Not Started | — | Ветвящаяся история, Состояние прохождения |
 | 9 | Галерея и счётчик веток | Progression | Vertical Slice | Not Started | — | Концовки и эпилог, Сохранение, Иллюстрации сцен |
@@ -130,7 +130,8 @@ Vertical Slice — 5 (один герой целиком: концовки и э
 ### Foundation Layer (no dependencies)
 
 1. Состояние прохождения — флаги, которые читают почти все системы; ошибка здесь дороже всего.
-2. Герои — характеристики и бонусы, на которые опираются проверки, меню и сохранение.
+2. Герои — характеристики и бонусы, на которые опираются проверки, меню и сохранение. Мягко
+   зависит от Состояния прохождения: берёт схему флага для своих объявлений и помех (`heroes.md`).
 
 ### Core Layer (depends on foundation)
 
@@ -139,7 +140,7 @@ Vertical Slice — 5 (один герой целиком: концовки и э
 
 ### Feature Layer (depends on core)
 
-1. Система выбора — depends on: Ветвящаяся история, Состояние прохождения, Проверки d20.
+1. Система выбора — depends on: Ветвящаяся история, Состояние прохождения, Проверки d20, Герои (закрытые помехой характеристики, `heroes.md`).
 2. Цель главы и маркер прогресса — depends on: Ветвящаяся история, Состояние прохождения.
 3. Жетоны вдохновения — depends on: Проверки d20 (у жетонов свой счёт, Состояние их не хранит — `run-state.md`).
 4. Концовки и эпилог — depends on: Ветвящаяся история, Состояние прохождения.
@@ -226,10 +227,10 @@ Effort: S = 1 сессия, M = 2–3 сессии, L = 4+ сессий. Вет�
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 19 |
-| Design docs started | 1 |
+| Design docs started | 2 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 1/10 |
+| MVP systems designed | 2/10 |
 | Vertical Slice systems designed | 0/5 |
 
 ---
