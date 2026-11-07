@@ -12,12 +12,15 @@ extends SceneTree
 ## 1 when any does not, 2 when no file was given.
 ##
 ## A scene whose script fails to parse still loads in Godot 4.7.2 (checked):
-## the node simply runs without its script. So every script the file depends
-## on — directly or through nested scenes and resources, followed recursively —
-## is loaded too, and a script that cannot instantiate fails the file
-## (`SCRIPT FAIL: <script> (in <path>)`). Shaders are NOT judged here: a broken
-## shader still loads as a Shader; its errors only show as engine
-## `SHADER ERROR` lines above the result.
+## the node simply runs without its script. So every external .gd script the
+## file depends on — directly or through nested .tscn/.scn/.tres/.res files,
+## followed recursively — is loaded too, and one that cannot instantiate fails
+## the file (`SCRIPT FAIL: <script> (in <path>)`).
+## NOT checked here: built-in scripts (`[sub_resource type="GDScript"]`) — they
+## are not reported as dependencies — and shaders: a broken shader still loads
+## as a Shader. Headless 4.7.2 does print `SHADER ERROR` when shader code fails
+## to compile (checked via Shader.code), but no such line proves nothing; use
+## the shader check in the procedural-art-sfx skill.
 ##
 ## Observations only: a scene that loads can still be laid out wrongly. Layout
 ## and touch problems are mobile-ux-validator's job, and the look needs a
@@ -70,7 +73,7 @@ func _scripts_ok(path: String) -> bool:
 		visited[current] = true
 		for dep in ResourceLoader.get_dependencies(current):
 			var dep_path: String = dep.get_slice("::", dep.get_slice_count("::") - 1)
-			if dep_path.ends_with(".tscn") or dep_path.ends_with(".tres"):
+			if dep_path.get_extension() in ["tscn", "scn", "tres", "res"]:
 				queue.append(dep_path)
 				continue
 			if not dep_path.ends_with(".gd"):
