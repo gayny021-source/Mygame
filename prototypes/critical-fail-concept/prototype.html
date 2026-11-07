@@ -1,0 +1,733 @@
+<!-- PROTOTYPE - NOT FOR PRODUCTION -->
+<!-- Question: Увидев шансы и бросив d20, игрок получает ветку провала. Считает ли он провал интереснее успеха и хочет ли пройти главу заново? -->
+<!-- Date: 2026-11-07 -->
+<!--
+  Test hook (local file only): open prototype.html?rolls=20,1,14,9 to force the
+  sequence of d20 results and shorten the roll animation. Without the parameter
+  every roll is random and plays at full length.
+-->
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Критический провал</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Seymour+One&family=Lora:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: one phone-width column. Hero strip on top, scene text in the middle,
+   choices pinned to the bottom under the thumb, dice sheet slides over the lower half.
+   Palette: faded two-strip film: paper, ink, brick red, mustard, teal. */
+:root {
+  --bg: #e9dfc6;
+  --card: #f7f0dc;
+  --ink: #17140f;
+  --ink-soft: #5a5142;
+  --red: #b3362b;
+  --mustard: #d9a21b;
+  --teal: #1c7571;
+  --on-accent: #fbf5e4;
+  --shadow: rgba(23, 20, 15, 0.55);
+  --font-display: 'Seymour One', 'Arial Black', 'Trebuchet MS', sans-serif;
+  --font-body: 'Lora', Georgia, 'Times New Roman', serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14110c;
+    --card: #221e16;
+    --ink: #f2e9d2;
+    --ink-soft: #b3a88f;
+    --red: #e0645a;
+    --mustard: #e8b83a;
+    --teal: #46b3ae;
+    --on-accent: #14110c;
+    --shadow: rgba(0, 0, 0, 0.7);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14110c;
+  --card: #221e16;
+  --ink: #f2e9d2;
+  --ink-soft: #b3a88f;
+  --red: #e0645a;
+  --mustard: #e8b83a;
+  --teal: #46b3ae;
+  --on-accent: #14110c;
+  --shadow: rgba(0, 0, 0, 0.7);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+#app {
+  max-width: 520px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-block: 14px 0;
+}
+button { font: inherit; color: inherit; }
+button:focus-visible { outline: 4px solid var(--mustard); outline-offset: 2px; }
+
+/* top strip */
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; }
+.brand { font-family: var(--font-display); font-size: 15px; letter-spacing: 0.02em; white-space: nowrap; }
+.brand small {
+  display: block; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-soft); margin: 2px 0 0;
+}
+.progress { font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
+
+/* hero */
+.hero {
+  border: 3px solid var(--ink); border-radius: 14px; background: var(--card);
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0;
+}
+.hero-name { font-family: var(--font-display); font-size: 16px; line-height: 1.25; }
+.hero-sub { font-size: 13px; color: var(--ink-soft); line-height: 1.35; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-size: 14px; font-weight: 600; padding: 2px 10px; border: 2px solid var(--ink);
+  border-radius: 999px; background: var(--bg); font-variant-numeric: tabular-nums;
+}
+.chip.neg { color: var(--red); }
+.chip.gift { background: var(--mustard); color: var(--ink); }
+:root:not([data-theme="light"]) .chip.gift { color: #14110c; }
+
+/* scene */
+.scene { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; padding-bottom: 8px; }
+.kicker {
+  align-self: flex-start; font-family: var(--font-display); font-size: 12px; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 3px 12px; border-radius: 6px; color: var(--on-accent);
+  background: var(--ink-soft);
+}
+.kicker.win { background: var(--teal); }
+.kicker.fail { background: var(--red); }
+.kicker.end { background: var(--mustard); color: #17140f; }
+.scene h1 {
+  font-family: var(--font-display); font-weight: 400; font-size: 25px; line-height: 1.2; margin: 0;
+  text-wrap: balance;
+}
+.scene p { margin: 0; max-width: 62ch; }
+.scene p + p { margin-top: 2px; }
+.recap {
+  font-family: var(--font-display); font-size: 14px; line-height: 1.4; border: 3px solid var(--ink); border-radius: 10px;
+  padding: 8px 12px; background: var(--card); font-variant-numeric: tabular-nums;
+}
+.howto, .epilogue, .stats {
+  border: 3px dashed var(--ink-soft); border-radius: 12px; padding: 10px 14px; font-size: 16px;
+  background: var(--card);
+}
+.howto b { font-family: var(--font-display); font-weight: 400; font-size: 14px; }
+.epilogue { display: flex; flex-direction: column; gap: 8px; }
+.epilogue .label, .stats .label {
+  font-family: var(--font-display); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.stats { border-style: solid; border-color: var(--ink); display: flex; flex-direction: column; gap: 4px; }
+.stats .big { font-family: var(--font-display); font-size: 19px; line-height: 1.3; }
+
+/* choices */
+.choices {
+  position: sticky; bottom: 0; display: grid; gap: 10px;
+  padding-top: 14px; padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to bottom, transparent, var(--bg) 14px);
+}
+.choice {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; cursor: pointer;
+  width: 100%; min-height: 60px; padding: 12px 16px; border: 3px solid var(--ink); border-radius: 14px;
+  background: var(--card); box-shadow: 0 5px 0 var(--ink); transition: transform 0.08s, box-shadow 0.08s;
+}
+.choice:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.choice-main { font-weight: 600; line-height: 1.3; }
+.choice-meta { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.choice.risky { background: var(--card); border-color: var(--red); box-shadow: 0 5px 0 var(--red); }
+.choice.risky .choice-meta { color: var(--red); font-weight: 600; }
+.choice.primary { background: var(--mustard); color: #17140f; }
+.choice.primary .choice-meta { color: #3b2f0b; }
+
+/* dice sheet */
+.overlay {
+  position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; justify-content: center;
+  background: var(--shadow);
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.overlay[hidden] { display: none; }
+.sheet {
+  width: 100%; max-width: 520px; background: var(--card); border: 3px solid var(--ink); border-radius: 18px;
+  padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  box-shadow: 0 6px 0 var(--ink);
+}
+.sheet-head { font-family: var(--font-display); font-size: 20px; line-height: 1.2; }
+.odds { font-size: 15px; color: var(--ink-soft); line-height: 1.4; }
+.mods { font-size: 14px; line-height: 1.5; width: 100%; display: flex; flex-direction: column; gap: 2px; }
+.mods div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dotted var(--ink-soft); }
+.mods span:last-child { font-variant-numeric: tabular-nums; font-weight: 600; }
+.die { width: 132px; height: 132px; margin: 4px 0; }
+.die svg { width: 100%; height: 100%; overflow: visible; }
+.die .face { fill: var(--mustard); stroke: var(--ink); stroke-width: 5; stroke-linejoin: round; }
+.die .inner { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; opacity: 0.55; }
+.die text { font-family: var(--font-display); font-size: 34px; fill: #17140f; }
+.die.tumble { transform: rotate(14deg) scale(1.04); }
+.die.landed { animation: pop 0.35s ease-out; }
+.die.win .face { fill: var(--teal); }
+.die.win text { fill: var(--on-accent); }
+.die.lose .face { fill: var(--red); }
+.die.lose text { fill: var(--on-accent); }
+.die.lose { animation: shake 0.45s ease-in-out; }
+.die.crit { animation: pop 0.5s ease-out; }
+@keyframes pop { 0% { transform: scale(0.8); } 60% { transform: scale(1.14); } 100% { transform: scale(1); } }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); } 20% { transform: translateX(-9px) rotate(-4deg); }
+  40% { transform: translateX(9px) rotate(4deg); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); }
+}
+.calc { font-family: var(--font-display); font-size: 16px; min-height: 24px; font-variant-numeric: tabular-nums; }
+.verdict { font-family: var(--font-display); font-size: 22px; line-height: 1.2; min-height: 30px; letter-spacing: 0.02em; }
+.verdict.win { color: var(--teal); }
+.verdict.fail { color: var(--red); }
+@media (prefers-reduced-motion: reduce) {
+  .die.tumble, .die.landed, .die.win, .die.lose, .die.crit { animation: none; transform: none; }
+  .choice { transition: none; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">Критический провал<small>прототип</small></div>
+    <div class="progress" id="progress"></div>
+  </header>
+  <section class="hero" id="hero" aria-label="Герой"></section>
+  <main class="scene" id="scene" aria-live="polite"></main>
+  <div class="choices" id="choices"></div>
+</div>
+
+<div class="overlay" id="roll" hidden role="dialog" aria-modal="true" aria-labelledby="rollHead">
+  <div class="sheet">
+    <div class="sheet-head" id="rollHead"></div>
+    <div class="odds" id="rollOdds"></div>
+    <div class="mods" id="rollMods"></div>
+    <div class="die" id="die">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <polygon class="face" points="50,4 92,28 92,72 50,96 8,72 8,28"/>
+        <polygon class="inner" points="50,16 81,34 81,66 50,84 19,66 19,34"/>
+        <text id="dieNum" x="50" y="60" text-anchor="middle">?</text>
+      </svg>
+    </div>
+    <div class="calc" id="rollCalc"></div>
+    <div class="verdict" id="rollVerdict" aria-live="assertive"></div>
+    <button class="choice primary" id="rollBtn" type="button"><span class="choice-main">Бросить d20</span></button>
+  </div>
+</div>
+
+<script>
+// PROTOTYPE - NOT FOR PRODUCTION
+// Question: Увидев шансы и бросив d20, игрок получает ветку провала. Считает ли он провал интереснее успеха и хочет ли пройти главу заново?
+// Date: 2026-11-07
+(function () {
+  'use strict';
+
+  /* ---------- hero (hardcoded on purpose: prototype) ---------- */
+  var HERO = {
+    name: 'Сэр Альрик Непоколебимый',
+    sub: 'Последний паладин Эльмира, Бога Света. Бог скончался во вторник.'
+  };
+  var STATS = {
+    str:   { label: 'Сила',    val: 4 },
+    cha:   { label: 'Обаяние', val: 2 },
+    faith: { label: 'Вера',    val: -1 }
+  };
+  var TOTAL_BRANCHES = 12;
+  var TOTAL_ENDINGS = 3;
+  var SCENE_COUNT = 5;
+
+  /* ---------- test hook: ?rolls=20,1,14 ---------- */
+  var params = new URLSearchParams(location.search);
+  var forced = (params.get('rolls') || '').split(',').filter(Boolean).map(Number);
+  var FAST = forced.length > 0;
+
+  /* ---------- state ---------- */
+  var seen = new Set();   // branch ids seen across all runs in this page load
+  var run = 0;
+  var flags = {};
+  var sceneNo = 1;
+
+  /* ---------- helpers ---------- */
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function fmt(v) { return v >= 0 ? '+' + v : '−' + Math.abs(v); }
+  function rollD20() {
+    if (forced.length) return forced.shift();
+    return 1 + Math.floor(Math.random() * 20);
+  }
+
+  /* ---------- the finale reads what happened earlier ---------- */
+  function finaleMods() {
+    var m = [];
+    if (flags.boris)      m.push({ label: 'Борис верит за двоих', val: 2 });
+    if (flags.villageWin) m.push({ label: 'Деревня снова немного верит', val: 1 });
+    if (flags.tickets)    m.push({ label: 'Свечи на шесть монет', val: 1 });
+    if (flags.harold)     m.push({ label: 'Пароль «Гарольд»', val: 2 });
+    if (flags.message)    m.push({ label: 'Сообщение оставлено, возможно, услышано', val: 1 });
+    return m;
+  }
+  function bonusFor(check) {
+    var base = STATS[check.stat].val;
+    var mods = check.mods ? finaleMods() : [];
+    var total = base;
+    mods.forEach(function (m) { total += m.val; });
+    return { base: base, mods: mods, total: total };
+  }
+  function need(total, dc) { return Math.min(20, Math.max(2, dc - total)); }
+  function chance(total, dc) {
+    var n = dc - total;
+    return Math.min(95, Math.max(5, (21 - n) * 5));
+  }
+  function checkText(check) {
+    var b = bonusFor(check);
+    return STATS[check.stat].label + ' ' + fmt(b.total) + ' · СЛ ' + check.dc + ' · шанс ' + chance(b.total, check.dc) + '%';
+  }
+
+  /* ---------- story data ---------- */
+  var SCENES = {
+    intro: {
+      title: 'Урна',
+      next: 'bridge',
+      howto: true,
+      paras: function () { return [
+        'Бог Света Эльмир скончался во вторник. Официальная причина — старость, одиннадцать тысяч триста сорок два года. Неофициальная — в него в последнее время верили по большей части из вежливости.',
+        'Сэр Альрик Непоколебимый, его последний паладин, получил прах в простой глиняной урне и последнюю волю на обороте счёта за свечи: «Похороните в храме Лунной Тишины. До заката пятницы. Я не хочу ходить по ночам».',
+        'Сегодня пятница. До заката шесть часов. До храма — мост, деревня и лес.',
+        'Альрик взял урну двумя руками, как берут что-то важное. Это и было что-то важное.'
+      ]; },
+      choices: [{ label: 'Идти к мосту', go: 'bridge', primary: true }]
+    },
+
+    bridge: {
+      title: 'Мост через Мутную',
+      paras: function () { return [
+        'Мост через реку Мутную держит тролль в жилетке с нашивкой «Мостовая служба». Он смотрит на Альрика так, как смотрит человек, у которого есть форма и график.',
+        '— Проход — три медяка, — говорит Борис. — Гробы — шесть. Вы с гробом?',
+        '— С урной, — отвечает Альрик.',
+        '— Урны по тарифу «Малый габарит». — Борис листает толстую книгу. — Два медяка. Нет, пять. Книга толстая, я иногда путаюсь.'
+      ]; },
+      choices: [
+        { label: 'Оттеснить тролля щитом', check: { stat: 'str', dc: 13, win: 'bridge_win', fail: 'bridge_fail' } },
+        { label: 'Заплатить два медяка', out: 'bridge_safe' }
+      ]
+    },
+
+    village: {
+      title: 'Мелкие Кочки',
+      paras: function (f) {
+        var p = [
+          'Деревня Мелкие Кочки встречает вас старостой, двумя гусями и транспарантом «ЭЛЬМИР — СПАСИБО, ДАЛЬШЕ САМИ». Именно здесь в него перестали верить всерьёз: прошлой весной, общим голосованием (одиннадцать за, трое против, один гусь воздержался).',
+          '— Прах бога, — староста Фрол разглядывает урну с интересом оценщика. — Редкость. Достопримечательность. Поставим у колодца, будем брать по две монеты с носа.'
+        ];
+        if (f.boris) p.push('Борис, стоящий за плечом Альрика, шепчет: «Сэр, я могу его ударить. Я пока не знаю как, но чувствую в себе это».');
+        if (f.bridgeWin) p.push('Где-то позади, у реки, слабо слышен голос Бориса: «В трёх экземплярах!»');
+        return p;
+      },
+      choices: [
+        { label: 'Воззвать к совести старосты', check: { stat: 'cha', dc: 14, win: 'village_win', fail: 'village_fail' } },
+        { label: 'Обойти деревню огородами', out: 'village_safe' }
+      ]
+    },
+
+    camp: {
+      title: 'Привал',
+      paras: function (f) {
+        var p = [
+          'Лес. Сумерки. Костёр. Впервые за три дня — тишина.',
+          'Альрик ставит урну рядом с огнём и, как делал всю жизнь, обращается к Эльмиру. Привычка сильнее логики. Нужно просто сказать вслух.'
+        ];
+        if (f.boris) p.push('Борис сидит поодаль и очень старается не мешать молитве. Получается плохо: он молится вслух, с выражением, по бумажке из книги тарифов.');
+        return p;
+      },
+      choices: [
+        { label: 'Помолиться и попросить совета', check: { stat: 'faith', dc: 11, win: 'camp_win', fail: 'camp_fail' } },
+        { label: 'Помолчать у костра', out: 'camp_safe' }
+      ]
+    },
+
+    temple: {
+      title: 'Храм Лунной Тишины',
+      paras: function (f) {
+        var p = [
+          'Храм Лунной Тишины стоит на холме. Над дверью табличка: «ХОРОНИМ ПО ЗАПИСИ. БЕЗ ЗАПИСИ — ПО ВЕРЕ». До заката — четверть часа.',
+          'Жрец у дверей, пожилой, с лицом человека, которого уже ничем не удивить, смотрит на урну.',
+          '— Записаны? — спрашивает он.'
+        ];
+        if (f.harold) p.push('Альрик вспоминает слово из блокнота: «Гарольд». Возможно, это важно.');
+        if (f.boris) p.push('— Сэр, — шепчет Борис, — я готов верить за двоих. Я начал вчера, но очень стараюсь.');
+        if (f.tickets) p.push('В кармане у Альрика звенят шесть монет. На свечи хватит.');
+        return p;
+      },
+      choices: [
+        { label: 'Похоронить бога по вере, без записи', check: { stat: 'faith', dc: 15, mods: true, win: 'e_win', fail: 'e_fail' } },
+        { label: 'Сдать прах в регистратуру', out: 'e_safe' }
+      ]
+    }
+  };
+
+  var OUT = {
+    bridge_win: {
+      next: 'village',
+      paras: function () { return [
+        'Щит встречает тролля, как таран встречает ворота, которые не любили своего хозяина. Борис описывает в воздухе красивую дугу и приземляется в реку. Выныривает. Поднимает над головой книгу тарифов — сухую.',
+        '— Я требую акт! — кричит он. — В трёх экземплярах!',
+        'Альрик переходит мост. Позади Борис уже пишет жалобу в Гильдию мостов. Почерк у него красивый.'
+      ]; },
+      set: 'bridgeWin'
+    },
+    bridge_fail: {
+      next: 'village',
+      paras: function () { return [
+        'Альрик бросается вперёд, зацепляется плащом за перила и падает на урну. В крышке появляется трещина; из трещины вырывается облачко праха — аккурат в лицо Борису. Борис чихает. Борис замирает.',
+        '— Я видел свет, — говорит он голосом человека, впервые услышавшего музыку. — Это был не налог. Это было лучше.',
+        'Через минуту тролль стоит перед Альриком по стойке «смирно», прижав к груди книгу тарифов.',
+        '— Сэр. Борис. Паладин. Первый день. Куда идём?',
+        'Альрик не умеет отказывать людям, впервые обретшим веру. Он кивает.'
+      ]; },
+      set: 'boris'
+    },
+    bridge_safe: {
+      next: 'village',
+      paras: function () { return [
+        'Альрик отсчитывает два медяка. Борис выдаёт квитанцию, проверяет её дважды и желает приятного погребения.',
+        'Это самый спокойный эпизод в жизни Альрика. Он не запомнит из него ничего, кроме подписи на квитанции.'
+      ]; }
+    },
+
+    village_win: {
+      next: 'camp',
+      paras: function () { return [
+        '— Староста, — говорит Альрик, и в его голосе нет ни тени улыбки. — Он вас терпел одиннадцать тысяч лет. Позвольте ему уйти без аплодисментов.',
+        'Фрол долго смотрит в землю. Потом снимает шапку. Потом снимает транспарант.',
+        '— Гусь, — говорит он. — Проводи.',
+        'Гусь провожает вас до околицы и шипит вслед с чувством, которое трудно назвать ненавистью. Деревня снова немного верит в Эльмира. Ровно настолько, чтобы устыдиться.'
+      ]; },
+      set: 'villageWin'
+    },
+    village_fail: {
+      next: 'camp',
+      paras: function () { return [
+        '— Староста, — начинает Альрик, — бог заслуживает…',
+        '— …билета! — подхватывает Фрол. — Именно! Паладину вход бесплатный, остальным по две монеты.',
+        'Через десять минут у урны стоит очередь. Альрик, пытавшийся сказать что-то возвышенное, оказывается «сотрудником экспозиции» и держит табличку «Не облокачиваться на бога». К вечеру он заработал шесть монет, один букет и приглашение на свадьбу. Урну, к счастью, никто не открывал.',
+        'Вы уходите. Староста машет вслед. Гусь машет крылом: это не прощание, но ближе к прощанию, чем что-либо ещё в этой деревне.'
+      ]; },
+      set: 'tickets'
+    },
+    village_safe: {
+      next: 'camp',
+      paras: function () { return [
+        'Огородами вы выходите к лесу, потеряв час и немного достоинства: на грядках стоят пугала с лицом старосты.',
+        'Ничего не происходит. Это тоже решение.'
+      ]; }
+    },
+
+    camp_win: {
+      next: 'temple',
+      paras: function () { return [
+        'Тишина. Долгая, плотная. А потом тёплое, знакомое, чуть усталое:',
+        '— Альрик. Ты опять. Я же умер.',
+        '— Знаю, Владыка.',
+        '— Тогда не кричи. Слушай: храм принимает по записи. Скажешь, что от Гарольда. Они поймут.',
+        'Связь обрывается. Альрик сидит ещё минуту. Потом ещё. Потом достаёт блокнот и записывает: «Гарольд».'
+      ]; },
+      set: 'harold'
+    },
+    camp_fail: {
+      next: 'temple',
+      paras: function () { return [
+        'Тишина. Долгая, плотная. А потом щелчок.',
+        '«Здравствуйте. Вы позвонили Эльмиру, Богу Света. В настоящее время абонент недоступен: он умер. Оставьте сообщение после сигнала или, если дело срочное, обратитесь к Владычице Ночи».',
+        'Сигнал был громовым. Лес притих. Альрик ни на секунду не усомнился, что это тоже форма ответа, и оставил сообщение. Оно длилось четыре минуты и включало подробности о том, как в девять лет он боялся козлёнка.',
+        'Где-то в глубине мироздания теперь хранится запись. Её, возможно, когда-нибудь прослушают.'
+      ]; },
+      set: 'message'
+    },
+    camp_safe: {
+      next: 'temple',
+      paras: function () { return [
+        'Альрик молчит. Огонь трещит. Лес слушает. Это, пожалуй, самая честная молитва за всю неделю. Ничего не происходит.',
+        'Утром Альрик просыпается с чувством, что забыл о чём-то спросить.'
+      ]; }
+    },
+
+    e_win: {
+      ending: true,
+      title: 'Достойные похороны',
+      paras: function () { return [
+        'Альрик ставит урну на алтарь, и слова приходят сами. Не молитва, не заклинание, а то, что говорят другу.',
+        '— Ты был строгим, — говорит он. — Ты был занудой. Ты был лучшим, что у нас было.',
+        'Тихо. Потом вспыхивает свет: тёплый, золотистый, усталый, как закат у большой реки. Урна становится лёгкой, как воспоминание. Где-то очень далеко кто-то вздыхает с облегчением.',
+        'Альрик остаётся стоять с пустыми руками. Впервые за неделю он не знает, куда их деть.'
+      ]; }
+    },
+    e_fail: {
+      ending: true,
+      title: 'Призрак с претензиями',
+      paras: function () { return [
+        'Альрик начинает обряд. Слова не идут, выходят кривыми, как телеги после ярмарки. Свет вспыхивает, гаснет, вспыхивает снова. Над урной проступает полупрозрачный старик в одеянии, на котором когда-то было золото.',
+        '— Это был обряд? Это была речь? — спрашивает призрак Эльмира. — Одиннадцать тысяч лет я ждал хоть какого-то уважения, а получил «э-э-э»!',
+        '— Владыка, — ровно отвечает Альрик, — я исполнил волю.',
+        '— Ты исполнил регламент. Это разные вещи.',
+        'Призрак вздыхает, скрещивает руки на груди и устраивается на крыше храма.',
+        '— Ладно. Остаюсь. Буду приглядывать. Призрак — это бог без обязанностей и с правом жаловаться.',
+        'У Альрика впервые за неделю появилась работа. Он слегка улыбается одними глазами. Это единственное, что он себе позволяет.'
+      ]; }
+    },
+    e_safe: {
+      ending: true,
+      title: 'По записи',
+      paras: function (f) { return [
+        'Альрик сдаёт урну в регистратуру. Жрец достаёт книгу и пишет: «Бог, 1 шт., прах, без предварительной записи». Выдаёт талон № 4081. «Ожидайте, вас вызовут».',
+        'Закат наступает. Тихо. Урна стоит на полке между урной Марфы Ивановны и урной кота Васьки. Из неё доносится приглушённое:',
+        f.harold ? '— Гарольд, я сказал. Гарольд!' : '— Вы меня вообще слышите?',
+        'Бог Света Эльмир ожидает своей очереди на погребение. Предположительно, долго.'
+      ]; }
+    }
+  };
+
+  var EPILOGUE = [
+    { flag: 'boris', by: {
+      e_win: 'Борис, паладин, первый день, плачет в сторонке и записывает всё в книгу тарифов.',
+      e_fail: 'Борис, паладин, первый день, аплодирует призраку стоя. Призрак не возражает.',
+      e_safe: 'Борис по собственной инициативе стоит в очереди вместо Альрика. Он очень старается.' } },
+    { flag: 'bridgeWin', all: 'Жалоба Гильдии мостов дошла до храма на следующий день. Приложены три экземпляра.' },
+    { flag: 'message', all: 'Автоответчик Эльмира переполнен. Иногда по ночам оттуда доносится шёпот: «…козлёнок…»' },
+    { flag: 'villageWin', all: 'Деревня Мелкие Кочки повесила на колодец новую табличку: «Эльмир, простите».' },
+    { flag: 'tickets', all: 'Билеты на «прах бога» в Мелких Кочках продавали ещё неделю. Староста заработал больше, чем бог за последние сто лет.' },
+    { flag: 'harold', by: {
+      e_win: 'На надгробии высечено «Гарольд». Эльмир, как выяснилось, давно хотел побыть Гарольдом.',
+      e_fail: 'Призрак просит называть его Гарольдом. Альрик отказывается: уважение требует полного титула.' } }
+  ];
+
+  /* ---------- rendering ---------- */
+  function renderHero() {
+    var box = $('hero');
+    box.replaceChildren();
+    box.appendChild(el('div', 'hero-name', HERO.name));
+    box.appendChild(el('div', 'hero-sub', HERO.sub));
+    var chips = el('div', 'chips');
+    Object.keys(STATS).forEach(function (k) {
+      var s = STATS[k];
+      chips.appendChild(el('span', 'chip' + (s.val < 0 ? ' neg' : ''), s.label + ' ' + fmt(s.val)));
+    });
+    if (flags.boris) chips.appendChild(el('span', 'chip gift', 'Борис, паладин (1-й день)'));
+    if (flags.harold) chips.appendChild(el('span', 'chip gift', 'Имя бога: Гарольд'));
+    if (flags.tickets) chips.appendChild(el('span', 'chip gift', '6 монет'));
+    box.appendChild(chips);
+  }
+
+  function setProgress(text) { $('progress').textContent = text; }
+
+  function paragraphs(parent, list) {
+    list.forEach(function (t) { parent.appendChild(el('p', null, t)); });
+  }
+
+  function renderChoices(list) {
+    var box = $('choices');
+    box.replaceChildren();
+    list.forEach(function (c) {
+      var b = el('button', 'choice' + (c.check ? ' risky' : '') + (c.primary ? ' primary' : ''));
+      b.type = 'button';
+      b.appendChild(el('span', 'choice-main', c.label));
+      if (c.check) b.appendChild(el('span', 'choice-meta', 'Проверка: ' + checkText(c.check)));
+      else if (c.out) b.appendChild(el('span', 'choice-meta', 'Без броска'));
+      b.addEventListener('click', function () { c.onPick(); });
+      box.appendChild(b);
+    });
+  }
+
+  function toTop() { try { window.scrollTo(0, 0); } catch (e) { /* ignore */ } }
+
+  function showScene(id) {
+    var s = SCENES[id];
+    if (id !== 'intro') sceneNo += 1;
+    renderHero();
+    setProgress('Сцена ' + sceneNo + ' из ' + SCENE_COUNT);
+    var box = $('scene');
+    box.replaceChildren();
+    box.appendChild(el('h1', null, s.title));
+    paragraphs(box, s.paras(flags));
+    if (s.howto) {
+      var how = el('div', 'howto');
+      how.appendChild(el('b', null, 'Как играть. '));
+      how.appendChild(document.createTextNode('Варианты с красной рамкой требуют проверки: бросаете d20, прибавляете бонус героя, и если получилось не меньше сложности (СЛ), всё удалось. Шанс виден заранее. Варианты без рамки срабатывают сразу.'));
+      box.appendChild(how);
+    }
+    var list = s.choices.map(function (c) {
+      var item = { label: c.label, check: c.check, out: c.out, primary: c.primary };
+      if (c.go) item.onPick = function () { showScene(c.go); };
+      else if (c.check) item.onPick = function () { runCheck(c.check); };
+      else item.onPick = function () { showOutcome(c.out, null); };
+      return item;
+    });
+    renderChoices(list);
+    toTop();
+  }
+
+  function showOutcome(id, recap) {
+    var o = OUT[id];
+    seen.add(id);
+    if (o.set) flags[o.set] = true;
+    renderHero();
+    if (o.ending) { showEnding(id, recap); return; }
+    var box = $('scene');
+    box.replaceChildren();
+    var kind = /_win$/.test(id) ? 'win' : /_fail$/.test(id) ? 'fail' : 'safe';
+    var label = kind === 'win' ? 'Успех' : kind === 'fail' ? 'Провал' : 'Без броска';
+    box.appendChild(el('div', 'kicker ' + kind, label));
+    if (recap) box.appendChild(el('div', 'recap', recap));
+    paragraphs(box, o.paras(flags));
+    renderChoices([{ label: 'Дальше', primary: true, onPick: function () { showScene(o.next); } }]);
+    toTop();
+  }
+
+  function showEnding(id, recap) {
+    var o = OUT[id];
+    setProgress('Конец');
+    var box = $('scene');
+    box.replaceChildren();
+    box.appendChild(el('div', 'kicker end', 'Концовка'));
+    box.appendChild(el('h1', null, o.title));
+    if (recap) box.appendChild(el('div', 'recap', recap));
+    paragraphs(box, o.paras(flags));
+
+    var lines = [];
+    EPILOGUE.forEach(function (e) {
+      if (!flags[e.flag]) return;
+      var t = e.all || (e.by && e.by[id]);
+      if (t) lines.push(t);
+    });
+    if (lines.length) {
+      var epi = el('div', 'epilogue');
+      epi.appendChild(el('div', 'label', 'Что было потом'));
+      paragraphs(epi, lines);
+      box.appendChild(epi);
+    }
+
+    var endings = ['e_win', 'e_fail', 'e_safe'].filter(function (k) { return seen.has(k); }).length;
+    var st = el('div', 'stats');
+    st.appendChild(el('div', 'label', 'Прохождение № ' + run));
+    st.appendChild(el('div', 'big', 'Веток увидено: ' + seen.size + ' из ' + TOTAL_BRANCHES));
+    st.appendChild(el('div', null, 'Концовок: ' + endings + ' из ' + TOTAL_ENDINGS));
+    box.appendChild(st);
+
+    renderChoices([{ label: 'Пройти заново', primary: true, onPick: newRun }]);
+    toTop();
+  }
+
+  /* ---------- the roll as an event ---------- */
+  function runCheck(check) {
+    var b = bonusFor(check);
+    var st = STATS[check.stat];
+    var overlay = $('roll');
+    var die = $('die');
+    var num = $('dieNum');
+    var btn = $('rollBtn');
+    var n = need(b.total, check.dc);
+
+    $('rollHead').textContent = 'Проверка: ' + st.label;
+    $('rollOdds').textContent = 'Бонус ' + fmt(b.total) + ' против сложности ' + check.dc +
+      '. Нужно выбросить ' + n + ' или больше. Шанс ' + chance(b.total, check.dc) + '%.';
+    var mods = $('rollMods');
+    mods.replaceChildren();
+    var rows = [{ label: st.label, val: b.base }].concat(b.mods);
+    if (b.mods.length) {
+      rows.forEach(function (r) {
+        var d = el('div');
+        d.appendChild(el('span', null, r.label));
+        d.appendChild(el('span', null, fmt(r.val)));
+        mods.appendChild(d);
+      });
+    }
+    die.className = 'die';
+    num.textContent = '?';
+    $('rollCalc').textContent = '';
+    var verdict = $('rollVerdict');
+    verdict.textContent = '';
+    verdict.className = 'verdict';
+    btn.disabled = false;
+    btn.firstChild.textContent = 'Бросить d20';
+    overlay.hidden = false;
+    btn.focus();
+
+    btn.onclick = function () {
+      btn.disabled = true;
+      var finalRoll = rollD20();
+      var delay = FAST ? 4 : 45;
+      var limit = FAST ? 14 : 300;
+      (function tick() {
+        num.textContent = String(1 + Math.floor(Math.random() * 20));
+        die.classList.toggle('tumble');
+        delay *= 1.16;
+        if (delay < limit) setTimeout(tick, delay); else land();
+      })();
+
+      function land() {
+        die.classList.remove('tumble');
+        num.textContent = String(finalRoll);
+        die.classList.add('landed');
+        setTimeout(reveal, FAST ? 8 : 700);
+      }
+
+      function reveal() {
+        var total = finalRoll + b.total;
+        var crit = finalRoll === 20 || finalRoll === 1;
+        var success = finalRoll === 20 || (finalRoll !== 1 && total >= check.dc);
+        die.classList.remove('landed');
+        die.classList.add(success ? 'win' : 'lose');
+        if (crit) die.classList.add('crit');
+        $('rollCalc').textContent = finalRoll + ' ' + (b.total >= 0 ? '+' : '−') + ' ' + Math.abs(b.total) +
+          ' = ' + total + ' против СЛ ' + check.dc;
+        verdict.textContent = finalRoll === 20 ? 'Критический успех!' : finalRoll === 1 ? 'Критический провал!' : success ? 'Успех' : 'Провал';
+        verdict.className = 'verdict ' + (success ? 'win' : 'fail');
+        try { if (navigator.vibrate) navigator.vibrate(success ? [30] : [60, 40, 60]); } catch (e) { /* ignore */ }
+        btn.firstChild.textContent = 'Что было дальше';
+        btn.disabled = false;
+        btn.focus();
+        btn.onclick = function () {
+          overlay.hidden = true;
+          var recap = 'Бросок: ' + finalRoll + ' ' + (b.total >= 0 ? '+' : '−') + ' ' + Math.abs(b.total) +
+            ' = ' + total + ' против СЛ ' + check.dc + (crit ? (success ? ' — критический успех' : ' — критический провал') : '');
+          showOutcome(success ? check.win : check.fail, recap);
+        };
+      }
+    };
+  }
+
+  /* ---------- start ---------- */
+  function newRun() {
+    run += 1;
+    flags = {};
+    sceneNo = 1;
+    renderHero();
+    showScene('intro');
+  }
+  newRun();
+})();
+</script>
+</body>
+</html>
