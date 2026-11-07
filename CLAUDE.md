@@ -76,8 +76,8 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 
 1. **Без пользователя.** Разногласия и ошибки, найденные аудиторами, аудиторы и
    профильные директора решают строго между собой, в фоновом режиме. Пользователя
-   не привлекать и разрешения на исправления не спрашивать. Для исправлений по итогам
-   аудита это исключение из Collaboration Protocol: вопрос «May I write…» не задаётся.
+   в спор не привлекать. Collaboration Protocol при этом действует: перед записью
+   исправлений в файлы спрашивать «May I write this to [filepath]?».
 2. **Кто с кем спорит.**
    - `godot-mobile-auditor` ↔ `technical-director` — код GDScript и сцены `.tscn`.
    - `lore-inquisitor` ↔ `narrative-director` — сюжет, диалоги, лор, описания, квесты.
@@ -99,7 +99,8 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
    2 раундов консенсуса нет, директор применяет статус `[DIRECTOR OVERRIDE]`, фиксирует
    финальное решение с обоснованием (в сообщении коммита и в
    `production/session-state/active.md`), вносит нужные правки через исполнителей
-   (`writer`, `gameplay-programmer` и др.) и двигает задачу дальше.
+   (`writer`, `gameplay-programmer` и др.), спросив разрешение на запись, и двигает
+   задачу дальше.
    - Решения пользователя, записанные в `USER_PREFERENCES.md` (рейтинг и границы,
      тон, имена и т. п.), — рамка спора, а не его предмет: ни аудитор, ни директор их
      не отменяют, в том числе через `[DIRECTOR OVERRIDE]`.
