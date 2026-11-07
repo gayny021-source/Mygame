@@ -253,6 +253,18 @@ write…» и называет пути в `tests/`.
 закрытым: задача дальше не двигается, а сводка для пользователя (п. 5 протокола спора)
 пишется только после того, как обе записи внесены.
 
+## Технические скиллы (читать только перед своей задачей)
+
+Справочники, проверенные на Godot 4.7.2. В общий контекст их не грузить: агент
+читает нужный `SKILL.md` (через Skill или Read) только перед соответствующей задачей.
+
+| Задача | Скилл |
+|---|---|
+| Написать или поправить `.tscn` / `.tres` руками, якоря и вёрстка под 16:9–20:9 | `.claude/skills/tscn-handcrafter/SKILL.md` |
+| Нарисовать SVG, написать 2D-шейдер, сделать звук кодом | `.claude/skills/procedural-art-sfx/SKILL.md` |
+| Отдача на касание: Tween, частицы, вибрация | `.claude/skills/mobile-juice/SKILL.md` |
+| Сборка Android APK в GitHub Actions, `export_presets.cfg` | `.claude/skills/godot-apk-ci/SKILL.md` |
+
 > **First session?** If the project has no engine configured and no game concept,
 > run `/start` to begin the guided onboarding flow.
 

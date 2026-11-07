@@ -1,0 +1,97 @@
+[gd_scene format=3]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_choice"]
+bg_color = Color(0.93, 0.86, 0.7, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.1, 0.08, 0.06, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="ReadingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Paper" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.98, 0.94, 0.84, 1)
+
+[node name="Safe" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 96
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 72
+
+[node name="Column" type="VBoxContainer" parent="Safe"]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="TopBar" type="HBoxContainer" parent="Safe/Column"]
+layout_mode = 2
+
+[node name="Goal" type="Label" parent="Safe/Column/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+text = "Цель главы"
+autowrap_mode = 3
+
+[node name="Progress" type="Label" parent="Safe/Column/TopBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "2 / 5"
+
+[node name="Scroll" type="ScrollContainer" parent="Safe/Column"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Story" type="RichTextLabel" parent="Safe/Column/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 1
+theme_override_font_sizes/normal_font_size = 44
+bbcode_enabled = true
+text = "Текст сцены."
+fit_content = true
+
+[node name="Choices" type="VBoxContainer" parent="Safe/Column"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Choice1" type="Button" parent="Safe/Column/Choices"]
+custom_minimum_size = Vector2(0, 144)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_choice")
+text = "Вариант 1"
+autowrap_mode = 3
+
+[node name="Choice2" type="Button" parent="Safe/Column/Choices"]
+custom_minimum_size = Vector2(0, 144)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_choice")
+text = "Вариант 2"
+autowrap_mode = 3
