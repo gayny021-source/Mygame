@@ -23,19 +23,24 @@ const REST_KEY := &"_juice_rest"
 
 ## Ends the running juice animation on `node` at once and leaves it at rest.
 ## Use it for "skip animation", the reduce-motion setting, and before driving
-## the same node with any other Tween.
+## the same node with any other Tween. Rest values are restored ONLY when a
+## Tween is still running: after a finished animation the node is already at
+## rest, and the game may have moved or dimmed it since.
 static func finish(node: CanvasItem) -> void:
 	if not is_instance_valid(node):
 		return
+	var running := false
 	if node.has_meta(TWEEN_KEY):
 		var old: Tween = node.get_meta(TWEEN_KEY)
-		if old != null and old.is_valid():
+		running = old != null and old.is_valid()
+		if running:
 			old.kill()
 		node.remove_meta(TWEEN_KEY)
 	if node.has_meta(REST_KEY):
-		var rest: Dictionary = node.get_meta(REST_KEY)
-		for path: String in rest:
-			node.set_indexed(NodePath(path), rest[path])
+		if running:
+			var rest: Dictionary[String, Variant] = node.get_meta(REST_KEY)
+			for path: String in rest:
+				node.set_indexed(NodePath(path), rest[path])
 		node.remove_meta(REST_KEY)
 
 
@@ -110,7 +115,7 @@ static func buzz(enabled: bool, duration_ms := 30, amplitude := -1.0) -> void:
 	Input.vibrate_handheld(duration_ms, amplitude)
 
 
-static func _restart(node: CanvasItem, rest: Dictionary) -> Tween:
+static func _restart(node: CanvasItem, rest: Dictionary[String, Variant]) -> Tween:
 	finish(node)
 	node.set_meta(REST_KEY, rest)
 	var tw := node.create_tween()

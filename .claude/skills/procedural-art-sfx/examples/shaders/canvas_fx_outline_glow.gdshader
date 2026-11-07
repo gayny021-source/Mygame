@@ -4,7 +4,8 @@
 // Budget: 8 neighbour texture samples per pixel — fine for one sprite, NOT for a
 // full-screen layer. Leave transparent padding >= radius_px around the sprite, or the
 // glow is clipped at the texture edge. No fallback tier: drop the shader if a device
-// struggles. COLOR on entry = texture(TEXTURE, UV) * vertex color * modulate (4.7.2).
+// struggles. COLOR on entry = texture(TEXTURE, UV) * vertex color * modulate (4.7.2);
+// the glow takes the vertex alpha through a varying, so a faded-out sprite has no glow.
 shader_type canvas_item;
 
 // cos(45°) = sin(45°): puts the four diagonal samples on the same radius as the axis ones.
@@ -19,6 +20,12 @@ uniform float pulse_speed : hint_range(0.0, 10.0) = 2.0;
 uniform float pulse_depth : hint_range(0.0, 1.0) = 0.25;
 group_uniforms;
 
+varying mediump vec4 v_color;
+
+void vertex() {
+	v_color = COLOR;
+}
+
 void fragment() {
 	mediump vec4 c = COLOR;
 	vec2 px = TEXTURE_PIXEL_SIZE * radius_px;
@@ -32,6 +39,6 @@ void fragment() {
 	a = max(a, texture(TEXTURE, UV + vec2(px.x, -px.y) * DIAGONAL).a);
 	a = max(a, texture(TEXTURE, UV + vec2(-px.x, px.y) * DIAGONAL).a);
 	mediump float pulse = (1.0 - pulse_depth) + pulse_depth * sin(mod(TIME * pulse_speed, TWO_PI));
-	mediump vec4 glow = vec4(glow_color.rgb, glow_color.a * a * pulse);
+	mediump vec4 glow = vec4(glow_color.rgb, glow_color.a * a * pulse * v_color.a);
 	COLOR = mix(glow, c, c.a);
 }

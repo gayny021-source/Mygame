@@ -13,8 +13,11 @@ extends SceneTree
 ##
 ## A scene whose script fails to parse still loads in Godot 4.7.2 (checked):
 ## the node simply runs without its script. So every script the file depends
-## on is loaded too, and a script that cannot instantiate fails the file
-## (`SCRIPT FAIL: <script> (in <path>)`).
+## on — directly or through nested scenes and resources, followed recursively —
+## is loaded too, and a script that cannot instantiate fails the file
+## (`SCRIPT FAIL: <script> (in <path>)`). Shaders are NOT judged here: a broken
+## shader still loads as a Shader; its errors only show as engine
+## `SHADER ERROR` lines above the result.
 ##
 ## Observations only: a scene that loads can still be laid out wrongly. Layout
 ## and touch problems are mobile-ux-validator's job, and the look needs a
@@ -54,18 +57,29 @@ func _initialize() -> void:
 	quit(1 if failed > 0 else 0)
 
 
-## Loads every script `path` depends on; false if any fails to parse.
+## Loads every script `path` depends on, following nested .tscn/.tres files;
+## false if any script fails to parse.
 func _scripts_ok(path: String) -> bool:
 	var ok := true
-	for dep in ResourceLoader.get_dependencies(path):
-		var dep_path: String = dep.get_slice("::", dep.get_slice_count("::") - 1)
-		if not (dep_path.ends_with(".gd") or dep_path.ends_with(".gdshader")):
+	var visited := {}
+	var queue: Array[String] = [path]
+	while not queue.is_empty():
+		var current: String = queue.pop_back()
+		if visited.has(current):
 			continue
-		var script_res := ResourceLoader.load(dep_path, "", ResourceLoader.CACHE_MODE_IGNORE)
-		var broken := script_res == null
-		if script_res is Script:
-			broken = not (script_res as Script).can_instantiate()
-		if broken:
-			printerr("SCRIPT FAIL: ", dep_path, " (in ", path, ")")
-			ok = false
+		visited[current] = true
+		for dep in ResourceLoader.get_dependencies(current):
+			var dep_path: String = dep.get_slice("::", dep.get_slice_count("::") - 1)
+			if dep_path.ends_with(".tscn") or dep_path.ends_with(".tres"):
+				queue.append(dep_path)
+				continue
+			if not dep_path.ends_with(".gd"):
+				continue
+			var script_res := ResourceLoader.load(dep_path, "", ResourceLoader.CACHE_MODE_IGNORE)
+			var broken := script_res == null
+			if script_res is Script:
+				broken = not (script_res as Script).can_instantiate()
+			if broken:
+				printerr("SCRIPT FAIL: ", dep_path, " (in ", current, ", checked for ", path, ")")
+				ok = false
 	return ok

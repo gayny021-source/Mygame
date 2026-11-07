@@ -12,8 +12,8 @@ shader_type canvas_item;
 const float SECOND_WAVE_FREQUENCY = 0.7;
 const float SECOND_WAVE_SPEED = 1.3;
 const float SECOND_WAVE_DEPTH = 0.5;
-// TIME wraps here to keep sin() inputs small on mobile GPUs.
-const float TIME_WRAP = 100.0;
+// Each wave phase wraps on a full period, so there is no jump and sin() inputs stay small.
+const float TWO_PI = 6.2831853;
 
 group_uniforms wave_motion;
 uniform float amplitude : hint_range(0.0, 0.05) = 0.01;
@@ -30,9 +30,10 @@ void vertex() {
 }
 
 void fragment() {
-	float t = mod(TIME, TIME_WRAP);
+	float phase1 = mod(TIME * speed, TWO_PI);
+	float phase2 = mod(TIME * speed * SECOND_WAVE_SPEED, TWO_PI);
 	vec2 uv = UV;
-	uv.x += sin(uv.y * frequency + t * speed) * amplitude;
-	uv.y += cos(uv.x * frequency * SECOND_WAVE_FREQUENCY + t * speed * SECOND_WAVE_SPEED) * amplitude * SECOND_WAVE_DEPTH;
+	uv.x += sin(uv.y * frequency + phase1) * amplitude;
+	uv.y += cos(uv.x * frequency * SECOND_WAVE_FREQUENCY + phase2) * amplitude * SECOND_WAVE_DEPTH;
 	COLOR = texture(TEXTURE, uv) * tint * v_color;
 }

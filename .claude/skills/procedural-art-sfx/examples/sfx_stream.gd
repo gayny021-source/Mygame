@@ -17,6 +17,9 @@ const MIN_FREQ := 20.0
 const MAX_FREQ := RATE * 0.45
 const FALLBACK_FREQ := 220.0
 const VOLUME := 0.2
+## Upper bound on chunks pushed per frame (32 × 512 frames, far more than a
+## 0.25 s buffer holds), so the loop ends even if the engine kept reporting space.
+const MAX_CHUNKS_PER_FRAME := 32
 
 ## Tone in Hz. Non-finite or out-of-range values are clamped, so a NaN from a
 ## caller's division (e.g. progress / total with total == 0) cannot poison the phase.
@@ -55,7 +58,9 @@ func _process(_delta: float) -> void:
 		return
 	var f := freq if is_finite(freq) else FALLBACK_FREQ
 	var step := TAU * clampf(f, MIN_FREQ, MAX_FREQ) / RATE
-	while _playback.get_frames_available() >= CHUNK:
+	var budget := MAX_CHUNKS_PER_FRAME
+	while budget > 0 and _playback.get_frames_available() >= CHUNK:
+		budget -= 1
 		for i in CHUNK:
 			var s := sin(_phase) * VOLUME
 			_buf[i] = Vector2(s, s)

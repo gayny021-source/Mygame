@@ -31,6 +31,13 @@ group_uniforms;
 
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear, repeat_disable;
 
+// Vertex alpha (with modulate) lets the layer fade in and out through modulate:a.
+varying mediump vec4 v_color;
+
+void vertex() {
+	v_color = COLOR;
+}
+
 // Classic one-line hash: dot with two irrational-ish constants, sin, keep the fraction.
 // highp on purpose: the large multiplier needs full precision.
 float hash(highp vec2 p) {
@@ -48,5 +55,5 @@ void fragment() {
 	float line_x = hash(vec2(t, 7.0));
 	mediump float line = step(SCRATCH_SHARPNESS, 1.0 - abs(SCREEN_UV.x - line_x)) * step(1.0 - scratches, hash(vec2(t, 3.0)));
 	col = mix(col, SCRATCH_COLOR, line * SCRATCH_STRENGTH);
-	COLOR = vec4(col * paper_tint.rgb, 1.0);
+	COLOR = vec4(col * paper_tint.rgb, v_color.a);
 }

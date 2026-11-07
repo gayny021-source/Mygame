@@ -2,16 +2,19 @@ class_name SafeAreaMargins
 extends MarginContainer
 ## Keeps everything inside this container out of camera cutouts and system bars.
 ##
-## Each margin = max(base margin, the display's real inset converted to viewport
-## pixels). Recomputed on start and whenever the viewport size changes.
+## Each margin = max(base margin, real inset + AIR) where the display reports an
+## inset (camera cutout, system bar), else the base margin. AIR keeps text from
+## touching the cutout. Recomputed on start and whenever the viewport size changes.
 ## API checked in Godot 4.7.2 (ClassDB): DisplayServer.get_display_safe_area()
-## -> Rect2i in screen pixels. On desktop and headless it returns an empty rect;
-## then only the base margins apply.
+## -> Rect2i in screen pixels. Headless it returns an empty rect (checked); then
+## only the base margins apply. What desktop returns has not been checked.
 
 @export var base_left := 48
 @export var base_top := 96
 @export var base_right := 48
 @export var base_bottom := 72
+## Extra viewport pixels kept between a reported inset and the content.
+@export var air := 24
 
 
 func _ready() -> void:
@@ -26,10 +29,15 @@ func _apply() -> void:
 		DisplayServer.window_get_size(),
 		get_viewport().get_visible_rect().size
 	)
-	add_theme_constant_override("margin_left", maxi(base_left, insets[0]))
-	add_theme_constant_override("margin_top", maxi(base_top, insets[1]))
-	add_theme_constant_override("margin_right", maxi(base_right, insets[2]))
-	add_theme_constant_override("margin_bottom", maxi(base_bottom, insets[3]))
+	add_theme_constant_override("margin_left", margin_for(base_left, insets[0], air))
+	add_theme_constant_override("margin_top", margin_for(base_top, insets[1], air))
+	add_theme_constant_override("margin_right", margin_for(base_right, insets[2], air))
+	add_theme_constant_override("margin_bottom", margin_for(base_bottom, insets[3], air))
+
+
+## Base margin when there is no inset; otherwise inset + air, never below base.
+static func margin_for(base: int, inset: int, air_px: int) -> int:
+	return base if inset <= 0 else maxi(base, inset + air_px)
 
 
 ## Pure conversion, unit-testable: returns [left, top, right, bottom] insets in

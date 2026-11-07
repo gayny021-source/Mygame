@@ -15,6 +15,30 @@ Last verified: 2026-10-17 (4.7 changes); 2026-02-12 (rest) | Engine: Godot 4.7
 - **`Control.offset_transform_*`**: visual offset transforms that containers
   do not reset; **`PopupMenu`** can show a search bar (4.7 release notes: https://godotengine.org/releases/4.7/)
 
+### Verified in the installed 4.7.2 binary (ClassDB and headless runs, 2026-11-07)
+
+Checked with `godot --headless` against `4.7.2.stable.official.ed1daf0bf`, not from
+release notes:
+
+- **Safe area:** `DisplayServer.get_display_safe_area() -> Rect2i` (screen pixels),
+  `DisplayServer.get_display_cutouts() -> Array`, `DisplayServer.screen_get_usable_rect(screen) -> Rect2i`.
+  Headless returns an empty rect.
+- **`Control.offset_transform_*`:** `_enabled` (default false), `_position` (px),
+  `_position_ratio`, `_scale`, `_rotation`, `_pivot` (px), `_pivot_ratio` (default
+  0.5, 0.5), `_visual_only` (default true). With it set, the layout rect and the global
+  transform stay unchanged and containers do not reset it.
+- **`mouse_filter`:** `STOP = 0`, `PASS = 1`, `IGNORE = 2`. Defaults: Control,
+  ColorRect, Panel, Button and RichTextLabel are STOP; TextureRect, MarginContainer,
+  VBoxContainer and ScrollContainer are PASS; Label is IGNORE.
+- **Default theme:** text is light (Label `#ffffff`, Button `#dfdfdf`, RichTextLabel
+  `default_color #ffffff`); the fallback font (Open Sans SemiBold) has Cyrillic.
+- **App lifecycle notifications (Node):** `NOTIFICATION_WM_GO_BACK_REQUEST = 1007`,
+  `NOTIFICATION_APPLICATION_RESUMED = 2014`, `_PAUSED = 2015`, `_FOCUS_IN = 2016`,
+  `_FOCUS_OUT = 2017`.
+- **Project display defaults** for a `project.godot` without `[display]`: viewport
+  1152×648, `stretch/mode = disabled`, `stretch/aspect = keep`,
+  `handheld/orientation = 0` (Landscape; Portrait = 1).
+
 ### 4.6 Changes
 - **Dual-focus system**: Mouse/touch focus is now SEPARATE from keyboard/gamepad focus
   - Visual feedback differs by input method
