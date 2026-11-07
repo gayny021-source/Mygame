@@ -38,7 +38,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(godot --headless *)
    - В шаблоне стоит заглушка `com.example.kritproval`.
    - После первой публикации имя пакета не меняется никогда. Выбирает его пользователь.
 3. **Настройки экрана в `project.godot`.**
-   - Раздела `[display]` сейчас нет: портретную ориентацию и растяжение задай до сборки
+   - Раздел `[display]` добавлен 2026-11-07 (портрет, 1080×1920, `canvas_items`, `expand`); если его нет, задай до сборки
      (скилл `tscn-handcrafter`, раздел 5).
    - Нужна и главная сцена `run/main_scene`, иначе APK запустится в пустоту.
 4. **Workflow.** Скопируй `templates/build-apk.yml` в `.github/workflows/build-apk.yml`.

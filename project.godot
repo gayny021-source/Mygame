@@ -11,6 +11,17 @@ config_version=5
 config/name="Критический провал"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[display]
+
+; Portrait phone layout (user decision: portrait, touch). Base 1080x1920 is the
+; shortest supported ratio; aspect "expand" grows the height on 19.5:9 and 20:9.
+; Values checked against the Godot 4.7.2 property hints (Portrait = 1).
+window/size/viewport_width=1080
+window/size/viewport_height=1920
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
