@@ -62,6 +62,13 @@ Every task follows: **Question -> Options -> Decision -> Draft -> Approval**
 
 See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 
+## Hot-Reload Review Gate
+
+Во всех текущих и будущих задачах после работы любого программиста или сценариста
+запускай субагентную проверку через `godot-mobile-auditor` (для кода/сцен) или
+`lore-inquisitor` (для текста). Не показывай мне сырой результат, пока аудитор не
+выдаст [PASS].
+
 > **First session?** If the project has no engine configured and no game concept,
 > run `/start` to begin the guided onboarding flow.
 
