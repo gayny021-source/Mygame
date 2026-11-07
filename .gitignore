@@ -28,6 +28,8 @@ production/session-state/
 
 # === Local sandboxes and scratch work ===
 examples/
+# ...but the skills' own example code ships with the skills.
+!.claude/skills/*/examples/
 sandbox/
 sandboxes/
 tests/sandboxes/
@@ -69,6 +71,8 @@ dist/
 !**/.godot/global_script_class_cache.cfg
 *.translation
 export_presets.cfg
+# ...except the preset template the godot-apk-ci skill ships (no secrets in it).
+!.claude/skills/godot-apk-ci/templates/export_presets.cfg
 # Uncomment if using Godot:
 # *.import
 

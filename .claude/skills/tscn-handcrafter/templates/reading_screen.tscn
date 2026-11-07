@@ -1,16 +1,7 @@
 [gd_scene format=3]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_choice"]
-bg_color = Color(0.93, 0.86, 0.7, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.1, 0.08, 0.06, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
+[ext_resource type="Theme" path="res://ui/reading_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://ui/safe_area_margins.gd" id="2_safe"]
 
 [node name="ReadingScreen" type="Control"]
 layout_mode = 3
@@ -19,6 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_theme")
 
 [node name="Paper" type="ColorRect" parent="."]
 layout_mode = 1
@@ -41,6 +33,7 @@ theme_override_constants/margin_left = 48
 theme_override_constants/margin_top = 96
 theme_override_constants/margin_right = 48
 theme_override_constants/margin_bottom = 72
+script = ExtResource("2_safe")
 
 [node name="Column" type="VBoxContainer" parent="Safe"]
 layout_mode = 2
@@ -52,13 +45,11 @@ layout_mode = 2
 [node name="Goal" type="Label" parent="Safe/Column/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 40
 text = "Цель главы"
 autowrap_mode = 3
 
 [node name="Progress" type="Label" parent="Safe/Column/TopBar"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
 text = "2 / 5"
 
 [node name="Scroll" type="ScrollContainer" parent="Safe/Column"]
@@ -71,7 +62,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 1
-theme_override_font_sizes/normal_font_size = 44
 bbcode_enabled = true
 text = "Текст сцены."
 fit_content = true
@@ -81,17 +71,15 @@ layout_mode = 2
 theme_override_constants/separation = 24
 
 [node name="Choice1" type="Button" parent="Safe/Column/Choices"]
-custom_minimum_size = Vector2(0, 144)
+custom_minimum_size = Vector2(144, 168)
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
-theme_override_styles/normal = SubResource("StyleBoxFlat_choice")
 text = "Вариант 1"
+alignment = 0
 autowrap_mode = 3
 
 [node name="Choice2" type="Button" parent="Safe/Column/Choices"]
-custom_minimum_size = Vector2(0, 144)
+custom_minimum_size = Vector2(144, 168)
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
-theme_override_styles/normal = SubResource("StyleBoxFlat_choice")
 text = "Вариант 2"
+alignment = 0
 autowrap_mode = 3

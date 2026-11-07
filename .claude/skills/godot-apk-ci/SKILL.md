@@ -54,7 +54,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(godot --headless *)
 | `permissions/vibrate` | `true` | `Input.vibrate_handheld` (скилл `mobile-juice`) |
 | `permissions/internet` | `false` | игре сеть не нужна; включишь — объясни зачем |
 | `screen/immersive_mode` | `true` | полный экран для чтения |
-| `screen/edge_to_edge` | `false` | пока не обработана безопасная зона: со значением `true` интерфейс уходит под вырез и системные панели (`mobile-ux-validator`) |
+| `screen/edge_to_edge` | `false` | первая защита от выреза и системных панелей, пока `SafeAreaMargins` (скилл `tscn-handcrafter`) не проверен на устройстве. Что именно опция делает с вырезом, в `docs/engine-reference/godot/` не описано, проверить на телефоне с вырезом |
 | `package/name` | «Критический провал» | имя под иконкой |
 | `version/code` | `1`, затем +1 на каждый выпуск | Android сравнивает именно его |
 | `keystore/*` | пусто | ключи берутся из `GODOT_ANDROID_KEYSTORE_DEBUG_*` / `_RELEASE_*` |
