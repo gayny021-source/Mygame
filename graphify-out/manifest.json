@@ -1,0 +1,381 @@
+{
+  ".claude/docs/templates/sprint-status.yaml": {
+    "mtime": 1794005814.0422153,
+    "seen": 1794149881.773009,
+    "ast_hash": "0e7ac3d84325909403de1b145a0984e1",
+    "semantic_hash": "0e7ac3d84325909403de1b145a0984e1"
+  },
+  ".claude/docs/workflow-catalog.yaml": {
+    "mtime": 1794005814.0422153,
+    "seen": 1794149881.7730727,
+    "ast_hash": "4459b6153cf0cb97c8ab8d5923a56e38",
+    "semantic_hash": "4459b6153cf0cb97c8ab8d5923a56e38"
+  },
+  ".claude/hooks/detect-gaps.sh": {
+    "mtime": 1794005814.0422153,
+    "seen": 1794149881.7730978,
+    "ast_hash": "bd8f5b317726fc6fb80bf70d64c68abe",
+    "semantic_hash": "bd8f5b317726fc6fb80bf70d64c68abe"
+  },
+  ".claude/hooks/log-agent-stop.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7731175,
+    "ast_hash": "94fa213fc268fee949a86db013febc35",
+    "semantic_hash": "94fa213fc268fee949a86db013febc35"
+  },
+  ".claude/hooks/log-agent.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7731354,
+    "ast_hash": "2d01ed4016667a46b9f476ba306af8a0",
+    "semantic_hash": "2d01ed4016667a46b9f476ba306af8a0"
+  },
+  ".claude/hooks/log-instructions.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7731524,
+    "ast_hash": "0c3a0e91f0c98598aa97a626ab4ddff7",
+    "semantic_hash": "0c3a0e91f0c98598aa97a626ab4ddff7"
+  },
+  ".claude/hooks/notify.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7731695,
+    "ast_hash": "dfdc616e6b05def1698d3f926ddfa51f",
+    "semantic_hash": "dfdc616e6b05def1698d3f926ddfa51f"
+  },
+  ".claude/hooks/pre-compact.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7732203,
+    "ast_hash": "46222d5ce9a3a9c1290d72eb131e7b50",
+    "semantic_hash": "46222d5ce9a3a9c1290d72eb131e7b50"
+  },
+  ".claude/hooks/session-start.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.773248,
+    "ast_hash": "73b779a90f030a673d11f20885f64181",
+    "semantic_hash": "73b779a90f030a673d11f20885f64181"
+  },
+  ".claude/hooks/session-stop.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7732713,
+    "ast_hash": "21c847b63c17ad550a2bddf7781e97e6",
+    "semantic_hash": "21c847b63c17ad550a2bddf7781e97e6"
+  },
+  ".claude/hooks/update-check.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7732944,
+    "ast_hash": "db12aca3523c356039070a998b528de2",
+    "semantic_hash": "db12aca3523c356039070a998b528de2"
+  },
+  ".claude/hooks/validate-agent-artifact.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.773313,
+    "ast_hash": "7d0f5066079a187731c190573d9a014c",
+    "semantic_hash": "7d0f5066079a187731c190573d9a014c"
+  },
+  ".claude/hooks/validate-assets.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.773331,
+    "ast_hash": "d7666314119e55190586bf79d5d43916",
+    "semantic_hash": "d7666314119e55190586bf79d5d43916"
+  },
+  ".claude/hooks/validate-commit.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7733474,
+    "ast_hash": "3842f3648d18b518e4738ce1535c6683",
+    "semantic_hash": "3842f3648d18b518e4738ce1535c6683"
+  },
+  ".claude/hooks/validate-push.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7733643,
+    "ast_hash": "1e11e84ed7e8c091d9bdb570e1841db6",
+    "semantic_hash": "1e11e84ed7e8c091d9bdb570e1841db6"
+  },
+  ".claude/hooks/validate-read.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7733812,
+    "ast_hash": "797e0d262279204a0465f293dc65f52a",
+    "semantic_hash": "797e0d262279204a0465f293dc65f52a"
+  },
+  ".claude/hooks/validate-registry.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.773397,
+    "ast_hash": "c290add28d3286b19b3e8694f0e46380",
+    "semantic_hash": "c290add28d3286b19b3e8694f0e46380"
+  },
+  ".claude/hooks/validate-skill-change.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7734234,
+    "ast_hash": "a4801b7f0bdf994f674ed5f4bb879b54",
+    "semantic_hash": "a4801b7f0bdf994f674ed5f4bb879b54"
+  },
+  ".claude/hooks/validate-write.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7734473,
+    "ast_hash": "4b4e626997fa81b8b1a20371c823172c",
+    "semantic_hash": "4b4e626997fa81b8b1a20371c823172c"
+  },
+  ".claude/hooks/yaml-helper.sh": {
+    "mtime": 1794005814.0457358,
+    "seen": 1794149881.7734635,
+    "ast_hash": "b8721cabb5a16081d45b36d32637d111",
+    "semantic_hash": "b8721cabb5a16081d45b36d32637d111"
+  },
+  ".claude/scripts/adr-dep-graph.sh": {
+    "mtime": 1794005814.0474856,
+    "seen": 1794149881.773482,
+    "ast_hash": "79a074a2a559bf5532d9af4778e729dc",
+    "semantic_hash": "79a074a2a559bf5532d9af4778e729dc"
+  },
+  ".claude/scripts/adr-status.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7734995,
+    "ast_hash": "977d81fba685119e90f0c6f88dad075f",
+    "semantic_hash": "977d81fba685119e90f0c6f88dad075f"
+  },
+  ".claude/scripts/agent-check.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7735162,
+    "ast_hash": "2648ecd7966173c30279780aa3d72afa",
+    "semantic_hash": "2648ecd7966173c30279780aa3d72afa"
+  },
+  ".claude/scripts/artifact-check.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7735324,
+    "ast_hash": "596fe9eed5eef371ee27a075878a724d",
+    "semantic_hash": "596fe9eed5eef371ee27a075878a724d"
+  },
+  ".claude/scripts/asset-scan.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7735496,
+    "ast_hash": "6945cec15361baab7ca5a72311f172c2",
+    "semantic_hash": "6945cec15361baab7ca5a72311f172c2"
+  },
+  ".claude/scripts/bug-stats.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7735662,
+    "ast_hash": "4b3f9af16388094de5153a7a06ebaaef",
+    "semantic_hash": "4b3f9af16388094de5153a7a06ebaaef"
+  },
+  ".claude/scripts/code-markers.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7735832,
+    "ast_hash": "fc562741e408d9e4bdb243d2b27ff7c9",
+    "semantic_hash": "fc562741e408d9e4bdb243d2b27ff7c9"
+  },
+  ".claude/scripts/compat-inventory.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7735984,
+    "ast_hash": "e3bd7d2b71d6694e1e70f8f5b071b90e",
+    "semantic_hash": "e3bd7d2b71d6694e1e70f8f5b071b90e"
+  },
+  ".claude/scripts/config-set.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7736135,
+    "ast_hash": "bc56cd4982dde199766699dc53f5fbd5",
+    "semantic_hash": "bc56cd4982dde199766699dc53f5fbd5"
+  },
+  ".claude/scripts/content-count.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7736304,
+    "ast_hash": "4a712cf970b893988a661b6620824674",
+    "semantic_hash": "4a712cf970b893988a661b6620824674"
+  },
+  ".claude/scripts/debt-register.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7736468,
+    "ast_hash": "1b1bfffda7ea6a61206bcdf8b599893d",
+    "semantic_hash": "1b1bfffda7ea6a61206bcdf8b599893d"
+  },
+  ".claude/scripts/flaky-stats.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.773663,
+    "ast_hash": "2001258c4924de04a70981de55bf2668",
+    "semantic_hash": "2001258c4924de04a70981de55bf2668"
+  },
+  ".claude/scripts/gdd-structure-check.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.773678,
+    "ast_hash": "87eceb341901e927f7f89125d788cdbf",
+    "semantic_hash": "87eceb341901e927f7f89125d788cdbf"
+  },
+  ".claude/scripts/hook-input.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.773694,
+    "ast_hash": "53c91e9cf2d2770a7f20f145a9447205",
+    "semantic_hash": "53c91e9cf2d2770a7f20f145a9447205"
+  },
+  ".claude/scripts/inputs-check.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7737103,
+    "ast_hash": "104b03f97a3d0d38ff1911776cc6d80f",
+    "semantic_hash": "104b03f97a3d0d38ff1911776cc6d80f"
+  },
+  ".claude/scripts/md-section.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7737255,
+    "ast_hash": "1dfab5453ce00bf2a63ac4e9be99a3b8",
+    "semantic_hash": "1dfab5453ce00bf2a63ac4e9be99a3b8"
+  },
+  ".claude/scripts/migrate-v1-config.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7737408,
+    "ast_hash": "7fac3885cb655202886c78b02e37a541",
+    "semantic_hash": "7fac3885cb655202886c78b02e37a541"
+  },
+  ".claude/scripts/plan-math.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7737575,
+    "ast_hash": "de0c483fa7e691e0e8e86c03b7351bf5",
+    "semantic_hash": "de0c483fa7e691e0e8e86c03b7351bf5"
+  },
+  ".claude/scripts/project-coherence.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.773773,
+    "ast_hash": "33e5bc14db8a8c44a30446999b400ebd",
+    "semantic_hash": "33e5bc14db8a8c44a30446999b400ebd"
+  },
+  ".claude/scripts/project-state.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7737887,
+    "ast_hash": "c9ad9bc0c4d823a139bacd6e34ad53a1",
+    "semantic_hash": "c9ad9bc0c4d823a139bacd6e34ad53a1"
+  },
+  ".claude/scripts/read-guard.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7738044,
+    "ast_hash": "9d5994f1f4ed765bb72b21fb7ab2187b",
+    "semantic_hash": "9d5994f1f4ed765bb72b21fb7ab2187b"
+  },
+  ".claude/scripts/registry.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.773821,
+    "ast_hash": "05140935fec3cace6ff6284210cd87bd",
+    "semantic_hash": "05140935fec3cace6ff6284210cd87bd"
+  },
+  ".claude/scripts/review-receipts.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.773837,
+    "ast_hash": "82ae68e700de3021d570ca0a7a501d44",
+    "semantic_hash": "82ae68e700de3021d570ca0a7a501d44"
+  },
+  ".claude/scripts/review-scope.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7738552,
+    "ast_hash": "1e045e1d6b709685d646e3efa66ffeda",
+    "semantic_hash": "1e045e1d6b709685d646e3efa66ffeda"
+  },
+  ".claude/scripts/rotate-session-state.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7738717,
+    "ast_hash": "fbe86de928ae09f755e073f3744d285c",
+    "semantic_hash": "fbe86de928ae09f755e073f3744d285c"
+  },
+  ".claude/scripts/session-state.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7738888,
+    "ast_hash": "928a245498dc104f790d1dc6d69bb7e0",
+    "semantic_hash": "928a245498dc104f790d1dc6d69bb7e0"
+  },
+  ".claude/scripts/set-stage.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.773904,
+    "ast_hash": "a3337f54ebe09bb0da0013e8c8a2db92",
+    "semantic_hash": "a3337f54ebe09bb0da0013e8c8a2db92"
+  },
+  ".claude/scripts/skill-lint.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7739205,
+    "ast_hash": "fd4a3ec3aa2c5a73696281b07f37de7f",
+    "semantic_hash": "fd4a3ec3aa2c5a73696281b07f37de7f"
+  },
+  ".claude/scripts/story-facts.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.773938,
+    "ast_hash": "b87925f1ba70619c59a574b299515451",
+    "semantic_hash": "b87925f1ba70619c59a574b299515451"
+  },
+  ".claude/scripts/story-status.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.773955,
+    "ast_hash": "8adbd9d799bdfb220caaa53f27078b26",
+    "semantic_hash": "8adbd9d799bdfb220caaa53f27078b26"
+  },
+  ".claude/scripts/test-run.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7739716,
+    "ast_hash": "ba3ce51bcbb8ec7beaf7a48d8e572667",
+    "semantic_hash": "ba3ce51bcbb8ec7beaf7a48d8e572667"
+  },
+  ".claude/scripts/test-scaffold.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.773986,
+    "ast_hash": "7de3e5908d0015672d7832c0418f463c",
+    "semantic_hash": "7de3e5908d0015672d7832c0418f463c"
+  },
+  ".claude/scripts/write-guard.sh": {
+    "mtime": 1794005814.0479498,
+    "seen": 1794149881.7740097,
+    "ast_hash": "d0c7e2ad926f32ea3fdbda43d9210711",
+    "semantic_hash": "d0c7e2ad926f32ea3fdbda43d9210711"
+  },
+  ".claude/settings.json": {
+    "mtime": 1794149824.3554206,
+    "seen": 1794149881.774025,
+    "ast_hash": "43b55c81667f98c02d08c528085764c4",
+    "semantic_hash": "43b55c81667f98c02d08c528085764c4"
+  },
+  ".claude/skills/godot-apk-ci/templates/build-apk-firebelley.yml": {
+    "mtime": 1794057146.3843284,
+    "seen": 1794149881.7740417,
+    "ast_hash": "d8c246e3b9547b574118bb31127788bd",
+    "semantic_hash": "d8c246e3b9547b574118bb31127788bd"
+  },
+  ".claude/skills/godot-apk-ci/templates/build-apk.yml": {
+    "mtime": 1794057146.3827028,
+    "seen": 1794149881.774064,
+    "ast_hash": "5b6a105e31f03c9b4de3a80b8d6e1005",
+    "semantic_hash": "5b6a105e31f03c9b4de3a80b8d6e1005"
+  },
+  ".claude/statusline.sh": {
+    "mtime": 1794005814.0678728,
+    "seen": 1794149881.7740839,
+    "ast_hash": "44f0dba610a04c0ef3864d4e60f657dd",
+    "semantic_hash": "44f0dba610a04c0ef3864d4e60f657dd"
+  },
+  ".github/FUNDING.yml": {
+    "mtime": 1794005814.0687146,
+    "seen": 1794149881.7740986,
+    "ast_hash": "47e53b78861a5f13c389081e9cc25e2b",
+    "semantic_hash": "47e53b78861a5f13c389081e9cc25e2b",
+    "ast_empty": true
+  },
+  "design/registry/entities.yaml": {
+    "mtime": 1794063959.2607844,
+    "seen": 1794149881.7741013,
+    "ast_hash": "fff3acf9e8940f8630ebdf73dd317d94",
+    "semantic_hash": "fff3acf9e8940f8630ebdf73dd317d94"
+  },
+  "docs/architecture/tr-registry.yaml": {
+    "mtime": 1794005814.0703938,
+    "seen": 1794149881.7741196,
+    "ast_hash": "c3e03700bf842bc7df83e33d5889003c",
+    "semantic_hash": "c3e03700bf842bc7df83e33d5889003c"
+  },
+  "docs/registry/architecture.yaml": {
+    "mtime": 1794005814.0738869,
+    "seen": 1794149881.774157,
+    "ast_hash": "01201e7110789a6631ed9e6c0e126f53",
+    "semantic_hash": "01201e7110789a6631ed9e6c0e126f53"
+  },
+  "project.yaml": {
+    "mtime": 1794009673.8890452,
+    "seen": 1794149881.7742162,
+    "ast_hash": "d7e031e30f6fc626caee0b89b232f7d6",
+    "semantic_hash": "d7e031e30f6fc626caee0b89b232f7d6"
+  },
+  "studio-tests/catalog.yaml": {
+    "mtime": 1794005814.0783079,
+    "seen": 1794149881.7742407,
+    "ast_hash": "ebf88ecc6a7a23e597d4fde58e59488d",
+    "semantic_hash": "ebf88ecc6a7a23e597d4fde58e59488d"
+  }
+}

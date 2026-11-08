@@ -179,3 +179,6 @@ $RECYCLE.BIN/
 # the project root. Anchored so a reports/ folder elsewhere stays tracked.
 /reports/
 /test-results/
+
+# graphify: the AST cache is rebuilt in seconds (graphify update .); the graph itself is committed
+graphify-out/cache/

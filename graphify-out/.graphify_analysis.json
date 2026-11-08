@@ -1,0 +1,832 @@
+{
+  "communities": {
+    "0": [
+      "claude_docs_workflow_catalog",
+      "claude_docs_workflow_catalog_artifact_any_of",
+      "claude_docs_workflow_catalog_artifact_glob",
+      "claude_docs_workflow_catalog_artifact_min_count",
+      "claude_docs_workflow_catalog_artifact_note",
+      "claude_docs_workflow_catalog_concept_description",
+      "claude_docs_workflow_catalog_concept_label",
+      "claude_docs_workflow_catalog_concept_next_phase",
+      "claude_docs_workflow_catalog_concept_steps",
+      "claude_docs_workflow_catalog_minimal_description",
+      "claude_docs_workflow_catalog_minimal_label",
+      "claude_docs_workflow_catalog_minimal_steps",
+      "claude_docs_workflow_catalog_paths",
+      "claude_docs_workflow_catalog_paths_minimal",
+      "claude_docs_workflow_catalog_phases",
+      "claude_docs_workflow_catalog_phases_concept",
+      "claude_docs_workflow_catalog_phases_polish",
+      "claude_docs_workflow_catalog_phases_pre_production",
+      "claude_docs_workflow_catalog_phases_production",
+      "claude_docs_workflow_catalog_phases_release",
+      "claude_docs_workflow_catalog_phases_systems_design",
+      "claude_docs_workflow_catalog_phases_technical_setup",
+      "claude_docs_workflow_catalog_polish_description",
+      "claude_docs_workflow_catalog_polish_label",
+      "claude_docs_workflow_catalog_polish_next_phase",
+      "claude_docs_workflow_catalog_polish_steps",
+      "claude_docs_workflow_catalog_pre_production_description",
+      "claude_docs_workflow_catalog_pre_production_label",
+      "claude_docs_workflow_catalog_pre_production_next_phase",
+      "claude_docs_workflow_catalog_pre_production_steps",
+      "claude_docs_workflow_catalog_production_description",
+      "claude_docs_workflow_catalog_production_label",
+      "claude_docs_workflow_catalog_production_next_phase",
+      "claude_docs_workflow_catalog_production_steps",
+      "claude_docs_workflow_catalog_release_description",
+      "claude_docs_workflow_catalog_release_label",
+      "claude_docs_workflow_catalog_release_next_phase",
+      "claude_docs_workflow_catalog_release_steps",
+      "claude_docs_workflow_catalog_steps_artifact",
+      "claude_docs_workflow_catalog_steps_command",
+      "claude_docs_workflow_catalog_steps_description",
+      "claude_docs_workflow_catalog_steps_id",
+      "claude_docs_workflow_catalog_steps_name",
+      "claude_docs_workflow_catalog_steps_repeatable",
+      "claude_docs_workflow_catalog_steps_required",
+      "claude_docs_workflow_catalog_systems_design_description",
+      "claude_docs_workflow_catalog_systems_design_label",
+      "claude_docs_workflow_catalog_systems_design_next_phase",
+      "claude_docs_workflow_catalog_systems_design_steps",
+      "claude_docs_workflow_catalog_technical_setup_description",
+      "claude_docs_workflow_catalog_technical_setup_label",
+      "claude_docs_workflow_catalog_technical_setup_next_phase",
+      "claude_docs_workflow_catalog_technical_setup_steps"
+    ],
+    "1": [
+      "design_registry_entities",
+      "design_registry_entities_constants",
+      "design_registry_entities_constants_added",
+      "design_registry_entities_constants_name",
+      "design_registry_entities_constants_notes",
+      "design_registry_entities_constants_referenced_by",
+      "design_registry_entities_constants_revised",
+      "design_registry_entities_constants_source",
+      "design_registry_entities_constants_status",
+      "design_registry_entities_constants_unit",
+      "design_registry_entities_constants_value",
+      "design_registry_entities_entities",
+      "design_registry_entities_entities_added",
+      "design_registry_entities_entities_charisma",
+      "design_registry_entities_entities_display_name",
+      "design_registry_entities_entities_faith",
+      "design_registry_entities_entities_mind",
+      "design_registry_entities_entities_name",
+      "design_registry_entities_entities_own_stat",
+      "design_registry_entities_entities_referenced_by",
+      "design_registry_entities_entities_revised",
+      "design_registry_entities_entities_scale",
+      "design_registry_entities_entities_source",
+      "design_registry_entities_entities_status",
+      "design_registry_entities_entities_strength",
+      "design_registry_entities_formulas",
+      "design_registry_entities_formulas_added",
+      "design_registry_entities_formulas_expression",
+      "design_registry_entities_formulas_name",
+      "design_registry_entities_formulas_notes",
+      "design_registry_entities_formulas_output_range",
+      "design_registry_entities_formulas_referenced_by",
+      "design_registry_entities_formulas_revised",
+      "design_registry_entities_formulas_source",
+      "design_registry_entities_formulas_status",
+      "design_registry_entities_formulas_variables",
+      "design_registry_entities_items",
+      "design_registry_entities_last_updated",
+      "design_registry_entities_version"
+    ],
+    "2": [
+      "project",
+      "project_commands",
+      "project_commands_build",
+      "project_commands_run",
+      "project_commands_smoke",
+      "project_commands_test",
+      "project_engine",
+      "project_engine_language",
+      "project_engine_name",
+      "project_engine_physics",
+      "project_engine_rendering",
+      "project_engine_version",
+      "project_framework",
+      "project_framework_last_upgraded",
+      "project_framework_version",
+      "project_modes",
+      "project_modes_automation",
+      "project_modes_rigor",
+      "project_naming",
+      "project_naming_classes",
+      "project_naming_constants",
+      "project_naming_files",
+      "project_naming_scenes",
+      "project_naming_signals",
+      "project_naming_variables",
+      "project_performance",
+      "project_performance_draw_call_limit",
+      "project_performance_frame_budget_ms",
+      "project_performance_target_framerate",
+      "project_project",
+      "project_project_stage",
+      "project_schema_version",
+      "project_specialists",
+      "project_specialists_additional",
+      "project_specialists_code",
+      "project_specialists_shader",
+      "project_specialists_ui",
+      "project_testing",
+      "project_testing_framework"
+    ],
+    "3": [
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_build_apk_container",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_build_apk_name",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_build_apk_permissions",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_build_apk_runs_on",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_build_apk_steps",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_container_image",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_env",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_env_apk_name",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_env_export_preset",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_env_godot_version",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_jobs",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_jobs_build_apk",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_name",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_on",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_on_push",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_on_workflow_dispatch",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_permissions_contents",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_push_branches",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_push_tags",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_steps_id",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_steps_if",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_steps_name",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_steps_run",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_steps_uses",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_steps_with",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_cache",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_export_debug",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_files",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_godot_executable_download_url",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_godot_export_templates_download_url",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_if_no_files_found",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_lfs",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_name",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_path",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_presets_to_export",
+      "claude_skills_godot_apk_ci_templates_build_apk_firebelley_with_relative_project_path"
+    ],
+    "4": [
+      "claude_hooks_yaml_helper",
+      "claude_hooks_yaml_helper_get_effective_yaml_array",
+      "claude_hooks_yaml_helper_get_effective_yaml_key",
+      "claude_hooks_yaml_helper_get_legacy_key",
+      "claude_hooks_yaml_helper_get_yaml_array",
+      "claude_hooks_yaml_helper_get_yaml_child_keys",
+      "claude_hooks_yaml_helper_get_yaml_default",
+      "claude_hooks_yaml_helper_get_yaml_key",
+      "claude_hooks_yaml_helper_hook_warn",
+      "claude_hooks_yaml_helper_is_always_ask_category",
+      "claude_hooks_yaml_helper_is_locally_overridable",
+      "claude_hooks_yaml_helper_log_decision",
+      "claude_hooks_yaml_helper_rc_named",
+      "claude_hooks_yaml_helper_rc_tag",
+      "claude_hooks_yaml_helper_rc_tp",
+      "claude_hooks_yaml_helper_rc_want",
+      "claude_hooks_yaml_helper_rc_yaml",
+      "claude_hooks_yaml_helper_resolve_code_root",
+      "claude_hooks_yaml_helper_resolve_setting",
+      "claude_hooks_yaml_helper_session_state_enabled",
+      "claude_hooks_yaml_helper_sh__entry",
+      "claude_hooks_yaml_helper_validate_enum_value",
+      "claude_hooks_yaml_helper_validate_local_scope",
+      "claude_hooks_yaml_helper_validate_local_yaml_base",
+      "claude_hooks_yaml_helper_validate_yaml_enum",
+      "claude_hooks_yaml_helper_yaml_helper_in_local_read_scope",
+      "claude_hooks_yaml_helper_yaml_helper_legacy_file_for",
+      "claude_hooks_yaml_helper_yaml_helper_resolve_python",
+      "claude_hooks_yaml_helper_yaml_helper_rigor_level",
+      "claude_hooks_yaml_helper_yaml_helper_rigor_value",
+      "claude_hooks_yaml_helper_yaml_helper_set_root"
+    ],
+    "5": [
+      "claude_skills_godot_apk_ci_templates_build_apk",
+      "claude_skills_godot_apk_ci_templates_build_apk_build_apk_container",
+      "claude_skills_godot_apk_ci_templates_build_apk_build_apk_name",
+      "claude_skills_godot_apk_ci_templates_build_apk_build_apk_permissions",
+      "claude_skills_godot_apk_ci_templates_build_apk_build_apk_runs_on",
+      "claude_skills_godot_apk_ci_templates_build_apk_build_apk_steps",
+      "claude_skills_godot_apk_ci_templates_build_apk_container_image",
+      "claude_skills_godot_apk_ci_templates_build_apk_env",
+      "claude_skills_godot_apk_ci_templates_build_apk_env_apk_name",
+      "claude_skills_godot_apk_ci_templates_build_apk_env_export_preset",
+      "claude_skills_godot_apk_ci_templates_build_apk_env_godot_version",
+      "claude_skills_godot_apk_ci_templates_build_apk_jobs",
+      "claude_skills_godot_apk_ci_templates_build_apk_jobs_build_apk",
+      "claude_skills_godot_apk_ci_templates_build_apk_name",
+      "claude_skills_godot_apk_ci_templates_build_apk_on",
+      "claude_skills_godot_apk_ci_templates_build_apk_on_push",
+      "claude_skills_godot_apk_ci_templates_build_apk_on_workflow_dispatch",
+      "claude_skills_godot_apk_ci_templates_build_apk_permissions_contents",
+      "claude_skills_godot_apk_ci_templates_build_apk_push_branches",
+      "claude_skills_godot_apk_ci_templates_build_apk_push_tags",
+      "claude_skills_godot_apk_ci_templates_build_apk_steps_if",
+      "claude_skills_godot_apk_ci_templates_build_apk_steps_name",
+      "claude_skills_godot_apk_ci_templates_build_apk_steps_run",
+      "claude_skills_godot_apk_ci_templates_build_apk_steps_uses",
+      "claude_skills_godot_apk_ci_templates_build_apk_steps_with",
+      "claude_skills_godot_apk_ci_templates_build_apk_with_files",
+      "claude_skills_godot_apk_ci_templates_build_apk_with_if_no_files_found",
+      "claude_skills_godot_apk_ci_templates_build_apk_with_lfs",
+      "claude_skills_godot_apk_ci_templates_build_apk_with_name",
+      "claude_skills_godot_apk_ci_templates_build_apk_with_path"
+    ],
+    "6": [
+      "claude_scripts_migrate_v1_config",
+      "claude_scripts_migrate_v1_config_agent_name",
+      "claude_scripts_migrate_v1_config_agent_names",
+      "claude_scripts_migrate_v1_config_is_num",
+      "claude_scripts_migrate_v1_config_lc_all",
+      "claude_scripts_migrate_v1_config_legacy_conflict",
+      "claude_scripts_migrate_v1_config_legacy_present",
+      "claude_scripts_migrate_v1_config_manual",
+      "claude_scripts_migrate_v1_config_null_warn",
+      "claude_scripts_migrate_v1_config_num",
+      "claude_scripts_migrate_v1_config_re_quote",
+      "claude_scripts_migrate_v1_config_sh__entry",
+      "claude_scripts_migrate_v1_config_specialist_warn",
+      "claude_scripts_migrate_v1_config_tp_configured",
+      "claude_scripts_migrate_v1_config_tp_get",
+      "claude_scripts_migrate_v1_config_trim_line",
+      "claude_scripts_migrate_v1_config_warn",
+      "claude_scripts_migrate_v1_config_yaml_list",
+      "claude_scripts_migrate_v1_config_yaml_num",
+      "claude_scripts_migrate_v1_config_yaml_str"
+    ],
+    "7": [
+      "claude_settings",
+      "claude_settings_hooks",
+      "claude_settings_hooks_notification",
+      "claude_settings_hooks_posttooluse",
+      "claude_settings_hooks_precompact",
+      "claude_settings_hooks_pretooluse",
+      "claude_settings_hooks_sessionstart",
+      "claude_settings_hooks_stop",
+      "claude_settings_hooks_subagentstart",
+      "claude_settings_hooks_subagentstop",
+      "claude_settings_permissions",
+      "claude_settings_permissions_allow",
+      "claude_settings_permissions_defaultmode",
+      "claude_settings_permissions_deny",
+      "claude_settings_schema",
+      "claude_settings_statusline",
+      "claude_settings_statusline_command",
+      "claude_settings_statusline_type",
+      "claude_settings_worktree",
+      "claude_settings_worktree_baseref"
+    ],
+    "8": [
+      "claude_scripts_test_scaffold",
+      "claude_scripts_test_scaffold_content_of",
+      "claude_scripts_test_scaffold_list_paths",
+      "claude_scripts_test_scaffold_made",
+      "claude_scripts_test_scaffold_need",
+      "claude_scripts_test_scaffold_render",
+      "claude_scripts_test_scaffold_sh__entry",
+      "claude_scripts_test_scaffold_tpl_asmdef_edit",
+      "claude_scripts_test_scaffold_tpl_asmdef_play",
+      "claude_scripts_test_scaffold_tpl_ci_godot",
+      "claude_scripts_test_scaffold_tpl_ci_unity",
+      "claude_scripts_test_scaffold_tpl_ci_unreal",
+      "claude_scripts_test_scaffold_tpl_readme_godot",
+      "claude_scripts_test_scaffold_tpl_readme_unity",
+      "claude_scripts_test_scaffold_tpl_readme_unreal",
+      "claude_scripts_test_scaffold_tpl_smoke",
+      "claude_scripts_test_scaffold_tpl_unreal_tests_readme",
+      "claude_scripts_test_scaffold_usage",
+      "claude_scripts_test_scaffold_write_new"
+    ],
+    "9": [
+      "claude_scripts_write_guard",
+      "claude_scripts_write_guard_abs_path",
+      "claude_scripts_write_guard_applied",
+      "claude_scripts_write_guard_engine_name",
+      "claude_scripts_write_guard_overwrite_why",
+      "claude_scripts_write_guard_phys",
+      "claude_scripts_write_guard_rel",
+      "claude_scripts_write_guard_rule_agent",
+      "claude_scripts_write_guard_rule_config",
+      "claude_scripts_write_guard_rule_freeze",
+      "claude_scripts_write_guard_rule_git",
+      "claude_scripts_write_guard_rule_overwrite",
+      "claude_scripts_write_guard_rule_prototype",
+      "claude_scripts_write_guard_sh__entry",
+      "claude_scripts_write_guard_tsv",
+      "claude_scripts_write_guard_usage",
+      "claude_scripts_write_guard_yaml_leaves",
+      "claude_scripts_write_guard_yh_const"
+    ],
+    "10": [
+      "claude_docs_templates_sprint_status",
+      "claude_docs_templates_sprint_status_end",
+      "claude_docs_templates_sprint_status_generated",
+      "claude_docs_templates_sprint_status_goal",
+      "claude_docs_templates_sprint_status_sprint",
+      "claude_docs_templates_sprint_status_start",
+      "claude_docs_templates_sprint_status_stories",
+      "claude_docs_templates_sprint_status_stories_blocker",
+      "claude_docs_templates_sprint_status_stories_completed",
+      "claude_docs_templates_sprint_status_stories_estimate_days",
+      "claude_docs_templates_sprint_status_stories_file",
+      "claude_docs_templates_sprint_status_stories_id",
+      "claude_docs_templates_sprint_status_stories_name",
+      "claude_docs_templates_sprint_status_stories_owner",
+      "claude_docs_templates_sprint_status_stories_priority",
+      "claude_docs_templates_sprint_status_stories_status",
+      "claude_docs_templates_sprint_status_updated"
+    ],
+    "11": [
+      "studio_tests_catalog",
+      "studio_tests_catalog_last_updated",
+      "studio_tests_catalog_skills",
+      "studio_tests_catalog_skills_category",
+      "studio_tests_catalog_skills_last_category",
+      "studio_tests_catalog_skills_last_category_result",
+      "studio_tests_catalog_skills_last_spec",
+      "studio_tests_catalog_skills_last_spec_result",
+      "studio_tests_catalog_skills_last_static",
+      "studio_tests_catalog_skills_last_static_result",
+      "studio_tests_catalog_skills_name",
+      "studio_tests_catalog_skills_priority",
+      "studio_tests_catalog_skills_spec",
+      "studio_tests_catalog_version"
+    ],
+    "12": [
+      "claude_scripts_review_receipts",
+      "claude_scripts_review_receipts_compare_stamp",
+      "claude_scripts_review_receipts_hash_file",
+      "claude_scripts_review_receipts_is_unexpanded_glob",
+      "claude_scripts_review_receipts_lc_all",
+      "claude_scripts_review_receipts_norm_path",
+      "claude_scripts_review_receipts_section_hash",
+      "claude_scripts_review_receipts_section_spans",
+      "claude_scripts_review_receipts_sh__entry",
+      "claude_scripts_review_receipts_sha1_stdin",
+      "claude_scripts_review_receipts_stored_get",
+      "claude_scripts_review_receipts_warn_no_hash"
+    ],
+    "13": [
+      "claude_scripts_test_run",
+      "claude_scripts_test_run_attr",
+      "claude_scripts_test_run_exe_ok",
+      "claude_scripts_test_run_first_line",
+      "claude_scripts_test_run_is_timeout",
+      "claude_scripts_test_run_list_failed",
+      "claude_scripts_test_run_ran_no",
+      "claude_scripts_test_run_run_timed",
+      "claude_scripts_test_run_set_rule",
+      "claude_scripts_test_run_sh__entry",
+      "claude_scripts_test_run_usage",
+      "claude_scripts_test_run_yget"
+    ],
+    "14": [
+      "claude_scripts_project_coherence",
+      "claude_scripts_project_coherence_differs",
+      "claude_scripts_project_coherence_godot_named",
+      "claude_scripts_project_coherence_lc_all",
+      "claude_scripts_project_coherence_match",
+      "claude_scripts_project_coherence_say",
+      "claude_scripts_project_coherence_sh__entry",
+      "claude_scripts_project_coherence_skipped",
+      "claude_scripts_project_coherence_summarise",
+      "claude_scripts_project_coherence_vmm",
+      "claude_scripts_project_coherence_yaml_block_value"
+    ],
+    "15": [
+      "claude_scripts_debt_register",
+      "claude_scripts_debt_register_effort_n",
+      "claude_scripts_debt_register_effort_name",
+      "claude_scripts_debt_register_impact_n",
+      "claude_scripts_debt_register_impact_name",
+      "claude_scripts_debt_register_is_date",
+      "claude_scripts_debt_register_lc",
+      "claude_scripts_debt_register_not_judged",
+      "claude_scripts_debt_register_sh__entry",
+      "claude_scripts_debt_register_usage"
+    ],
+    "16": [
+      "claude_hooks_update_check",
+      "claude_hooks_update_check_sh__entry",
+      "claude_hooks_update_check_update_check_cache",
+      "claude_hooks_update_check_update_check_enabled",
+      "claude_hooks_update_check_update_check_newer",
+      "claude_hooks_update_check_update_check_notice",
+      "claude_hooks_update_check_update_check_now",
+      "claude_hooks_update_check_update_check_refresh"
+    ],
+    "17": [
+      "claude_scripts_project_state",
+      "claude_scripts_project_state_count",
+      "claude_scripts_project_state_first_line",
+      "claude_scripts_project_state_is_stage",
+      "claude_scripts_project_state_row",
+      "claude_scripts_project_state_sh__entry",
+      "claude_scripts_project_state_stage_rows",
+      "claude_scripts_project_state_yaml_get"
+    ],
+    "18": [
+      "claude_scripts_registry",
+      "claude_scripts_registry_abs_path",
+      "claude_scripts_registry_files",
+      "claude_scripts_registry_is_slug",
+      "claude_scripts_registry_next_seen",
+      "claude_scripts_registry_reg_path",
+      "claude_scripts_registry_sh__entry",
+      "claude_scripts_registry_usage"
+    ],
+    "19": [
+      "docs_registry_architecture",
+      "docs_registry_architecture_api_decisions",
+      "docs_registry_architecture_forbidden_patterns",
+      "docs_registry_architecture_interfaces",
+      "docs_registry_architecture_last_updated",
+      "docs_registry_architecture_performance_budgets",
+      "docs_registry_architecture_state_ownership",
+      "docs_registry_architecture_version"
+    ],
+    "20": [
+      "claude_scripts_config_set",
+      "claude_scripts_config_set_replace_file",
+      "claude_scripts_config_set_sh__entry",
+      "claude_scripts_config_set_split_and",
+      "claude_scripts_config_set_usage",
+      "claude_scripts_config_set_yget",
+      "claude_scripts_config_set_yh_const"
+    ],
+    "21": [
+      "claude_scripts_inputs_check",
+      "claude_scripts_inputs_check_add_spec",
+      "claude_scripts_inputs_check_glob_matches",
+      "claude_scripts_inputs_check_has_content",
+      "claude_scripts_inputs_check_sh__entry",
+      "claude_scripts_inputs_check_slashes"
+    ],
+    "22": [
+      "claude_scripts_session_state",
+      "claude_scripts_session_state_emit",
+      "claude_scripts_session_state_emit_text",
+      "claude_scripts_session_state_lines",
+      "claude_scripts_session_state_locate",
+      "claude_scripts_session_state_sh__entry"
+    ],
+    "23": [
+      "claude_hooks_validate_push",
+      "claude_hooks_validate_push_command_segments",
+      "claude_hooks_validate_push_git_segment",
+      "claude_hooks_validate_push_mask_quoted",
+      "claude_hooks_validate_push_sh__entry"
+    ],
+    "24": [
+      "claude_hooks_validate_registry",
+      "claude_hooks_validate_registry_sh__entry",
+      "claude_hooks_validate_registry_vr_row",
+      "claude_hooks_validate_registry_vr_skip",
+      "claude_hooks_validate_registry_vr_warn"
+    ],
+    "25": [
+      "claude_scripts_gdd_structure_check",
+      "claude_scripts_gdd_structure_check_check_file",
+      "claude_scripts_gdd_structure_check_not_a_system_gdd",
+      "claude_scripts_gdd_structure_check_placeholders",
+      "claude_scripts_gdd_structure_check_sh__entry"
+    ],
+    "26": [
+      "claude_scripts_hook_input",
+      "claude_scripts_hook_input_phys",
+      "claude_scripts_hook_input_sh__entry",
+      "claude_scripts_hook_input_tsv",
+      "claude_scripts_hook_input_usage"
+    ],
+    "27": [
+      "claude_scripts_plan_math",
+      "claude_scripts_plan_math_is_date",
+      "claude_scripts_plan_math_is_num",
+      "claude_scripts_plan_math_sh__entry",
+      "claude_scripts_plan_math_usage"
+    ],
+    "28": [
+      "claude_hooks_log_instructions",
+      "claude_hooks_log_instructions_pick",
+      "claude_hooks_log_instructions_sh__entry",
+      "claude_hooks_log_instructions_shorten"
+    ],
+    "29": [
+      "claude_hooks_validate_commit",
+      "claude_hooks_validate_commit_command_segments",
+      "claude_hooks_validate_commit_git_segment",
+      "claude_hooks_validate_commit_sh__entry"
+    ],
+    "30": [
+      "claude_hooks_validate_read",
+      "claude_hooks_validate_read_sh__entry",
+      "claude_hooks_validate_read_vr_row",
+      "claude_hooks_validate_read_vr_warn"
+    ],
+    "31": [
+      "claude_hooks_validate_write",
+      "claude_hooks_validate_write_sh__entry",
+      "claude_hooks_validate_write_vw_row",
+      "claude_hooks_validate_write_vw_warn"
+    ],
+    "32": [
+      "claude_scripts_adr_status",
+      "claude_scripts_adr_status_add_file",
+      "claude_scripts_adr_status_adr_id",
+      "claude_scripts_adr_status_sh__entry"
+    ],
+    "33": [
+      "claude_scripts_md_section",
+      "claude_scripts_md_section_cleanup",
+      "claude_scripts_md_section_sh__entry",
+      "claude_scripts_md_section_usage"
+    ],
+    "34": [
+      "claude_scripts_read_guard",
+      "claude_scripts_read_guard_rg_get",
+      "claude_scripts_read_guard_sh__entry",
+      "claude_scripts_read_guard_usage"
+    ],
+    "35": [
+      "claude_scripts_review_scope",
+      "claude_scripts_review_scope_all_gdds",
+      "claude_scripts_review_scope_not_a_system_gdd",
+      "claude_scripts_review_scope_sh__entry"
+    ],
+    "36": [
+      "docs_architecture_tr_registry",
+      "docs_architecture_tr_registry_last_updated",
+      "docs_architecture_tr_registry_requirements",
+      "docs_architecture_tr_registry_version"
+    ],
+    "37": [
+      "claude_hooks_validate_agent_artifact",
+      "claude_hooks_validate_agent_artifact_sh__entry",
+      "claude_hooks_validate_agent_artifact_va_say"
+    ],
+    "38": [
+      "claude_scripts_adr_dep_graph",
+      "claude_scripts_adr_dep_graph_adr_id",
+      "claude_scripts_adr_dep_graph_sh__entry"
+    ],
+    "39": [
+      "claude_scripts_asset_scan",
+      "claude_scripts_asset_scan_sh__entry",
+      "claude_scripts_asset_scan_usage"
+    ],
+    "40": [
+      "claude_scripts_content_count",
+      "claude_scripts_content_count_sh__entry",
+      "claude_scripts_content_count_usage"
+    ],
+    "41": [
+      "claude_scripts_set_stage",
+      "claude_scripts_set_stage_replace_file",
+      "claude_scripts_set_stage_sh__entry"
+    ],
+    "42": [
+      "claude_scripts_skill_lint",
+      "claude_scripts_skill_lint_sh__entry",
+      "claude_scripts_skill_lint_usage"
+    ],
+    "43": [
+      "claude_hooks_detect_gaps",
+      "claude_hooks_detect_gaps_sh__entry"
+    ],
+    "44": [
+      "claude_hooks_log_agent",
+      "claude_hooks_log_agent_sh__entry"
+    ],
+    "45": [
+      "claude_hooks_log_agent_stop",
+      "claude_hooks_log_agent_stop_sh__entry"
+    ],
+    "46": [
+      "claude_hooks_notify",
+      "claude_hooks_notify_sh__entry"
+    ],
+    "47": [
+      "claude_hooks_pre_compact",
+      "claude_hooks_pre_compact_sh__entry"
+    ],
+    "48": [
+      "claude_hooks_session_start",
+      "claude_hooks_session_start_sh__entry"
+    ],
+    "49": [
+      "claude_hooks_session_stop",
+      "claude_hooks_session_stop_sh__entry"
+    ],
+    "50": [
+      "claude_hooks_validate_assets",
+      "claude_hooks_validate_assets_sh__entry"
+    ],
+    "51": [
+      "claude_hooks_validate_skill_change",
+      "claude_hooks_validate_skill_change_sh__entry"
+    ],
+    "52": [
+      "claude_scripts_agent_check",
+      "claude_scripts_agent_check_sh__entry"
+    ],
+    "53": [
+      "claude_scripts_artifact_check",
+      "claude_scripts_artifact_check_sh__entry"
+    ],
+    "54": [
+      "claude_scripts_bug_stats",
+      "claude_scripts_bug_stats_sh__entry"
+    ],
+    "55": [
+      "claude_scripts_code_markers",
+      "claude_scripts_code_markers_sh__entry"
+    ],
+    "56": [
+      "claude_scripts_compat_inventory",
+      "claude_scripts_compat_inventory_sh__entry"
+    ],
+    "57": [
+      "claude_scripts_flaky_stats",
+      "claude_scripts_flaky_stats_sh__entry"
+    ],
+    "58": [
+      "claude_scripts_rotate_session_state",
+      "claude_scripts_rotate_session_state_sh__entry"
+    ],
+    "59": [
+      "claude_scripts_story_facts",
+      "claude_scripts_story_facts_sh__entry"
+    ],
+    "60": [
+      "claude_scripts_story_status",
+      "claude_scripts_story_status_sh__entry"
+    ],
+    "61": [
+      "claude_statusline",
+      "claude_statusline_sh__entry"
+    ]
+  },
+  "cohesion": {
+    "0": 0.07039187227866474,
+    "1": 0.05128205128205128,
+    "2": 0.05128205128205128,
+    "3": 0.05405405405405406,
+    "4": 0.17204301075268819,
+    "5": 0.06666666666666667,
+    "6": 0.22105263157894736,
+    "7": 0.1,
+    "8": 0.2046783625730994,
+    "9": 0.23529411764705882,
+    "10": 0.11764705882352941,
+    "11": 0.14285714285714285,
+    "12": 0.3333333333333333,
+    "13": 0.3181818181818182,
+    "14": 0.38181818181818183,
+    "15": 0.35555555555555557,
+    "16": 0.5,
+    "17": 0.5357142857142857,
+    "18": 0.4642857142857143,
+    "19": 0.25,
+    "20": 0.47619047619047616,
+    "21": 0.6,
+    "22": 0.6,
+    "23": 0.8,
+    "24": 0.8,
+    "25": 0.7,
+    "26": 0.6,
+    "27": 0.7,
+    "28": 0.8333333333333334,
+    "29": 0.8333333333333334,
+    "30": 0.8333333333333334,
+    "31": 0.8333333333333334,
+    "32": 0.8333333333333334,
+    "33": 0.6666666666666666,
+    "34": 0.8333333333333334,
+    "35": 1.0,
+    "36": 0.5,
+    "37": 1.0,
+    "38": 1.0,
+    "39": 1.0,
+    "40": 1.0,
+    "41": 1.0,
+    "42": 1.0,
+    "43": 1.0,
+    "44": 1.0,
+    "45": 1.0,
+    "46": 1.0,
+    "47": 1.0,
+    "48": 1.0,
+    "49": 1.0,
+    "50": 1.0,
+    "51": 1.0,
+    "52": 1.0,
+    "53": 1.0,
+    "54": 1.0,
+    "55": 1.0,
+    "56": 1.0,
+    "57": 1.0,
+    "58": 1.0,
+    "59": 1.0,
+    "60": 1.0,
+    "61": 1.0
+  },
+  "gods": [
+    {
+      "id": "design_registry_entities_entities",
+      "label": "entities",
+      "degree": 14
+    },
+    {
+      "id": "claude_hooks_yaml_helper_sh__entry",
+      "label": "yaml-helper.sh script",
+      "degree": 14
+    },
+    {
+      "id": "claude_scripts_migrate_v1_config_sh__entry",
+      "label": "migrate-v1-config.sh script",
+      "degree": 14
+    },
+    {
+      "id": "claude_hooks_yaml_helper_yaml_helper_set_root",
+      "label": "_yaml_helper_set_root()",
+      "degree": 13
+    },
+    {
+      "id": "claude_scripts_test_scaffold_content_of",
+      "label": "content_of()",
+      "degree": 13
+    },
+    {
+      "id": "claude_skills_godot_apk_ci_templates_build_apk_firebelley_steps_with",
+      "label": "with",
+      "degree": 12
+    },
+    {
+      "id": "claude_docs_workflow_catalog_steps_artifact",
+      "label": "artifact",
+      "degree": 11
+    },
+    {
+      "id": "design_registry_entities_formulas",
+      "label": "formulas",
+      "degree": 11
+    },
+    {
+      "id": "studio_tests_catalog_skills",
+      "label": "skills",
+      "degree": 11
+    },
+    {
+      "id": "claude_scripts_test_run_sh__entry",
+      "label": "test-run.sh script",
+      "degree": 11
+    }
+  ],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `LC_ALL`, `LC_ALL`, `LC_ALL` to the rest of the system?",
+      "why": "3 weakly-connected nodes found - possible missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.07039187227866474 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 1` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05128205128205128 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 2` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05128205128205128 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 3` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05405405405405406 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 5` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 7` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.1 - nodes in this community are weakly interconnected."
+    }
+  ]
+}
