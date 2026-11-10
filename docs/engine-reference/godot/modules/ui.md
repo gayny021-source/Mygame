@@ -35,6 +35,13 @@ release notes:
 - **App lifecycle notifications (Node):** `NOTIFICATION_WM_GO_BACK_REQUEST = 1007`,
   `NOTIFICATION_APPLICATION_RESUMED = 2014`, `_PAUSED = 2015`, `_FOCUS_IN = 2016`,
   `_FOCUS_OUT = 2017`.
+- **Back button quits by default** (headless run, 2026-11-10): `SceneTree.quit_on_go_back`
+  and `application/config/quit_on_go_back` are both `true`. Set the project setting to
+  `false` and handle `NOTIFICATION_WM_GO_BACK_REQUEST` (1007) if «Назад» must do anything
+  but close the game.
+- **`BaseButton.action_mode`** defaults to `1` (`ACTION_MODE_BUTTON_RELEASE`): a button
+  fires on release (headless run, 2026-11-10). Whether dragging a finger off the button
+  cancels the press on a touchscreen is NOT verified — check on a device.
 - **Project display defaults** for a `project.godot` without `[display]`: viewport
   1152×648, `stretch/mode = disabled`, `stretch/aspect = keep`,
   `handheld/orientation = 0` (Landscape; Portrait = 1).
