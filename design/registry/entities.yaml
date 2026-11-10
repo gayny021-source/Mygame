@@ -306,7 +306,17 @@ constants:
       - design/gdd/d20-checks.md
     value: 5
     unit: checks
-    notes: "K_budget, d20-checks.md formula 7. Max choices with a risky variant on any path of one chapter; a token reroll is not counted. Safe 4-6. From the concept MVP (about 12 scenes, 4-5 checks). MVP checks it by review and playtest, later the build walks the scene graph. The branching story GDD must reference it when written."
+    notes: "K_budget, d20-checks.md formula 7. Max choices with a risky variant on any path of one chapter; a token reroll is not counted. Safe 4-6; must stay >= check_min_per_path + 2. From the concept MVP (about 12 scenes, 4-5 checks). MVP checks it by review and playtest, later the build walks the scene graph. The branching story GDD must reference it when written."
+    added: 2026-11-10
+    revised: 2026-11-10
+  - name: check_min_per_path
+    status: active
+    source: design/gdd/d20-checks.md
+    referenced_by:
+      - design/gdd/d20-checks.md
+    value: 3
+    unit: checks
+    notes: "K_min, d20-checks.md formula 7 (creative-director, DD-004). Min choices with a risky variant on every chapter path of at least 8 scenes; shorter paths (early endings) are not checked. Safe 2-4; must stay <= check_budget_per_path - 2. A breach is a review warning (later a build warning), never an error."
     added: 2026-11-10
     revised: ""
 

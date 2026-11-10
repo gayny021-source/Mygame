@@ -349,9 +349,9 @@
     "ast_empty": true
   },
   "design/registry/entities.yaml": {
-    "mtime": 1794288858.0624015,
-    "seen": 1794306973.7505789,
-    "ast_hash": "80a445b66d374ee8b95d71e6d2ba562a",
+    "mtime": 1794307519.696077,
+    "seen": 1794307521.5289488,
+    "ast_hash": "0bf8c366949d554741e5291ee933cf40",
     "semantic_hash": ""
   },
   "docs/architecture/tr-registry.yaml": {
@@ -2767,9 +2767,9 @@
     "semantic_hash": ""
   },
   "USER_PREFERENCES.md": {
-    "mtime": 1794306970.0883842,
-    "seen": 1794306973.7511287,
-    "ast_hash": "abd10a25208f8363c4cf8ef90dd15810",
+    "mtime": 1794307477.3044143,
+    "seen": 1794307521.5296636,
+    "ast_hash": "aa525b1d9b5ddd7493ccd09e78f316f2",
     "semantic_hash": ""
   },
   "design/CLAUDE.md": {
@@ -2779,9 +2779,9 @@
     "semantic_hash": ""
   },
   "design/DIRECTOR_DECISIONS.md": {
-    "mtime": 1794288876.9907107,
-    "seen": 1794306973.7511308,
-    "ast_hash": "d19b785dd7017762e007042f5674b5ce",
+    "mtime": 1794307519.7084167,
+    "seen": 1794307521.5296671,
+    "ast_hash": "826a2d648c287e20df7da9255468e259",
     "semantic_hash": ""
   },
   "design/DISSENT_LOG.md": {
@@ -2797,9 +2797,9 @@
     "semantic_hash": ""
   },
   "design/gdd/d20-checks.md": {
-    "mtime": 1794288858.0953977,
-    "seen": 1794306973.7511346,
-    "ast_hash": "b3e51c1fa77be3d936a2b9d59cd47e0d",
+    "mtime": 1794307519.6729512,
+    "seen": 1794307521.5296755,
+    "ast_hash": "d99af54e9d824fffb4d81a577eb3fc08",
     "semantic_hash": ""
   },
   "design/gdd/game-concept.md": {
@@ -2821,9 +2821,9 @@
     "semantic_hash": ""
   },
   "design/gdd/run-state.md": {
-    "mtime": 1794288857.9778814,
-    "seen": 1794306973.7511394,
-    "ast_hash": "9ad37c0d51578e82a8cea568f78f3140",
+    "mtime": 1794307095.791958,
+    "seen": 1794307521.529682,
+    "ast_hash": "93303c1deb1fe07d06c026f92984fbb1",
     "semantic_hash": ""
   },
   "design/gdd/systems-index.md": {
@@ -3982,6 +3982,12 @@
     "mtime": 1794005814.0875602,
     "seen": 1794306973.7513843,
     "ast_hash": "c030ca5eb23050c1e93cc761009e4f11",
+    "semantic_hash": ""
+  },
+  "design/art/art-bible.md": {
+    "mtime": 1794307287.8868523,
+    "seen": 1794307521.5296736,
+    "ast_hash": "9ae191598d92e6063bd394600e346b36",
     "semantic_hash": ""
   }
 }
