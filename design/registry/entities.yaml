@@ -54,7 +54,7 @@
 #   in any other shape is reported as unsupported layout, with its number.
 
 version: 1
-last_updated: "2026-11-07"
+last_updated: "2026-11-10"
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -144,13 +144,28 @@ formulas:
     source: design/gdd/heroes.md
     referenced_by:
       - design/gdd/heroes.md
+      - design/gdd/d20-checks.md
     variables:
       - hero_id
       - stat_id
     output_range: [-1, 5]
     expression: "heroes_data[hero_id].stats[stat_id].bonus"
-    notes: "Read by the d20 checks GDD (not written yet). Constant over a run; a debuff closes a stat but never changes the number."
+    notes: "Read by d20-checks.md (formulas 1, 2, 5). Constant over a run; a debuff closes a stat but never changes the number."
     added: 2026-11-07
+    revised: 2026-11-10
+  - name: check_chance
+    status: active
+    source: design/gdd/d20-checks.md
+    referenced_by:
+      - design/gdd/d20-checks.md
+      - design/gdd/heroes.md
+    variables:
+      - dc
+      - bonus
+    output_range: [5, 95]
+    expression: "N = clamp(DC - bonus, 2, 20); chance = (21 - N) * 5"
+    notes: "d20-checks.md formula 2. Percent, multiple of 5. N is the lowest natural face that succeeds (nat 1 always fails, nat 20 always succeeds). With dc 11/13/15 and bonus -1..+5, N = 6..16 and chance = 25..75, so the clamp never fires. heroes.md quotes it as clamp((21 - (DC - bonus)) * 5, 5, 95), proven equal for every integer DC - bonus. One roll without a token."
+    added: 2026-11-10
     revised: ""
 
 # Example:
@@ -190,26 +205,29 @@ constants:
     source: design/gdd/heroes.md
     referenced_by:
       - design/gdd/heroes.md
+      - design/gdd/d20-checks.md
     value: -1
     unit: bonus
-    notes: "B_min, heroes.md formula 2; derived from dc_max and chance_window_low."
+    notes: "B_min, heroes.md formula 2. Derived once from dc_max and chance_window_low, then frozen. Hero data is validated against it (heroes.md formula 1), and d20-checks.md formula 3 (condition 5) checks that the DC levels keep it inside the chance window. Changed only by a hero balance patch, never by a DC config edit."
     added: 2026-11-07
-    revised: ""
+    revised: 2026-11-10
   - name: stat_bonus_max
     status: active
     source: design/gdd/heroes.md
     referenced_by:
       - design/gdd/heroes.md
+      - design/gdd/d20-checks.md
     value: 5
     unit: bonus
-    notes: "B_max, heroes.md formula 2; derived from dc_min and chance_window_high."
+    notes: "B_max, heroes.md formula 2. Derived once from dc_min and chance_window_high, then frozen. Hero data is validated against it (heroes.md formula 1), and d20-checks.md formula 3 (condition 4) checks that the DC levels keep it inside the chance window. Changed only by a hero balance patch, never by a DC config edit."
     added: 2026-11-07
-    revised: ""
+    revised: 2026-11-10
   - name: profile_gap_min
     status: active
     source: design/gdd/heroes.md
     referenced_by:
       - design/gdd/heroes.md
+      - design/gdd/d20-checks.md
     value: 4
     unit: bonus
     notes: "G_min, heroes.md formula 3. The d20 checks GDD must keep the DC spread at or below (P_hi - P_lo)/5 - G_min = 6."
@@ -220,50 +238,76 @@ constants:
     source: design/gdd/heroes.md
     referenced_by:
       - design/gdd/heroes.md
+      - design/gdd/d20-checks.md
     value: 0
     unit: bonus
-    notes: "F_max, heroes.md formula 3. Forces dc_max <= 16 while chance_window_low is 25."
+    notes: "F_max, heroes.md formula 3. On its own it caps dc_max at 16 while chance_window_low is 25. The real cap is 21 + stat_bonus_min - chance_window_low/5 = 15 while stat_bonus_min is -1 (d20-checks.md formula 3, condition 5). Until 2026-11-10 this note said the cap was 16."
     added: 2026-11-07
-    revised: ""
+    revised: 2026-11-10
   - name: dc_min
     status: active
-    source: design/gdd/heroes.md
+    source: design/gdd/d20-checks.md
     referenced_by:
+      - design/gdd/d20-checks.md
       - design/gdd/heroes.md
     value: 11
     unit: dc
-    notes: "Provisional (prototype). Ownership moves to the d20 checks GDD when it is written."
+    notes: "DC_easy, level Легко (user decision 2026-11-08; d20-checks.md rule 2, formula 3). Safe 11-13. heroes.md calls it DC_lo. Source was heroes.md until 2026-11-10."
     added: 2026-11-07
+    revised: 2026-11-10
+  - name: dc_medium
+    status: active
+    source: design/gdd/d20-checks.md
+    referenced_by:
+      - design/gdd/d20-checks.md
+      - design/gdd/heroes.md
+    value: 13
+    unit: dc
+    notes: "DC_medium, level Средне (user decision 2026-11-08; d20-checks.md rule 2, formula 3). Safe 12-14, strictly between dc_min and dc_max. heroes.md uses it in the Rovend chance table."
+    added: 2026-11-10
     revised: ""
   - name: dc_max
     status: active
-    source: design/gdd/heroes.md
+    source: design/gdd/d20-checks.md
     referenced_by:
+      - design/gdd/d20-checks.md
       - design/gdd/heroes.md
     value: 15
     unit: dc
-    notes: "Provisional (prototype); allowed up to 16 by heroes.md formula 2. Ownership moves to the d20 checks GDD."
+    notes: "DC_hard, level Трудно (user decision 2026-11-08; d20-checks.md rule 2, formula 3). Safe 13-15; 16 needs a hero balance patch that lifts stat_bonus_min to 0. heroes.md calls it DC_hi. Source was heroes.md until 2026-11-10."
     added: 2026-11-07
-    revised: ""
+    revised: 2026-11-10
   - name: chance_window_low
     status: active
-    source: design/gdd/heroes.md
+    source: design/gdd/d20-checks.md
     referenced_by:
+      - design/gdd/d20-checks.md
       - design/gdd/heroes.md
     value: 25
     unit: percent
-    notes: "P_lo, single roll without a token. Proposal for the d20 checks GDD."
+    notes: "P_lo, single roll without a token (d20-checks.md formula 3). Reached exactly by stat_bonus_min -1 on dc_max 15. Source was heroes.md until 2026-11-10."
     added: 2026-11-07
-    revised: ""
+    revised: 2026-11-10
   - name: chance_window_high
     status: active
-    source: design/gdd/heroes.md
+    source: design/gdd/d20-checks.md
     referenced_by:
+      - design/gdd/d20-checks.md
       - design/gdd/heroes.md
     value: 75
     unit: percent
-    notes: "P_hi = 100 - P_lo. Proposal for the d20 checks GDD."
+    notes: "P_hi = 100 - P_lo (d20-checks.md formula 3). Reached exactly by stat_bonus_max +5 on dc_min 11. Source was heroes.md until 2026-11-10."
     added: 2026-11-07
+    revised: 2026-11-10
+  - name: check_budget_per_path
+    status: active
+    source: design/gdd/d20-checks.md
+    referenced_by:
+      - design/gdd/d20-checks.md
+    value: 5
+    unit: checks
+    notes: "K_budget, d20-checks.md formula 7. Max choices with a risky variant on any path of one chapter; a token reroll is not counted. Safe 4-6. From the concept MVP (about 12 scenes, 4-5 checks). MVP checks it by review and playtest, later the build walks the scene graph. The branching story GDD must reference it when written."
+    added: 2026-11-10
     revised: ""
 
 # Example:
