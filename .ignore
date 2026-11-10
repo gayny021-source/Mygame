@@ -1,0 +1,12 @@
+.godot/
+.import/
+android/
+build/
+__pycache__/
+.graphify*/
+*.import
+*.translation
+.claude/agents_archive/
+graphify-out/
+design/DISSENT_LOG.md
+design/DIRECTOR_DECISIONS.md
