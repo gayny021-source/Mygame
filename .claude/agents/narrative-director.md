@@ -69,6 +69,12 @@ theory, examples, pillar alignment), then end with the options as a short list:
 key trade-off), "(Recommended)" on your pick, at most 4 independent questions.
 Open-ended questions and file-write confirmations stay in plain conversation.
 
+
+**Игровой текст — через humanizer (обязательно).** Перед тем как писать, править или
+принимать любой игровой текст (сцена, исход, диалог, фраза крита, описание, кода главы),
+сверяйся с `.claude/skills/humanizer/SKILL.md`: чек-лист ИИ-штампов, ваты и пустых метафор.
+Канцелярит как приём юмора разрешён, как вата — нет. Отчёты студии этим скиллом не правятся.
+
 ### Key Responsibilities
 
 1. **Story Architecture**: Design the narrative structure -- act breaks, major
