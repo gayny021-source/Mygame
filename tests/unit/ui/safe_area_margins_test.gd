@@ -239,7 +239,7 @@ func test_margins_headless_empty_safe_area_gives_base_fields() -> void:
 	# Arrange
 	var insets := SafeAreaMargins.insets_for(Rect2i(), Vector2i.ZERO, PHONE_WIN, PHONE_VIEW)
 	# Act
-	var margins := [
+	var margins: Array[int] = [
 		SafeAreaMargins.margin_for(BASE_LEFT, insets[0], AIR),
 		SafeAreaMargins.margin_for(BASE_TOP, insets[1], AIR),
 		SafeAreaMargins.margin_for(BASE_RIGHT, insets[2], AIR),
@@ -253,7 +253,7 @@ func test_margins_phone_1080x2400_gives_expected_fields() -> void:
 	# Arrange
 	var insets := SafeAreaMargins.insets_for(_phone_safe(), Vector2i.ZERO, PHONE_WIN, PHONE_VIEW)
 	# Act
-	var margins := [
+	var margins: Array[int] = [
 		SafeAreaMargins.margin_for(BASE_LEFT, insets[0], AIR),
 		SafeAreaMargins.margin_for(BASE_TOP, insets[1], AIR),
 		SafeAreaMargins.margin_for(BASE_RIGHT, insets[2], AIR),
