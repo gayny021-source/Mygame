@@ -69,7 +69,7 @@
 | # | System Name | Category | Priority | Status | Design Doc | Depends On |
 |---|-------------|----------|----------|--------|------------|------------|
 | 1 | Состояние прохождения | Core | MVP | Designed | [run-state.md](run-state.md) | — |
-| 2 | Ветвящаяся история | Core | MVP | Not Started | — | Состояние прохождения |
+| 2 | Ветвящаяся история | Core | MVP | Designed | [branching-story.md](branching-story.md) | Состояние прохождения |
 | 3 | Проверки d20 | Gameplay | MVP | Designed | [d20-checks.md](d20-checks.md) | Герои |
 | 4 | Система выбора | Gameplay | MVP | Not Started | — | Ветвящаяся история, Состояние прохождения, Проверки d20, Герои |
 | 5 | Цель главы и маркер прогресса | Gameplay | MVP | Not Started | — | Ветвящаяся история, Состояние прохождения |
@@ -230,10 +230,10 @@ Effort: S = 1 сессия, M = 2–3 сессии, L = 4+ сессий. Вет�
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 20 |
-| Design docs started | 3 |
+| Design docs started | 4 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 3/10 |
+| MVP systems designed | 4/10 |
 | Vertical Slice systems designed | 0/5 |
 
 ---
