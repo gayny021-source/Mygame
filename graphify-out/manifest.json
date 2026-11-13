@@ -2647,9 +2647,9 @@
     "semantic_hash": ""
   },
   ".claude/skills/tscn-handcrafter/SKILL.md": {
-    "mtime": 1794062037.647411,
-    "seen": 1794306973.7511044,
-    "ast_hash": "6acf44bc486cac518ace5396904ec754",
+    "mtime": 1794307845.2691226,
+    "seen": 1794537836.2293143,
+    "ast_hash": "f17a1eceb95a777f82d7fcb71fd449ef",
     "semantic_hash": ""
   },
   ".claude/skills/ux-design/SKILL.md": {
@@ -2767,9 +2767,9 @@
     "semantic_hash": ""
   },
   "USER_PREFERENCES.md": {
-    "mtime": 1794307477.3044143,
-    "seen": 1794307521.5296636,
-    "ast_hash": "aa525b1d9b5ddd7493ccd09e78f316f2",
+    "mtime": 1794537662.0341904,
+    "seen": 1794537836.2293377,
+    "ast_hash": "fb5474495a1f1cb6c7281c74550d240a",
     "semantic_hash": ""
   },
   "design/CLAUDE.md": {
@@ -2791,27 +2791,27 @@
     "semantic_hash": ""
   },
   "design/accessibility-requirements.md": {
-    "mtime": 1794288525.2457776,
-    "seen": 1794306973.7511334,
-    "ast_hash": "2d9711640101807e5d11fdb250a69650",
+    "mtime": 1794308044.053349,
+    "seen": 1794537836.2293487,
+    "ast_hash": "caab9a13dda764e6a41d1e6f05ef43cf",
     "semantic_hash": ""
   },
   "design/gdd/d20-checks.md": {
-    "mtime": 1794307519.6729512,
-    "seen": 1794307521.5296755,
-    "ast_hash": "d99af54e9d824fffb4d81a577eb3fc08",
+    "mtime": 1794307928.787873,
+    "seen": 1794537836.2293522,
+    "ast_hash": "03c7fc136ea270e59ef0a7af82889754",
     "semantic_hash": ""
   },
   "design/gdd/game-concept.md": {
-    "mtime": 1794063882.5274935,
-    "seen": 1794306973.751136,
-    "ast_hash": "0a4efb106fb9180c579eb9bb50ac8dc4",
+    "mtime": 1794536497.1798406,
+    "seen": 1794537836.2293534,
+    "ast_hash": "8893e268fa952dd2f117bbac33a887fd",
     "semantic_hash": ""
   },
   "design/gdd/heroes.md": {
-    "mtime": 1794288876.9891026,
-    "seen": 1794306973.751137,
-    "ast_hash": "a9891b537bbdb7d4be64a21192a8b171",
+    "mtime": 1794307754.476741,
+    "seen": 1794537836.2293544,
+    "ast_hash": "e0215561f942790e503bf6873166510d",
     "semantic_hash": ""
   },
   "design/gdd/reviews/game-concept-review-log.md": {
@@ -2827,9 +2827,9 @@
     "semantic_hash": ""
   },
   "design/gdd/systems-index.md": {
-    "mtime": 1794288858.0073292,
-    "seen": 1794306973.7511406,
-    "ast_hash": "d428a3218d5791fcd0d0ce1a7637751b",
+    "mtime": 1794536278.4354863,
+    "seen": 1794537836.2293577,
+    "ast_hash": "f2bd924cc9d66c11b288d8d523ade1fa",
     "semantic_hash": ""
   },
   "design/narrative/voices/rovend.md": {
@@ -3988,6 +3988,126 @@
     "mtime": 1794307287.8868523,
     "seen": 1794307521.5296736,
     "ast_hash": "9ae191598d92e6063bd394600e346b36",
+    "semantic_hash": ""
+  },
+  ".github/workflows/build-apk.yml": {
+    "mtime": 1794537718.2965434,
+    "seen": 1794537836.2288039,
+    "ast_hash": "5b6a105e31f03c9b4de3a80b8d6e1005",
+    "semantic_hash": ""
+  },
+  ".github/workflows/tests.yml": {
+    "mtime": 1794537724.8069391,
+    "seen": 1794537836.2288063,
+    "ast_hash": "148d05941b8243b06c670c8e744f123f",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/runtest.sh": {
+    "mtime": 1794537785.820155,
+    "seen": 1794537836.2288077,
+    "ast_hash": "8e80a96be9f32ea01de23b74cdbd97fb",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/dotnet/GdUnit4CSharpApi.cs": {
+    "mtime": 1794537785.8241374,
+    "seen": 1794537836.2288089,
+    "ast_hash": "55a0b0f6102376f0eeb5fe10d2f94c57",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/asserts/CLAUDE.md": {
+    "mtime": 1794537785.8208454,
+    "seen": 1794537836.2293394,
+    "ast_hash": "801633d7687d2940848e7d683826576c",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/reporters/html/template/folder_report.html": {
+    "mtime": 1794537785.8255606,
+    "seen": 1794537836.229341,
+    "ast_hash": "01d1e1a3d1d7fa4ab7372807c7fa2cfd",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/reporters/html/template/index.html": {
+    "mtime": 1794537785.825575,
+    "seen": 1794537836.2293422,
+    "ast_hash": "415d9f3dbc2e5a1c6ab9bd0377f532e2",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/reporters/html/template/suite_report.html": {
+    "mtime": 1794537785.8255908,
+    "seen": 1794537836.2293432,
+    "ast_hash": "05919f8a94c7dd0a4888157caee3aa1b",
+    "semantic_hash": ""
+  },
+  "design/gdd/branching-story.md": {
+    "mtime": 1794536507.627789,
+    "seen": 1794537836.2293508,
+    "ast_hash": "4bca9b32ceaaa33b8a3a55787637ed56",
+    "semantic_hash": ""
+  },
+  "tests/README.md": {
+    "mtime": 1794537724.8081496,
+    "seen": 1794537836.2296066,
+    "ast_hash": "8294457b94ebd8ad9be42dc3505d0e6f",
+    "semantic_hash": ""
+  },
+  "tests/smoke/critical-paths.md": {
+    "mtime": 1794537724.8093348,
+    "seen": 1794537836.2296078,
+    "ast_hash": "2400179ff0f031d2cd93c55e5b6ab62a",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/core/assets/touch-button.png": {
+    "mtime": 1794537785.8221729,
+    "seen": 1794537836.229609,
+    "ast_hash": "47eacbeb6557c1fffb81523c51ea4cf4",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/reporters/html/template/css/logo.png": {
+    "mtime": 1794537785.825493,
+    "seen": 1794537836.22961,
+    "ast_hash": "c5f2f37e1003addc2399b42b1df3fa6e",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/ui/settings/logo.png": {
+    "mtime": 1794537785.826437,
+    "seen": 1794537836.229611,
+    "ast_hash": "c5f2f37e1003addc2399b42b1df3fa6e",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/update/assets/border_bottom.png": {
+    "mtime": 1794537785.8267827,
+    "seen": 1794537836.229612,
+    "ast_hash": "83e6be7903f5aece682f6d88f1d06583",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/update/assets/border_top.png": {
+    "mtime": 1794537785.8268003,
+    "seen": 1794537836.229613,
+    "ast_hash": "69709cfced516c7a41d3c82706b3ad84",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/update/assets/dot1.png": {
+    "mtime": 1794537785.8268154,
+    "seen": 1794537836.229614,
+    "ast_hash": "f9ef621408422256623b8cf096727f86",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/update/assets/dot2.png": {
+    "mtime": 1794537785.82683,
+    "seen": 1794537836.2296152,
+    "ast_hash": "af1aaa93d81ea5869ef45eb1ad1718e8",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/update/assets/embedded.png": {
+    "mtime": 1794537785.8268495,
+    "seen": 1794537836.2296228,
+    "ast_hash": "94abdc6e8422d5f970fff4c83f89a379",
+    "semantic_hash": ""
+  },
+  "addons/gdUnit4/src/update/assets/horizontal-line2.png": {
+    "mtime": 1794537785.8268673,
+    "seen": 1794537836.229624,
+    "ast_hash": "5e5f97d0d7e6f2c32b9eb418ceba96ef",
     "semantic_hash": ""
   }
 }

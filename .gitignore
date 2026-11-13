@@ -70,7 +70,6 @@ dist/
 # Keep this un-ignore, or run `godot --headless --import` once after cloning.
 !**/.godot/global_script_class_cache.cfg
 *.translation
-export_presets.cfg
 # ...except the preset template the godot-apk-ci skill ships (no secrets in it).
 !.claude/skills/godot-apk-ci/templates/export_presets.cfg
 # Uncomment if using Godot:
@@ -182,3 +181,4 @@ $RECYCLE.BIN/
 
 # graphify: the AST cache is rebuilt in seconds (graphify update .); the graph itself is committed
 graphify-out/cache/
+reports/

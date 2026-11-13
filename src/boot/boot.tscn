@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://src/ui/reading_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://src/ui/safe_area_margins.gd" id="2_safe"]
+[ext_resource type="Script" path="res://src/boot/boot.gd" id="3_boot"]
+
+[node name="Boot" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+script = ExtResource("3_boot")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"ScreenBackground"
+
+[node name="Safe" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 96
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 72
+script = ExtResource("2_safe")
+
+[node name="Title" type="Label" parent="Safe"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 72
+text = "Критический провал"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3

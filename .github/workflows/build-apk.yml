@@ -1,0 +1,73 @@
+# Main template (user decision 2026-11-07): barichello/godot-ci only. The image
+# already holds Godot 4.7.2, the export templates, JDK 17 and the Android SDK, so
+# nothing is downloaded per run. Copy to .github/workflows/build-apk.yml after the
+# prerequisites in SKILL.md. NOT YET RUN on GitHub.
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.7.2"
+  EXPORT_PRESET: "Android"
+  APK_NAME: "kriticheskiy-proval"
+
+jobs:
+  build-apk:
+    name: Export debug APK
+    runs-on: ubuntu-24.04
+    container:
+      image: barichello/godot-ci:4.7.2
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          lfs: true
+
+      # GitHub sets HOME=/github/home inside container jobs; the image keeps
+      # its editor settings and export templates under /root.
+      - name: Move the image's settings and templates to the job HOME
+        run: |
+          mkdir -p "$HOME/.config" "$HOME/.local/share/godot/export_templates"
+          cp -r /root/.config/godot "$HOME/.config/godot"
+          mv "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
+             "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+
+      - name: Generate a debug keystore
+        run: |
+          keytool -genkeypair -v -keystore "$RUNNER_TEMP/debug.keystore" \
+            -alias androiddebugkey -storepass android -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+          {
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$RUNNER_TEMP/debug.keystore"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android"
+          } >> "$GITHUB_ENV"
+
+      - name: Import the project
+        run: godot --headless --path . --import
+
+      - name: Export debug APK
+        run: |
+          mkdir -p build/android
+          godot --headless --path . --export-debug "$EXPORT_PRESET" "build/android/$APK_NAME.apk"
+          test -s "build/android/$APK_NAME.apk"
+
+      - name: Upload APK to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APK_NAME }}-debug
+          path: build/android/*.apk
+          if-no-files-found: error
+
+      - name: Attach APK to the Release (tags v* only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/android/*.apk

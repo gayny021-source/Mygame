@@ -1,17 +1,18 @@
-# Graph Report - Mygame  (2026-11-10)
+# Graph Report - Mygame  (2026-11-13)
 
 ## Corpus Check
-- 64 files · ~978,448 words
+- 68 files · ~990,249 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 26 file(s) not represented in the graph (top: (none) 9, .gd 6, .gdshader 5)
+- Unclassified: 539 file(s) not represented in the graph (top: .gd 245, .uid 239, .tscn 18)
+- WARNING: 539 of 1224 files seen (44%) have no supported extractor and are missing from this graph entirely. It may look complete while representing only part of the codebase.
 
 ## Summary
-- 556 nodes · 757 edges · 63 communities (36 shown, 27 thin omitted)
+- 645 nodes · 849 edges · 67 communities (39 shown, 28 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1e95d91c`
+- Built from commit: `7684a041`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -78,18 +79,22 @@
 - story-facts.sh
 - story-status.sh
 - statusline.sh
+- GdUnit4CSharpApi
+- steps
+- with
+- runtest.sh
 
 ## God Nodes (most connected - your core abstractions)
 1. `entities` - 14 edges
 2. `yaml-helper.sh script` - 14 edges
 3. `migrate-v1-config.sh script` - 14 edges
-4. `_yaml_helper_set_root()` - 13 edges
-5. `content_of()` - 13 edges
-6. `with` - 12 edges
-7. `formulas` - 11 edges
+4. `GdUnit4CSharpApi` - 13 edges
+5. `_yaml_helper_set_root()` - 13 edges
+6. `content_of()` - 13 edges
+7. `with` - 12 edges
 8. `artifact` - 11 edges
-9. `skills` - 11 edges
-10. `test-run.sh script` - 11 edges
+9. `formulas` - 11 edges
+10. `skills` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
@@ -97,7 +102,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (63 total, 27 thin omitted)
+## Communities (67 total, 28 thin omitted)
 
 ### Community 0 - "artifact"
 Cohesion: 0.07
@@ -243,10 +248,22 @@ Nodes (3): all_gdds(), not_a_system_gdd(), review-scope.sh script
 Cohesion: 0.50
 Nodes (3): last_updated, requirements, version
 
+### Community 63 - "GdUnit4CSharpApi"
+Cohesion: 0.08
+Nodes (3): ExecutionCompletedEventHandler, GdUnit4CSharpApi, gdUnit4.addons.gdUnit4.src.dotnet
+
+### Community 64 - "steps"
+Cohesion: 0.07
+Nodes (29): container, name, permissions, runs-on, steps, image, env, APK_NAME (+21 more)
+
+### Community 65 - "with"
+Cohesion: 0.08
+Nodes (25): jobs, test, name, on, pull_request, push, checks, contents (+17 more)
+
 ## Knowledge Gaps
 - **3 isolated node(s):** `LC_ALL`, `LC_ALL`, `LC_ALL`
-  These have ≤1 connection - possible missing edges. (Counts symbols only; 250 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **27 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges. (Counts symbols only; 309 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_

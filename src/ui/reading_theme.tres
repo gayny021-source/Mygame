@@ -1,0 +1,111 @@
+[gd_resource type="Theme" format=3]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_background"]
+bg_color = Color(0.9137255, 0.8745098, 0.7764706, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_disabled"]
+content_margin_left = 40.0
+content_margin_top = 24.0
+content_margin_right = 40.0
+content_margin_bottom = 24.0
+bg_color = Color(0.9137255, 0.8745098, 0.7764706, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.3529412, 0.3176471, 0.2588235, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_focus"]
+draw_center = false
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+expand_margin_left = 12.0
+expand_margin_top = 12.0
+expand_margin_right = 12.0
+expand_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_focus_inset"]
+draw_center = false
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+content_margin_left = 40.0
+content_margin_top = 24.0
+content_margin_right = 40.0
+content_margin_bottom = 24.0
+bg_color = Color(0.9686275, 0.9411765, 0.8627451, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
+content_margin_left = 40.0
+content_margin_top = 24.0
+content_margin_right = 40.0
+content_margin_bottom = 24.0
+bg_color = Color(0.9137255, 0.8745098, 0.7764706, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[resource]
+default_font_size = 48
+Button/colors/font_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+Button/colors/font_disabled_color = Color(0.3529412, 0.3176471, 0.2588235, 1)
+Button/colors/font_focus_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+Button/colors/font_hover_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+Button/colors/font_hover_pressed_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+Button/colors/font_pressed_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+Button/colors/icon_disabled_color = Color(1, 1, 1, 1)
+Button/font_sizes/font_size = 48
+Button/styles/disabled = SubResource("StyleBoxFlat_disabled")
+Button/styles/focus = SubResource("StyleBoxFlat_focus")
+Button/styles/hover = SubResource("StyleBoxFlat_card")
+Button/styles/normal = SubResource("StyleBoxFlat_card")
+Button/styles/pressed = SubResource("StyleBoxFlat_pressed")
+CaptionLabel/base_type = &"Label"
+CaptionLabel/colors/font_color = Color(0.3529412, 0.3176471, 0.2588235, 1)
+CaptionLabel/font_sizes/font_size = 42
+Label/colors/font_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+Label/font_sizes/font_size = 48
+RichTextLabel/colors/default_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+RichTextLabel/constants/line_separation = 3
+RichTextLabel/font_sizes/bold_font_size = 48
+RichTextLabel/font_sizes/bold_italics_font_size = 48
+RichTextLabel/font_sizes/italics_font_size = 48
+RichTextLabel/font_sizes/mono_font_size = 48
+RichTextLabel/font_sizes/normal_font_size = 48
+RichTextLabel/styles/focus = SubResource("StyleBoxFlat_focus_inset")
+ScreenBackground/base_type = &"Panel"
+ScreenBackground/styles/panel = SubResource("StyleBoxFlat_background")
