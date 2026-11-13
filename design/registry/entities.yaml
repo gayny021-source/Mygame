@@ -316,7 +316,7 @@ constants:
       - design/gdd/d20-checks.md
     value: 3
     unit: checks
-    notes: "K_min, d20-checks.md formula 7 (creative-director, DD-004). Min choices with a risky variant on every chapter path of at least 8 scenes; shorter paths (early endings) are not checked. Safe 2-4; must stay <= check_budget_per_path - 2. A breach is a review warning (later a build warning), never an error."
+    notes: "K_min, d20-checks.md formula 7 (creative-director, DD-004). Min choices with a risky variant on every chapter path of at least 8 scenes; shorter paths (early endings) are not checked. Safe 2-3 at check_budget_per_path = 5, 2-4 at >= 6 (DD-006); must stay <= check_budget_per_path - 2. A breach is a review warning (later a build warning), never an error."
     added: 2026-11-10
     revised: ""
 
