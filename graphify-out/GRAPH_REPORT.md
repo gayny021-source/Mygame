@@ -1,10 +1,10 @@
-# Graph Report - Mygame  (2026-11-13)
+# Graph Report - Mygame  (2026-11-14)
 
 ## Corpus Check
-- 68 files · ~990,249 words
+- 68 files · ~1,047,769 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 539 file(s) not represented in the graph (top: .gd 245, .uid 239, .tscn 18)
-- WARNING: 539 of 1224 files seen (44%) have no supported extractor and are missing from this graph entirely. It may look complete while representing only part of the codebase.
+- Unclassified: 541 file(s) not represented in the graph (top: .gd 246, .uid 240, .tscn 18)
+- WARNING: 541 of 1232 files seen (44%) have no supported extractor and are missing from this graph entirely. It may look complete while representing only part of the codebase.
 
 ## Summary
 - 645 nodes · 849 edges · 67 communities (39 shown, 28 thin omitted)
@@ -12,7 +12,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7684a041`
+- Built from commit: `3136ff12`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -92,8 +92,8 @@
 5. `_yaml_helper_set_root()` - 13 edges
 6. `content_of()` - 13 edges
 7. `with` - 12 edges
-8. `artifact` - 11 edges
-9. `formulas` - 11 edges
+8. `formulas` - 11 edges
+9. `artifact` - 11 edges
 10. `skills` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)

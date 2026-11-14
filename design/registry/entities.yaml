@@ -167,6 +167,19 @@ formulas:
     notes: "d20-checks.md formula 2. Percent, multiple of 5. N is the lowest natural face that succeeds (nat 1 always fails, nat 20 always succeeds). With dc 11/13/15 and bonus -1..+5, N = 6..16 and chance = 25..75, so the clamp never fires. heroes.md quotes it as clamp((21 - (DC - bonus)) * 5, 5, 95), proven equal for every integer DC - bonus. One roll without a token."
     added: 2026-11-10
     revised: ""
+  - name: choice_roll_share
+    status: active
+    source: design/gdd/choice-system.md
+    referenced_by:
+      - design/gdd/choice-system.md
+    variables:
+      - N_roll
+      - N_S
+    output_range: [0, 1]
+    expression: "R = N_roll / N_S, defined only when N_S > 0 (otherwise 'no data')"
+    notes: "choice-system.md F1. Playtest metric: share of counted choices decided by a risky variant. Thresholds R_lo (and R_hi, if any) are NOT set: CEO assigns them after the first playtest (2026-11-13). Per-scene output is forbidden until a minimum N_S is set; chapter-level only (balance-simulator, 2026-11-13)."
+    added: 2026-11-14
+    revised: ""
 
 # Example:
 #
@@ -318,6 +331,40 @@ constants:
     unit: checks
     notes: "K_min, d20-checks.md formula 7 (creative-director, DD-004). Min choices with a risky variant on every chapter path of at least 8 scenes; shorter paths (early endings) are not checked. Safe 2-3 at check_budget_per_path = 5, 2-4 at >= 6 (DD-006); must stay <= check_budget_per_path - 2. A breach is a review warning (later a build warning), never an error."
     added: 2026-11-10
+    revised: ""
+  - name: options_max
+    status: active
+    source: design/gdd/branching-story.md
+    referenced_by:
+      - design/gdd/branching-story.md
+      - design/gdd/choice-system.md
+    value: 4
+    unit: options
+    notes: "OPTIONS_MAX, branching-story.md F4. Options per scene, 1..4. Safe 3-4."
+    added: 2026-11-14
+    revised: ""
+  - name: guard_window_ms
+    status: active
+    source: design/gdd/branching-story.md
+    referenced_by:
+      - design/gdd/branching-story.md
+      - design/gdd/d20-checks.md
+      - design/gdd/choice-system.md
+    value: 300
+    unit: ms
+    notes: "GUARD_WINDOW_MS, branching-story.md UR-7 / GF-5 (DD-007). A touch begun inside the window after a screen change does not fire. choice-system.md rule 7 (DD-010/DD-011): window starts on screen change; background return resets finger tracking, window = return + 300 ms."
+    added: 2026-11-14
+    revised: ""
+  - name: past_options_max
+    status: active
+    source: design/gdd/choice-system.md
+    referenced_by:
+      - design/gdd/choice-system.md
+      - design/gdd/branching-story.md
+    value: 1
+    unit: options
+    notes: "Max options opened by a past decision per choice (CEO 2026-11-13); the fatal variant counts. Breach is a build warning, silenced by `исключение`. Replaces '<= 2' in branching-story.md F4 (patch pending)."
+    added: 2026-11-14
     revised: ""
 
 # Example:

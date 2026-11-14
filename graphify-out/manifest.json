@@ -349,9 +349,9 @@
     "ast_empty": true
   },
   "design/registry/entities.yaml": {
-    "mtime": 1794569548.764919,
-    "seen": 1794569551.499961,
-    "ast_hash": "cf83c3b90debc5ef97a2061496b419c5",
+    "mtime": 1794689873.885623,
+    "seen": 1794689915.1897686,
+    "ast_hash": "d112ff341f35403769f09ce3ec5db422",
     "semantic_hash": ""
   },
   "docs/architecture/tr-registry.yaml": {
@@ -2767,9 +2767,9 @@
     "semantic_hash": ""
   },
   "USER_PREFERENCES.md": {
-    "mtime": 1794569404.7485356,
-    "seen": 1794569551.5008688,
-    "ast_hash": "0fc8393da4344a45a03d80c4b52fce47",
+    "mtime": 1794576685.2391505,
+    "seen": 1794689915.1901577,
+    "ast_hash": "63cd5984a4e6c60dbf9453d1714b24ad",
     "semantic_hash": ""
   },
   "design/CLAUDE.md": {
@@ -2779,9 +2779,9 @@
     "semantic_hash": ""
   },
   "design/DIRECTOR_DECISIONS.md": {
-    "mtime": 1794538441.830237,
-    "seen": 1794569551.5008829,
-    "ast_hash": "6943f2666df2168e93c12ced0f9193ea",
+    "mtime": 1794689827.25196,
+    "seen": 1794689915.1901634,
+    "ast_hash": "c25b2c86b4c088d638799b21ca32bf43",
     "semantic_hash": ""
   },
   "design/DISSENT_LOG.md": {
@@ -2791,15 +2791,15 @@
     "semantic_hash": ""
   },
   "design/accessibility-requirements.md": {
-    "mtime": 1794308044.053349,
-    "seen": 1794537836.2293487,
-    "ast_hash": "caab9a13dda764e6a41d1e6f05ef43cf",
+    "mtime": 1794569990.0828607,
+    "seen": 1794689915.1901655,
+    "ast_hash": "6b52ad991524aba413956873bdbe839c",
     "semantic_hash": ""
   },
   "design/gdd/d20-checks.md": {
-    "mtime": 1794569539.71283,
-    "seen": 1794569551.5008943,
-    "ast_hash": "c658ed02f07c0bc0151e41f69a806346",
+    "mtime": 1794572753.5691178,
+    "seen": 1794689915.19017,
+    "ast_hash": "6602d6fc2d32ad30e67c0e2572c0df75",
     "semantic_hash": ""
   },
   "design/gdd/game-concept.md": {
@@ -2809,9 +2809,9 @@
     "semantic_hash": ""
   },
   "design/gdd/heroes.md": {
-    "mtime": 1794538178.8525324,
-    "seen": 1794569551.5008998,
-    "ast_hash": "ed1183b34e88a15bd90d90a58afcfa74",
+    "mtime": 1794569990.0844364,
+    "seen": 1794689915.1901722,
+    "ast_hash": "daec3745aa7f9915bd8b1b60670b249d",
     "semantic_hash": ""
   },
   "design/gdd/reviews/game-concept-review-log.md": {
@@ -2821,15 +2821,15 @@
     "semantic_hash": ""
   },
   "design/gdd/run-state.md": {
-    "mtime": 1794538178.8510084,
-    "seen": 1794569551.5009048,
-    "ast_hash": "2d88c6cc3cd87b421f7156a89ca3cfe3",
+    "mtime": 1794572753.5446687,
+    "seen": 1794689915.1901739,
+    "ast_hash": "988c77b6f9e0524b696426f053b22990",
     "semantic_hash": ""
   },
   "design/gdd/systems-index.md": {
-    "mtime": 1794538189.88572,
-    "seen": 1794569551.5009067,
-    "ast_hash": "0277871467e117b406089165dd5a7cec",
+    "mtime": 1794689882.804788,
+    "seen": 1794689915.1901748,
+    "ast_hash": "4273af8dd02f231972f505c37ebb4c3e",
     "semantic_hash": ""
   },
   "design/narrative/voices/rovend.md": {
@@ -4039,9 +4039,9 @@
     "semantic_hash": ""
   },
   "design/gdd/branching-story.md": {
-    "mtime": 1794569539.688243,
-    "seen": 1794569551.5008917,
-    "ast_hash": "07fe8d0f3c7d7432da38a1383575dc0f",
+    "mtime": 1794572753.5230434,
+    "seen": 1794689915.190168,
+    "ast_hash": "fcf4e82432692e57f1278912bd2d9ccc",
     "semantic_hash": ""
   },
   "tests/README.md": {
@@ -4138,6 +4138,12 @@
     "mtime": 1794538685.0822513,
     "seen": 1794569551.500909,
     "ast_hash": "aae9bb93082b3b0fff25ce8efe4962ac",
+    "semantic_hash": ""
+  },
+  "design/gdd/choice-system.md": {
+    "mtime": 1794689842.0441453,
+    "seen": 1794689915.1901689,
+    "ast_hash": "d7a10ea9b50661a8bac4fc93ad6e95b8",
     "semantic_hash": ""
   }
 }
