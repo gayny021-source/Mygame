@@ -366,6 +366,28 @@ constants:
     notes: "Max options opened by a past decision per choice (CEO 2026-11-13); the fatal variant counts. Breach is a build warning, silenced by `исключение`. Replaces '<= 2' in branching-story.md F4 (patch pending)."
     added: 2026-11-14
     revised: ""
+  - name: chapter_milestones_min
+    status: active
+    source: design/gdd/chapter-goal.md
+    referenced_by:
+      - design/gdd/chapter-goal.md
+      - design/gdd/branching-story.md
+    value: 3
+    unit: milestones
+    notes: "V_min, chapter-goal.md F1 (proposal; BS-27 data check). Number of milestones in a chapter; V = length of the `вехи` list. Typical chapter (12 scenes, 4-7 knot scenes) gives 4-8 (balance-simulator, 200 graphs, 2026-11-14)."
+    added: 2026-11-14
+    revised: ""
+  - name: chapter_milestones_max
+    status: active
+    source: design/gdd/chapter-goal.md
+    referenced_by:
+      - design/gdd/chapter-goal.md
+      - design/gdd/branching-story.md
+    value: 8
+    unit: milestones
+    notes: "V_max, chapter-goal.md F1 (proposal, readability limit; one row of dots fits up to 14 at 200 %). A breach is a data check failure (BS-27)."
+    added: 2026-11-14
+    revised: ""
 
 # Example:
 #

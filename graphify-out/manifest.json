@@ -349,9 +349,9 @@
     "ast_empty": true
   },
   "design/registry/entities.yaml": {
-    "mtime": 1794689873.885623,
-    "seen": 1794689915.1897686,
-    "ast_hash": "d112ff341f35403769f09ce3ec5db422",
+    "mtime": 1794694760.92071,
+    "seen": 1794694765.2984753,
+    "ast_hash": "8605f734bb1301fbc4ce5d03ef4cebe2",
     "semantic_hash": ""
   },
   "docs/architecture/tr-registry.yaml": {
@@ -2767,9 +2767,9 @@
     "semantic_hash": ""
   },
   "USER_PREFERENCES.md": {
-    "mtime": 1794576685.2391505,
-    "seen": 1794689915.1901577,
-    "ast_hash": "63cd5984a4e6c60dbf9453d1714b24ad",
+    "mtime": 1794691210.3471308,
+    "seen": 1794694765.2988892,
+    "ast_hash": "28075f02ba0d6778084f37f605969800",
     "semantic_hash": ""
   },
   "design/CLAUDE.md": {
@@ -2779,9 +2779,9 @@
     "semantic_hash": ""
   },
   "design/DIRECTOR_DECISIONS.md": {
-    "mtime": 1794689827.25196,
-    "seen": 1794689915.1901634,
-    "ast_hash": "c25b2c86b4c088d638799b21ca32bf43",
+    "mtime": 1794694725.3632565,
+    "seen": 1794694765.2988966,
+    "ast_hash": "6677d63fa9616736a8328ef22d7b0b34",
     "semantic_hash": ""
   },
   "design/DISSENT_LOG.md": {
@@ -2791,27 +2791,27 @@
     "semantic_hash": ""
   },
   "design/accessibility-requirements.md": {
-    "mtime": 1794569990.0828607,
-    "seen": 1794689915.1901655,
-    "ast_hash": "6b52ad991524aba413956873bdbe839c",
+    "mtime": 1794694749.1651158,
+    "seen": 1794694765.2988987,
+    "ast_hash": "d6415213bca225f3d90a48bcb8bdb3d3",
     "semantic_hash": ""
   },
   "design/gdd/d20-checks.md": {
-    "mtime": 1794572753.5691178,
-    "seen": 1794689915.19017,
-    "ast_hash": "6602d6fc2d32ad30e67c0e2572c0df75",
+    "mtime": 1794690184.38425,
+    "seen": 1794694765.2989063,
+    "ast_hash": "3ca1372a50ba7449d7630104f5963cdd",
     "semantic_hash": ""
   },
   "design/gdd/game-concept.md": {
-    "mtime": 1794569435.270076,
-    "seen": 1794569551.500897,
-    "ast_hash": "b5454e5b40ce97c78543b36777b459b6",
+    "mtime": 1794690174.3296506,
+    "seen": 1794694765.2989073,
+    "ast_hash": "f73f7d83505ee073be0b57c964d0d201",
     "semantic_hash": ""
   },
   "design/gdd/heroes.md": {
-    "mtime": 1794569990.0844364,
-    "seen": 1794689915.1901722,
-    "ast_hash": "daec3745aa7f9915bd8b1b60670b249d",
+    "mtime": 1794690184.4241831,
+    "seen": 1794694765.2989087,
+    "ast_hash": "ddfaef0ab291e3af7aae59f21d4f1b62",
     "semantic_hash": ""
   },
   "design/gdd/reviews/game-concept-review-log.md": {
@@ -2821,15 +2821,15 @@
     "semantic_hash": ""
   },
   "design/gdd/run-state.md": {
-    "mtime": 1794572753.5446687,
-    "seen": 1794689915.1901739,
-    "ast_hash": "988c77b6f9e0524b696426f053b22990",
+    "mtime": 1794694725.338111,
+    "seen": 1794694765.2989106,
+    "ast_hash": "3ca91bbaf5c4dc824fcdb2953122f55f",
     "semantic_hash": ""
   },
   "design/gdd/systems-index.md": {
-    "mtime": 1794689882.804788,
-    "seen": 1794689915.1901748,
-    "ast_hash": "4273af8dd02f231972f505c37ebb4c3e",
+    "mtime": 1794694746.4874728,
+    "seen": 1794694765.2989118,
+    "ast_hash": "8820306fbe0601705ff10e772427c000",
     "semantic_hash": ""
   },
   "design/narrative/voices/rovend.md": {
@@ -4039,9 +4039,9 @@
     "semantic_hash": ""
   },
   "design/gdd/branching-story.md": {
-    "mtime": 1794572753.5230434,
-    "seen": 1794689915.190168,
-    "ast_hash": "fcf4e82432692e57f1278912bd2d9ccc",
+    "mtime": 1794694725.3603868,
+    "seen": 1794694765.2989018,
+    "ast_hash": "17153715b5f545226aa146c9a5c42d0f",
     "semantic_hash": ""
   },
   "tests/README.md": {
@@ -4141,9 +4141,15 @@
     "semantic_hash": ""
   },
   "design/gdd/choice-system.md": {
-    "mtime": 1794689842.0441453,
-    "seen": 1794689915.1901689,
-    "ast_hash": "d7a10ea9b50661a8bac4fc93ad6e95b8",
+    "mtime": 1794694760.9192579,
+    "seen": 1794694765.2989054,
+    "ast_hash": "4a57c64f3bd362da0ad24728837858c5",
+    "semantic_hash": ""
+  },
+  "design/gdd/chapter-goal.md": {
+    "mtime": 1794694725.3162024,
+    "seen": 1794694765.2989035,
+    "ast_hash": "8a8edc123e23bb6e5d82dcf8415b70a6",
     "semantic_hash": ""
   }
 }

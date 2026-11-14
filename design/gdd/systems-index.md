@@ -48,7 +48,7 @@
 10. **Сохранение** — автосохранение при входе в каждую сцену и сразу после «Бросить»
     (решение пользователя 2026-11-08); продолжение с той же сцены и с тем же исходом.
 11. **Настройки** (inferred) — размер шрифта, звук, вибрация, меньше анимации.
-12. **Экран чтения** (inferred) — текст сцены, иллюстрация, маркер цели и кнопки выбора
+12. **Экран чтения** (inferred) — текст сцены, иллюстрация, раскладка маркера цели (содержание — «Цель главы»), кнопки выбора
     внизу под палец; основной экран игры.
 13. **Экран броска** — бросок как событие: шанс, кубик, пауза, разбор результата.
 14. **Меню и выбор героя** (partly inferred) — «Продолжить», «Новая игра», выбор героя.
@@ -72,7 +72,7 @@
 | 2 | Ветвящаяся история | Core | MVP | Designed | [branching-story.md](branching-story.md) | Состояние прохождения |
 | 3 | Проверки d20 | Gameplay | MVP | Designed | [d20-checks.md](d20-checks.md) | Герои |
 | 4 | Система выбора | Gameplay | MVP | Designed | [choice-system.md](choice-system.md) | Ветвящаяся история, Состояние прохождения, Проверки d20, Герои |
-| 5 | Цель главы и маркер прогресса | Gameplay | MVP | Not Started | — | Ветвящаяся история, Состояние прохождения |
+| 5 | Цель главы и маркер прогресса | Gameplay | MVP | Designed | [chapter-goal.md](chapter-goal.md) | Ветвящаяся история, Состояние прохождения |
 | 6 | Герои | Gameplay | MVP | Designed | [heroes.md](heroes.md) | Состояние прохождения (мягко: схема флагов) |
 | 7 | Жетоны вдохновения | Gameplay | Vertical Slice | Not Started | — | Проверки d20 |
 | 8 | Концовки и эпилог | Narrative | Vertical Slice | Not Started | — | Ветвящаяся история, Состояние прохождения |
@@ -230,10 +230,10 @@ Effort: S = 1 сессия, M = 2–3 сессии, L = 4+ сессий. Вет�
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 20 |
-| Design docs started | 5 |
+| Design docs started | 6 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 5/10 |
+| MVP systems designed | 6/10 |
 | Vertical Slice systems designed | 0/5 |
 
 ---

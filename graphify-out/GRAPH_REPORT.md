@@ -1,10 +1,10 @@
 # Graph Report - Mygame  (2026-11-14)
 
 ## Corpus Check
-- 68 files · ~1,047,769 words
+- 68 files · ~1,070,863 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 541 file(s) not represented in the graph (top: .gd 246, .uid 240, .tscn 18)
-- WARNING: 541 of 1232 files seen (44%) have no supported extractor and are missing from this graph entirely. It may look complete while representing only part of the codebase.
+- WARNING: 541 of 1233 files seen (44%) have no supported extractor and are missing from this graph entirely. It may look complete while representing only part of the codebase.
 
 ## Summary
 - 645 nodes · 849 edges · 67 communities (39 shown, 28 thin omitted)
@@ -12,7 +12,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3136ff12`
+- Built from commit: `ed562173`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
