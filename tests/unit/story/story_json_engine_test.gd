@@ -1,7 +1,8 @@
 extends GdUnitTestSuite
 ## Pins the Godot 4.7.2 behaviour that ADR-0001 lists as NOT SOURCEABLE (Engine
 ## Compatibility) and that the story loaders rely on. A red test here means the
-## engine changed under the loader, not that the loader is wrong.
+## engine changed under the loader, not that the loader is wrong. The probes that
+## need a file are in tests/integration/story/story_file_engine_test.gd.
 
 const FOUR_LINES_ERROR_ON_LAST := "{\n  \"a\": 1,\n  \"b\": [1, 2\n  \"c\": 3\n}"
 const ZERO_BASED_ERROR_LINE := 3
@@ -58,22 +59,6 @@ func test_json_parse_empty_text_returns_error() -> void:
 	var error: Error = json.parse("")
 	# Assert
 	assert_int(error).is_equal(ERR_PARSE_ERROR)
-
-
-func test_file_access_reads_fixture_from_res_in_headless() -> void:
-	# Act
-	var file: FileAccess = FileAccess.open(StoryFixtures.DT02_ROOT_ARRAY, FileAccess.READ)
-	# Assert
-	assert_object(file).is_not_null()
-	assert_str(file.get_as_text()).starts_with("[\"корень файла")
-
-
-func test_file_access_open_missing_file_returns_null_and_open_error() -> void:
-	# Act
-	var file: FileAccess = FileAccess.open(StoryFixtures.MISSING_FILE, FileAccess.READ)
-	# Assert
-	assert_object(file).is_null()
-	assert_int(FileAccess.get_open_error()).is_equal(ERR_FILE_NOT_FOUND)
 
 
 func test_regex_dollar_matches_before_trailing_newline() -> void:

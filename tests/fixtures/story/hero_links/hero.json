@@ -1,0 +1,12 @@
+{
+  "_note": "Битые связи героя с главой: m_alien перечислена дважды (BS-01), файл m_alien содержит id m_other (BS-01), проверка главы ссылается на stat luck, которого нет в stats (BS-01).",
+  "schema_version": 1,
+  "id": "hero_links",
+  "stats": [
+    {"id": "strength", "bonus": 0}
+  ],
+  "chapters": ["m_alien", "m_alien"],
+  "endings": [],
+  "portrait": "portrait_stub",
+  "accent": "cobalt"
+}

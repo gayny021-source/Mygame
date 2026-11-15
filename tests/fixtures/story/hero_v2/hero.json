@@ -1,0 +1,12 @@
+{
+  "_note": "Паспорт чужой версии схемы (DT-07): дальше версии файл не читается.",
+  "schema_version": 2,
+  "id": "hero_v2",
+  "stats": [
+    {"id": "strength", "bonus": 0}
+  ],
+  "chapters": ["ch_any"],
+  "endings": [],
+  "portrait": "portrait_stub",
+  "accent": "plum"
+}

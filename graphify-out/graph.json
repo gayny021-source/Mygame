@@ -491,6 +491,11 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/story/data/stat_data.gd",
+   "label": "stat_data.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/story/data/transition_data.gd",
    "label": "transition_data.gd",
    "group": "GDScript"
@@ -511,13 +516,23 @@
    "group": "GDScript"
   },
   {
-   "id": "tests/unit/story/chapter_loader_test.gd",
-   "label": "chapter_loader_test.gd",
+   "id": "tests/integration/story/chapter_loader_file_test.gd",
+   "label": "chapter_loader_file_test.gd",
    "group": "GDScript"
   },
   {
-   "id": "tests/unit/story/hero_loader_test.gd",
+   "id": "tests/integration/story/hero_loader_test.gd",
    "label": "hero_loader_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/integration/story/story_file_engine_test.gd",
+   "label": "story_file_engine_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/chapter_loader_test.gd",
+   "label": "chapter_loader_test.gd",
    "group": "GDScript"
   },
   {
@@ -1601,6 +1616,10 @@
    "target": "design/gdd/branching-story.md"
   },
   {
+   "source": "src/core/story/data/stat_data.gd",
+   "target": "design/gdd/heroes.md"
+  },
+  {
    "source": "src/core/story/data/transition_data.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -1613,6 +1632,18 @@
    "target": "src/boot/boot.tscn"
   },
   {
+   "source": "tests/integration/story/chapter_loader_file_test.gd",
+   "target": "tests/unit/story/chapter_loader_test.gd"
+  },
+  {
+   "source": "tests/integration/story/hero_loader_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/integration/story/story_file_engine_test.gd",
+   "target": "tests/unit/story/story_json_engine_test.gd"
+  },
+  {
    "source": "tests/unit/story/chapter_loader_test.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -1621,8 +1652,8 @@
    "target": "tests/unit/story/story_json_engine_test.gd"
   },
   {
-   "source": "tests/unit/story/hero_loader_test.gd",
-   "target": "design/gdd/branching-story.md"
+   "source": "tests/unit/story/story_json_engine_test.gd",
+   "target": "tests/integration/story/story_file_engine_test.gd"
   },
   {
    "source": "tests/unit/ui/safe_area_margins_test.gd",

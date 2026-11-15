@@ -23,9 +23,11 @@ static func load_hero(hero_id: String, root: String = DATA_ROOT) -> LoadResult:
 		return result
 	var hero: HeroData = HeroData.new()
 	hero.id = reader.id()
-	for stat: DictReader in reader.children("stats", STAT_KEYS):
-		hero.stat_ids.append(stat.id())
-		hero.stat_bonuses.append(stat.integer("bonus"))
+	for stat_reader: DictReader in reader.children("stats", STAT_KEYS):
+		var stat: StatData = StatData.new()
+		stat.id = stat_reader.id()
+		stat.bonus = stat_reader.integer("bonus")
+		hero.stats.append(stat)
 	hero.chapter_ids = reader.strings("chapters")
 	hero.endings = reader.strings("endings")
 	hero.portrait = reader.text("portrait")

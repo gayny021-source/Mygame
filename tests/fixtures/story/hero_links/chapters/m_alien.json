@@ -1,0 +1,32 @@
+{
+  "_note": "Глава героя hero_links: сама по себе верна, но id не совпадает с именем файла, а проверка al_c1 бросается по stat luck, которого у героя нет.",
+  "schema_version": 1,
+  "id": "m_other",
+  "title": "Чужой id и чужая характеристика",
+  "goal": "Цель",
+  "starts": [
+    {"id": "st_main", "scene": "al_s1"}
+  ],
+  "scenes": [
+    {
+      "id": "al_s1",
+      "paragraphs": ["Сцена."],
+      "illustration": "ill_a",
+      "options": [
+        {
+          "id": "al_risk",
+          "text": "Рискнуть",
+          "kind": "risky",
+          "check": {"id": "al_c1", "stat": "luck", "level": "medium", "success": "al_ok", "failure": "al_fail"}
+        }
+      ]
+    }
+  ],
+  "outcomes": [
+    {"id": "al_ok", "routes": [{"transition": "al_t_end"}]},
+    {"id": "al_fail", "routes": [{"transition": "al_t_end"}]}
+  ],
+  "transitions": [
+    {"id": "al_t_end", "to": "chapter_end"}
+  ]
+}

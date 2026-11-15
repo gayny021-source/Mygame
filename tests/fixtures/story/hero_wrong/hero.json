@@ -1,0 +1,12 @@
+{
+  "_note": "Паспорт с ошибками уровня героя: id не совпадает с каталогом (BS-01), нет portrait (DT-03), stat strength дважды (BS-01), chapters пуст (BS-01).",
+  "schema_version": 1,
+  "id": "hero_other",
+  "stats": [
+    {"id": "strength", "bonus": 1},
+    {"id": "strength", "bonus": 2}
+  ],
+  "chapters": [],
+  "endings": [],
+  "accent": "plum"
+}
