@@ -1,0 +1,13 @@
+{
+  "_note": "Битый паспорт: дробный bonus (DT-02), ключ name вне таблицы ADR (DT-04), id главы не по шаблону (DT-06).",
+  "schema_version": 1,
+  "id": "hero_bad",
+  "name": "Ровенд",
+  "stats": [
+    {"id": "strength", "bonus": 1.5}
+  ],
+  "chapters": ["../hero_stub/chapters/ch_f1"],
+  "endings": [],
+  "portrait": "portrait_stub",
+  "accent": "plum"
+}

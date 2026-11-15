@@ -1,0 +1,26 @@
+{
+  "_note": "Вторая глава героя hero_refs: сама по себе верна, но исход o_a уже есть в m_refs (id уникален в данных героя).",
+  "schema_version": 1,
+  "id": "m_refs_b",
+  "title": "Повтор id между главами",
+  "goal": "Цель",
+  "starts": [
+    {"id": "st_main", "scene": "rb_s1"}
+  ],
+  "scenes": [
+    {
+      "id": "rb_s1",
+      "paragraphs": ["Сцена."],
+      "illustration": "ill_a",
+      "options": [
+        {"id": "rb_go", "text": "Дальше", "kind": "normal", "outcome": "o_a"}
+      ]
+    }
+  ],
+  "outcomes": [
+    {"id": "o_a", "routes": [{"transition": "rb_t_end"}]}
+  ],
+  "transitions": [
+    {"id": "rb_t_end", "to": "ending:end_ok"}
+  ]
+}

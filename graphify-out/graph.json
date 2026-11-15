@@ -411,13 +411,118 @@
    "group": "Scenes"
   },
   {
+   "id": "src/core/story/data/bridge_data.gd",
+   "label": "bridge_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/chapter_data.gd",
+   "label": "chapter_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/chapter_loader.gd",
+   "label": "chapter_loader.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/check_data.gd",
+   "label": "check_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/data_issue.gd",
+   "label": "data_issue.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/dict_reader.gd",
+   "label": "dict_reader.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/hero_data.gd",
+   "label": "hero_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/hero_loader.gd",
+   "label": "hero_loader.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/load_result.gd",
+   "label": "load_result.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/milestone_data.gd",
+   "label": "milestone_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/option_data.gd",
+   "label": "option_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/outcome_data.gd",
+   "label": "outcome_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/paragraph_data.gd",
+   "label": "paragraph_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/route_data.gd",
+   "label": "route_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/scene_data.gd",
+   "label": "scene_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/start_data.gd",
+   "label": "start_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/transition_data.gd",
+   "label": "transition_data.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/ui/safe_area_margins.gd",
    "label": "safe_area_margins.gd",
    "group": "GDScript"
   },
   {
+   "id": "tests/fixtures/story/story_fixtures.gd",
+   "label": "story_fixtures.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/integration/boot/boot_smoke_test.gd",
    "label": "boot_smoke_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/chapter_loader_test.gd",
+   "label": "chapter_loader_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/hero_loader_test.gd",
+   "label": "hero_loader_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/story_json_engine_test.gd",
+   "label": "story_json_engine_test.gd",
    "group": "GDScript"
   },
   {
@@ -957,6 +1062,10 @@
   },
   {
    "source": "design/accessibility-requirements.md",
+   "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "design/accessibility-requirements.md",
    "target": "design/gdd/systems-index.md"
   },
   {
@@ -1025,6 +1134,10 @@
   },
   {
    "source": "design/gdd/branching-story.md",
+   "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "design/gdd/branching-story.md",
    "target": "design/gdd/systems-index.md"
   },
   {
@@ -1062,6 +1175,10 @@
   {
    "source": "design/gdd/chapter-goal.md",
    "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "design/gdd/chapter-goal.md",
+   "target": "design/gdd/save-system.md"
   },
   {
    "source": "design/gdd/chapter-goal.md",
@@ -1110,6 +1227,10 @@
   {
    "source": "design/gdd/choice-system.md",
    "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "design/gdd/choice-system.md",
+   "target": "design/gdd/save-system.md"
   },
   {
    "source": "design/gdd/choice-system.md",
@@ -1173,6 +1294,10 @@
   },
   {
    "source": "design/gdd/d20-checks.md",
+   "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "design/gdd/d20-checks.md",
    "target": "design/gdd/systems-index.md"
   },
   {
@@ -1237,6 +1362,10 @@
   },
   {
    "source": "design/gdd/heroes.md",
+   "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "design/gdd/heroes.md",
    "target": "design/gdd/systems-index.md"
   },
   {
@@ -1286,6 +1415,10 @@
   {
    "source": "design/gdd/run-state.md",
    "target": "design/gdd/heroes.md"
+  },
+  {
+   "source": "design/gdd/run-state.md",
+   "target": "design/gdd/save-system.md"
   },
   {
    "source": "design/gdd/run-state.md",
@@ -1432,12 +1565,64 @@
    "target": "src/ui/safe_area_margins.gd"
   },
   {
+   "source": "src/core/story/data/chapter_data.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/data/chapter_loader.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/data/check_data.gd",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "src/core/story/data/dict_reader.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/data/hero_data.gd",
+   "target": "design/gdd/heroes.md"
+  },
+  {
+   "source": "src/core/story/data/option_data.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/data/outcome_data.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/data/scene_data.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/data/start_data.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/data/transition_data.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
    "source": "tests/integration/boot/boot_smoke_test.gd",
    "target": "src/boot/boot.gd"
   },
   {
    "source": "tests/integration/boot/boot_smoke_test.gd",
    "target": "src/boot/boot.tscn"
+  },
+  {
+   "source": "tests/unit/story/chapter_loader_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/unit/story/chapter_loader_test.gd",
+   "target": "tests/unit/story/story_json_engine_test.gd"
+  },
+  {
+   "source": "tests/unit/story/hero_loader_test.gd",
+   "target": "design/gdd/branching-story.md"
   },
   {
    "source": "tests/unit/ui/safe_area_margins_test.gd",

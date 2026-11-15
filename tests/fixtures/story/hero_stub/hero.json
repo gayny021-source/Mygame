@@ -1,0 +1,15 @@
+{
+  "_note": "Герой-фикстура по эталону AC branching-story.md (бонусы Ровенда).",
+  "schema_version": 1,
+  "id": "hero_stub",
+  "stats": [
+    {"id": "strength", "bonus": 4},
+    {"id": "charisma", "bonus": 2},
+    {"id": "mind", "bonus": 0},
+    {"id": "faith", "bonus": -1}
+  ],
+  "chapters": ["ch_f1"],
+  "endings": ["end_a", "end_b", "end_c", "end_d"],
+  "portrait": "portrait_stub",
+  "accent": "carmine"
+}

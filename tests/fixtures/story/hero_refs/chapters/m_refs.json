@@ -1,0 +1,37 @@
+{
+  "_note": "m_refs (AC-01), часть S1: старт -> nope; вариант -> o_missing; scene:ghost; два объекта с id a. Пятая ошибка, ending:ghost, видна только загрузчику героя.",
+  "schema_version": 1,
+  "id": "m_refs",
+  "title": "Битые ссылки",
+  "goal": "Цель",
+  "starts": [
+    {"id": "st_main", "scene": "nope"}
+  ],
+  "scenes": [
+    {
+      "id": "a",
+      "paragraphs": ["Первая сцена."],
+      "illustration": "ill_a",
+      "options": [
+        {"id": "a_go", "text": "Дальше", "kind": "normal", "outcome": "o_missing"}
+      ]
+    },
+    {
+      "id": "a",
+      "paragraphs": ["Вторая сцена с тем же id."],
+      "illustration": "ill_a",
+      "options": [
+        {"id": "a_stay", "text": "Остаться", "kind": "normal", "outcome": "o_a"},
+        {"id": "a_leave", "text": "Уйти", "kind": "normal", "outcome": "o_b"}
+      ]
+    }
+  ],
+  "outcomes": [
+    {"id": "o_a", "paragraphs": ["Исход."], "routes": [{"transition": "t_ghost_scene"}]},
+    {"id": "o_b", "paragraphs": ["Исход."], "routes": [{"transition": "t_ghost_end"}]}
+  ],
+  "transitions": [
+    {"id": "t_ghost_scene", "to": "scene:ghost", "bridge": {"base": "Мост в никуда."}},
+    {"id": "t_ghost_end", "to": "ending:ghost"}
+  ]
+}

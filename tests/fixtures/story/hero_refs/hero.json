@@ -1,0 +1,12 @@
+{
+  "_note": "m_refs (AC-01): битые ссылки уровня героя — концовка ghost, файл главы m_absent, id o_a в двух главах.",
+  "schema_version": 1,
+  "id": "hero_refs",
+  "stats": [
+    {"id": "strength", "bonus": 0}
+  ],
+  "chapters": ["m_refs", "m_refs_b", "m_absent"],
+  "endings": ["end_ok"],
+  "portrait": "portrait_stub",
+  "accent": "cobalt"
+}
