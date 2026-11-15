@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rebuild graphify-out/graph.html as a full project map: pure Python, no LLM, no graphify CLI.
+"""Rebuild graphify-out/graph.html and graph.json as a full project map: pure Python, no LLM, no graphify CLI.
 
 Run from the repo root: python3 scripts/update_visual_graph.py
 Nodes: design docs, studio agents and skills, GDScript, scenes. Edges: regex mentions,
@@ -16,15 +16,13 @@ OUT = os.path.join(ROOT, "graphify-out", "graph.html")
 # vis-network 9.1.9 (MIT / Apache-2.0), inlined so the page opens offline and behind proxies.
 VIS = os.path.join(ROOT, "scripts", "vendor", "vis-network.min.js")
 # addons/ is third-party (gdUnit4: hundreds of scripts) and would drown the project map.
-SKIP_DIRS = {".git", ".godot", ".import", "graphify-out", "addons", "node_modules"}
-SKIP_PATHS = {".claude/agents_archive"}
+SKIP_DIRS = {".git", ".godot", ".import", "graphify-out", ".template_archive", "addons", "node_modules"}
 GROUPS = {
     "GDD / Docs": "#e6b422",
     "Studio / Agents": "#a56bf5",
     "GDScript": "#4a9cf5",
     "Scenes": "#4cc26a",
 }
-GENERIC_STEMS = {"skill", "readme", "index", "claude", "main", "test", "active"}
 
 
 def classify(rel: str) -> str | None:
@@ -37,7 +35,7 @@ def classify(rel: str) -> str | None:
         return "Studio / Agents"
     if rel.startswith(".claude/skills/") and name == "SKILL.md":
         return "Studio / Agents"
-    if rel.startswith("design/") and rel.endswith(".md"):
+    if rel.startswith("design/") and rel.endswith(".md") and name != "CLAUDE.md":
         return "GDD / Docs"
     if rel in ("CLAUDE.md", "USER_PREFERENCES.md"):
         return "GDD / Docs"
@@ -48,14 +46,11 @@ def collect() -> dict[str, dict]:
     nodes: dict[str, dict] = {}
     for base, dirs, files in os.walk(ROOT):
         rel_base = os.path.relpath(base, ROOT).replace(os.sep, "/")
-        dirs[:] = [
-            d for d in dirs
-            if d not in SKIP_DIRS and f"{rel_base}/{d}".removeprefix("./") not in SKIP_PATHS
-        ]
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS and "archive" not in d.lower()]
         for name in files:
             rel = f"{rel_base}/{name}".removeprefix("./")
             group = classify(rel)
-            if not group:
+            if not group or "archive" in rel.lower():
                 continue
             try:
                 text = open(os.path.join(ROOT, rel), encoding="utf-8", errors="replace").read()
@@ -66,29 +61,32 @@ def collect() -> dict[str, dict]:
     return nodes
 
 
-def mention_keys(rel: str, node: dict) -> set[str]:
+def mention_keys(rel: str) -> set[str]:
+    """Exact keys only: path, res:// path, file name with extension, @agent, hyphenated compound name."""
     name = os.path.basename(rel)
     stem = name.rsplit(".", 1)[0]
-    keys = {rel}
+    keys = {rel, f"res://{rel}"}
     if name == "SKILL.md":
         skill = rel.split("/")[-2]
-        keys.add(f"skills/{skill}")
-        if len(skill) >= 6:
+        keys |= {f"skills/{skill}", f"{skill}/SKILL.md"}
+        if "-" in skill:
             keys.add(skill)
         return keys
-    keys.add(name)
+    if name != "CLAUDE.md" or rel == "CLAUDE.md":
+        keys.add(name)
     if rel.startswith(".claude/agents/"):
         keys.add(f"@{stem}")
-        keys.add(stem)
-    elif len(stem) >= 6 and stem.lower() not in GENERIC_STEMS:
+    elif rel.startswith("design/") and "-" in stem:
         keys.add(stem)
     return keys
 
 
 def build_edges(nodes: dict[str, dict]) -> set[tuple[str, str]]:
     key_to_node: dict[str, str] = {}
-    for rel, node in nodes.items():
-        for key in mention_keys(rel, node):
+    for rel in nodes:
+        if rel == "project.godot":
+            continue
+        for key in mention_keys(rel):
             key_to_node.setdefault(key.lower(), rel)
     ordered = sorted(key_to_node, key=len, reverse=True)
     pattern = re.compile(
@@ -100,13 +98,19 @@ def build_edges(nodes: dict[str, dict]) -> set[tuple[str, str]]:
         for m in re.finditer(r"^class_name\s+(\w+)", node["text"], re.M)
     }
     autoloads: dict[str, str] = {}
+    edges: set[tuple[str, str]] = set()
     godot = nodes.get("project.godot")
     if godot:
         section = re.search(r"^\[autoload\]\n(.*?)(?=^\[|\Z)", godot["text"], re.M | re.S)
         for m in re.finditer(r'^(\w+)="\*?res://([^"]+)"', section.group(1) if section else "", re.M):
             autoloads[m.group(1)] = m.group(2)
-    edges: set[tuple[str, str]] = set()
+        main = re.search(r'^run/main_scene="res://([^"]+)"', godot["text"], re.M)
+        for target in [main.group(1) if main else "", *autoloads.values()]:
+            if target in nodes:
+                edges.add(("project.godot", target))
     for rel, node in nodes.items():
+        if rel == "project.godot":
+            continue
         text = node["text"]
         targets = {key_to_node[m.group(1).lower()] for m in pattern.finditer(text)}
         if node["group"] in ("GDScript", "Scenes"):
@@ -117,7 +121,7 @@ def build_edges(nodes: dict[str, dict]) -> set[tuple[str, str]]:
                 if re.search(rf"\b{name}\.", text):
                     targets.add(path)
         for target in targets:
-            if target in nodes and target != rel:
+            if target in nodes and target not in (rel, "project.godot"):
                 edges.add((rel, target))
     return edges
 
@@ -187,6 +191,12 @@ def main() -> None:
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(html)
+    graph = {
+        "nodes": [{"id": n["id"], "label": n["label"], "group": n["group"]} for n in node_list],
+        "links": [{"source": src, "target": dst} for src, dst in sorted(edges)],
+    }
+    with open(os.path.join(os.path.dirname(OUT), "graph.json"), "w", encoding="utf-8") as f:
+        json.dump(graph, f, ensure_ascii=False, indent=1)
     print(f"Nodes: {len(nodes)}, Edges: {len(edges)}")
 
 

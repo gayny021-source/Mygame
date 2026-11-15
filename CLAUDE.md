@@ -1,6 +1,6 @@
 # Claude Code Game Studios — «Критический провал»
 
-Текстовый D&D-квест для Android. 49 субагентов CCGS, у каждого свой домен.
+Текстовый D&D-квест для Android. 22 рабочих субагента CCGS, у каждого свой домен; неиспользуемые шаблоны агентов и скиллов — в `.template_archive/` (не загружаются, вернуть — `git mv`).
 
 ## Technology Stack
 
@@ -69,7 +69,7 @@
 
 - **Sniper Read & Edit.** Незнакомый файл — `Read(limit: 120)`. Файл больше 120 строк целиком не читать: `Grep -n` или `graphify explain` → `Read(offset, limit: 60)` → `Edit`. Документы дизайна — по разделам (`Grep "^#"`); `validate-read.sh` не даёт читать целиком документы больше 40 КБ.
 - **Quiet Bash.** Тихие флаги и короткий вывод: `-q`, `--short`, `| tail -n 15`.
-- **Auto-Graph.** Перед `git commit`: `python3 scripts/update_visual_graph.py >/dev/null 2>&1 || true` — пересобирает `graphify-out/graph.html` (полная карта: документы, агенты, скиллы, `.gd`, `.tscn`; чистый Python, без LLM и CLI). `graph.json` обновляет только `graphify update .`.
+- **Auto-Graph.** Перед `git commit`: `python3 scripts/update_visual_graph.py >/dev/null 2>&1 || true` — пересобирает `graphify-out/graph.html` и `graph.json` (карта: документы, агенты, скиллы, `.gd`, `.tscn`; связи только по точным именам; чистый Python, без LLM и CLI).
 - `.ignore` скрывает от `Grep`/`Glob` сборку, импорт, `graphify-out/` и журналы решений; в Git они остаются.
 
 ## graphify
