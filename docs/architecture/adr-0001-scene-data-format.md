@@ -101,7 +101,7 @@ GDD «Ветвящаяся история» определяет поля гла
 | **Глава**: `id`, `заголовок`, `цель` | `id`, `title`, `goal` | string |
 | `старты` {`id`, `если?`, `сцена`, `цель?`} | `starts` [{`id`, `if`, `scene`, `goal`}] | `if`, `goal` необязательны |
 | `флаг_провала_цели` | `goal_fail_flag` | string, `id` флага |
-| `вехи` {`id`, `шаг`} | `milestones` [{`id`, `step`}] | `step` — int; предварительно, до GDD «Цель главы» |
+| `вехи` {`id`, `шаг`} | `milestones` [{`id`, `step`}] | `step` — string: текст подписи шага (обязательная, непустая; `chapter-goal.md`, правило 3); порядок вех — порядок списка. Исправлено 2026-11-15: в первой редакции ошибочно стоял int |
 | `сцены` / `исходы` / `переходы` | `scenes` / `outcomes` / `transitions` | плоские массивы, связи по `id` |
 | **Сцена**: `id`, `заголовок` | `id`, `title` | `title` необязателен |
 | `абзацы` | `paragraphs` | массив абзацев (см. ниже) |
@@ -236,7 +236,7 @@ tests/integration/story/       # загрузка настоящих данны�
 - `DataIssue`: `code: String` (`BS-NN` или `DT-NN`), `severity`, `path: String`, `object_id: String`, `message: String`
 
 ### Implementation Guidelines
-- Загрузчик, парсер условий, валидатор и `story_navigator` **must** быть чистыми классами: без `Node`, `SceneTree`, автозагрузок и глобального состояния; `FileAccess` — только в `chapter_loader.load_file`, `hero_loader`, `released_ids` и CLI.
+- Загрузчик, парсер условий, валидатор и `story_navigator` **must** быть чистыми классами: без `Node`, `SceneTree`, автозагрузок и глобального состояния; `FileAccess` — только в `ChapterLoader.read_object` (чтение файла) и `HeroLoader` (`file_exists` перед чтением глав; справкой движка не покрыт, закреплён headless-тестом, на APK не проверен), `hero_loader`, `released_ids` и CLI.
 - Структуры данных **must** иметь статические типы всех полей; `Dictionary` **must never** выходить за пределы загрузчика.
 - Ошибка данных **must** оформляться как `DataIssue` с кодом из таблицы BS/DT; `assert`/`push_error`-падение вместо находки — **must never**.
 - Пределы F1–F8, `OPTIONS_MAX`, `P_EARLY_MAX` и т.п. **must** читаться из внешней конфигурации (`Gameplay values must be data-driven`), не быть константами в проверках.
