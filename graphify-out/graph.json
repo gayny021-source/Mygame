@@ -793,7 +793,19 @@
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
+   "target": ".claude/agents/opus-solver.md"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
    "target": ".claude/agents/producer.md"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": ".claude/agents/qa-lead.md"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": ".claude/agents/systems-designer.md"
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
@@ -838,6 +850,10 @@
   {
    "source": "design/DIRECTOR_DECISIONS.md",
    "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "design/gdd/save-system.md"
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
