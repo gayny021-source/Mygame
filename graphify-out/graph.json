@@ -531,6 +531,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/fixtures/story/condition_fixtures.gd",
+   "label": "condition_fixtures.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/fixtures/story/fake_flags.gd",
    "label": "fake_flags.gd",
    "group": "GDScript"
