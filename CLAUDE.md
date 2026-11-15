@@ -87,7 +87,7 @@
 | Отдача на касание: Tween, частицы, вибрация | `.claude/skills/mobile-juice/SKILL.md` |
 | APK в GitHub Actions, `export_presets.cfg` | `.claude/skills/godot-apk-ci/SKILL.md` |
 | Граф знаний, `/graphify` | `.claude/skills/graphify/SKILL.md` |
-| Любая правка `.gd` / `.tscn` и скриптов: минимальная хирургическая правка, граничные случаи до коммита | `.claude/skills/lean-code/SKILL.md` |
+| **Обязательно** при любой работе с `.gd` / `.tscn` и скриптами — Lean & Typed Code Standard: YAGNI, строгая типизация, одна операция — одна строка, хирургическая правка, граничные случаи до коммита | `.claude/skills/lean-code/SKILL.md` |
 | Писать или проверять сюжет, диалоги, исходы, описания (только игровой текст) | `.claude/skills/humanizer/SKILL.md` |
 | Отчёт CEO, ответ субагента | `.claude/skills/caveman/SKILL.md` |
 
