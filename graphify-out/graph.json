@@ -381,6 +381,11 @@
    "group": "GDD / Docs"
   },
   {
+   "id": "design/gdd/scene-illustrations.md",
+   "label": "scene-illustrations.md",
+   "group": "GDD / Docs"
+  },
+  {
    "id": "design/gdd/systems-index.md",
    "label": "systems-index.md",
    "group": "GDD / Docs"
@@ -1488,6 +1493,38 @@
    "target": "design/gdd/systems-index.md"
   },
   {
+   "source": "design/gdd/scene-illustrations.md",
+   "target": "USER_PREFERENCES.md"
+  },
+  {
+   "source": "design/gdd/scene-illustrations.md",
+   "target": "design/accessibility-requirements.md"
+  },
+  {
+   "source": "design/gdd/scene-illustrations.md",
+   "target": "design/art/art-bible.md"
+  },
+  {
+   "source": "design/gdd/scene-illustrations.md",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "design/gdd/scene-illustrations.md",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
+   "source": "design/gdd/scene-illustrations.md",
+   "target": "design/gdd/choice-system.md"
+  },
+  {
+   "source": "design/gdd/scene-illustrations.md",
+   "target": "design/gdd/game-concept.md"
+  },
+  {
+   "source": "design/gdd/scene-illustrations.md",
+   "target": "design/gdd/systems-index.md"
+  },
+  {
    "source": "design/gdd/systems-index.md",
    "target": "design/gdd/branching-story.md"
   },
@@ -1608,6 +1645,10 @@
    "target": "design/gdd/heroes.md"
   },
   {
+   "source": "src/core/story/data/milestone_data.gd",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
    "source": "src/core/story/data/option_data.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -1654,6 +1695,10 @@
   {
    "source": "tests/unit/story/chapter_loader_test.gd",
    "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/unit/story/chapter_loader_test.gd",
+   "target": "design/gdd/chapter-goal.md"
   },
   {
    "source": "tests/unit/story/chapter_loader_test.gd",

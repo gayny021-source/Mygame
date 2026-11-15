@@ -5,7 +5,7 @@ extends GdUnitTestSuite
 ## The tests that read a file are in tests/integration/story/chapter_loader_file_test.gd.
 
 const SOURCE := "test"
-const MAX_WHOLE_STEP := 9007199254740992.0
+const MAX_WHOLE_VERSION := 9007199254740992.0
 
 
 func _count(result: LoadResult, code: String) -> int:
@@ -103,65 +103,66 @@ func test_load_from_dict_scene_that_is_not_object_returns_dt02() -> void:
 	assert_str(_first(result, "DT-02").path).is_equal("test/scenes/1")
 
 
-func test_load_from_dict_fractional_step_returns_dt02() -> void:
-	# Arrange
-	var chapter: Dictionary = StoryFixtures.minimal_chapter()
-	chapter["milestones"] = [{"id": "m1", "step": 1.5}]
-	# Act
-	var result: LoadResult = _load(chapter)
-	# Assert
-	assert_int(_count(result, "DT-02")).is_equal(1)
-	assert_str(_first(result, "DT-02").path).is_equal("test/milestones/m1/step")
-
-
-func test_load_from_dict_whole_float_step_becomes_int() -> void:
+func test_load_from_dict_whole_float_schema_version_is_read_as_int() -> void:
 	# Arrange: JSON numbers arrive as float (story_json_engine_test.gd)
 	var chapter: Dictionary = StoryFixtures.minimal_chapter()
-	chapter["milestones"] = [{"id": "m1", "step": 2.0}]
+	chapter["schema_version"] = 1.0
 	# Act
 	var result: LoadResult = _load(chapter)
 	# Assert
 	assert_array(_lines(result)).is_empty()
-	var loaded: ChapterData = result.data
-	assert_int(loaded.milestones[0].step).is_equal(2)
+	assert_object(result.data).is_not_null()
 
 
 @warning_ignore("unused_parameter")
-func test_load_from_dict_step_outside_whole_range_returns_dt02(step: float, test_parameters := [
+func test_load_from_dict_schema_version_outside_whole_range_returns_dt02(version: float, test_parameters := [
 	[1e20],
 	[9007199254740994.0],
 	[-1e20],
 ]) -> void:
 	# Arrange: above 2^53 a float no longer holds every whole number (ADR-0001 §4)
 	var chapter: Dictionary = StoryFixtures.minimal_chapter()
-	chapter["milestones"] = [{"id": "m1", "step": step}]
+	chapter["schema_version"] = version
 	# Act
 	var result: LoadResult = _load(chapter)
-	# Assert
+	# Assert: not a whole number at all, so the version is not even compared (no DT-07)
 	assert_object(result.data).is_null()
 	assert_int(result.issues.size()).is_equal(1)
 	assert_str(result.issues[0].code).is_equal("DT-02")
-	assert_str(result.issues[0].path).is_equal("test/milestones/m1/step")
+	assert_str(result.issues[0].path).is_equal("test/schema_version")
 
 
-func test_load_from_dict_step_two_to_the_53rd_becomes_int() -> void:
+func test_load_from_dict_schema_version_two_to_the_53rd_is_whole_and_returns_dt07() -> void:
 	# Arrange
 	var chapter: Dictionary = StoryFixtures.minimal_chapter()
-	chapter["milestones"] = [{"id": "m1", "step": MAX_WHOLE_STEP}]
+	chapter["schema_version"] = MAX_WHOLE_VERSION
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert: read as a whole number — the only finding is about the version itself
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-07")
+
+
+func test_load_from_dict_milestone_step_keeps_caption_text() -> void:
+	# Arrange: step is the caption of the step, not a number (chapter-goal.md, rule 3)
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["milestones"] = [{"id": "m1", "step": "Мост"}, {"id": "m2", "step": "Тролль"}]
 	# Act
 	var result: LoadResult = _load(chapter)
 	# Assert
 	assert_array(_lines(result)).is_empty()
 	var loaded: ChapterData = result.data
-	assert_int(loaded.milestones[0].step).is_equal(int(MAX_WHOLE_STEP))
+	assert_str(loaded.milestones[0].step).is_equal("Мост")
+	assert_str(loaded.milestones[1].step).is_equal("Тролль")
 
 
 @warning_ignore("unused_parameter")
-func test_load_from_dict_step_not_above_zero_returns_dt02(step: float, test_parameters := [
-	[0.0],
-	[-1.0],
+func test_load_from_dict_milestone_step_that_is_not_caption_returns_dt02(step: Variant, test_parameters := [
+	[1],
+	[2.0],
+	[""],
 ]) -> void:
-	# Arrange: provisional rule, until the GDD section «Цель главы» says otherwise
+	# Arrange
 	var chapter: Dictionary = StoryFixtures.minimal_chapter()
 	chapter["milestones"] = [{"id": "m1", "step": step}]
 	# Act
@@ -171,6 +172,28 @@ func test_load_from_dict_step_not_above_zero_returns_dt02(step: float, test_para
 	assert_int(result.issues.size()).is_equal(1)
 	assert_str(result.issues[0].code).is_equal("DT-02")
 	assert_str(result.issues[0].path).is_equal("test/milestones/m1/step")
+
+
+@warning_ignore("unused_parameter")
+func test_load_from_dict_list_of_wrong_type_returns_only_dt02(key: String, test_parameters := [
+	["starts"],
+	["milestones"],
+	["scenes"],
+	["outcomes"],
+	["transitions"],
+]) -> void:
+	# Arrange: the scene points at a milestone, so every list here has references to it
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["milestones"] = [{"id": "m1", "step": "Мост"}]
+	chapter["scenes"][0]["milestone"] = "m1"
+	chapter[key] = 5
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert: the broken list is the cause; BS-01 about references to it would only repeat it
+	assert_object(result.data).is_null()
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-02")
+	assert_str(result.issues[0].path).is_equal("test/" + key)
 
 
 func test_load_from_dict_empty_title_returns_dt02() -> void:
@@ -269,6 +292,18 @@ func test_load_from_dict_missing_schema_version_returns_dt03_and_no_chapter() ->
 	assert_object(result.data).is_null()
 	assert_int(_count(result, "DT-03")).is_equal(1)
 	assert_int(_count(result, "DT-07")).is_equal(0)
+
+
+func test_load_from_dict_milestone_without_step_returns_dt03() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["milestones"] = [{"id": "m1"}]
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-03")
+	assert_str(result.issues[0].path).is_equal("test/milestones/m1/step")
 
 
 @warning_ignore("unused_parameter")
@@ -498,7 +533,7 @@ func test_load_from_dict_risky_option_with_outcome_and_no_check_returns_no_issue
 func test_load_from_dict_scene_milestone_outside_milestones_returns_bs01() -> void:
 	# Arrange
 	var chapter: Dictionary = StoryFixtures.minimal_chapter()
-	chapter["milestones"] = [{"id": "m1", "step": 1}]
+	chapter["milestones"] = [{"id": "m1", "step": "Мост"}]
 	chapter["scenes"][0]["milestone"] = "m_ghost"
 	# Act
 	var result: LoadResult = _load(chapter)
@@ -512,7 +547,7 @@ func test_load_from_dict_scene_milestone_outside_milestones_returns_bs01() -> vo
 func test_load_from_dict_scene_milestone_from_milestones_returns_no_issues() -> void:
 	# Arrange
 	var chapter: Dictionary = StoryFixtures.minimal_chapter()
-	chapter["milestones"] = [{"id": "m1", "step": 1}]
+	chapter["milestones"] = [{"id": "m1", "step": "Мост"}]
 	chapter["scenes"][0]["milestone"] = "m1"
 	# Act
 	var result: LoadResult = _load(chapter)

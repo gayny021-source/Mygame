@@ -1,0 +1,12 @@
+{
+  "_note": "chapters — строка, а не список (DT-02): находка одна, BS-01 «нет ни одной главы» поверх неё быть не должно.",
+  "schema_version": 1,
+  "id": "hero_nochapters",
+  "stats": [
+    {"id": "strength", "bonus": 0}
+  ],
+  "chapters": "m_one",
+  "endings": [],
+  "portrait": "portrait_stub",
+  "accent": "cobalt"
+}

@@ -81,9 +81,12 @@ static func parse(data: Dictionary, source: String, issues: Array[DataIssue]) ->
 	for item: DictReader in reader.children("transitions", TRANSITION_KEYS):
 		chapter.transitions.append(_transition(item))
 	for key: String in REQUIRED_LISTS:
-		# без обязательного списка (о нём уже есть DT-03) проверка ссылок дала бы только вторичные BS-01
-		if not reader.has(key):
+		# без списка (о нём уже есть DT-03 или DT-02) проверка ссылок дала бы только вторичные BS-01
+		if not reader.has_list(key):
 			return chapter
+	# milestones необязателен: мешает только ключ неверного типа
+	if reader.has("milestones") and not reader.has_list("milestones"):
+		return chapter
 	_check_references(chapter, source, issues)
 	return chapter
 
@@ -118,7 +121,7 @@ static func _start(reader: DictReader) -> StartData:
 static func _milestone(reader: DictReader) -> MilestoneData:
 	var milestone: MilestoneData = MilestoneData.new()
 	milestone.id = reader.id()
-	milestone.step = reader.positive("step")
+	milestone.step = reader.text("step")
 	return milestone
 
 

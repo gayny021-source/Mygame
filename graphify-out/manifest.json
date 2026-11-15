@@ -2113,9 +2113,9 @@
     "semantic_hash": ""
   },
   "design/narrative/voices/rovend.md": {
-    "mtime": 1794784940.5576925,
-    "seen": 1794784960.9001398,
-    "ast_hash": "02712f171e50f0b01f392e83d9f56143",
+    "mtime": 1794785111.2017028,
+    "seen": 1794785311.7547836,
+    "ast_hash": "771f0fde6ddb73365a50dc1986c68174",
     "semantic_hash": ""
   },
   "docs/CLAUDE.md": {
@@ -3415,9 +3415,9 @@
     "semantic_hash": ""
   },
   "design/narrative/chapter-writing-rules.md": {
-    "mtime": 1794784934.4136922,
-    "seen": 1794784960.9001384,
-    "ast_hash": "b3e19fcbf31e852e51988f10e106e094",
+    "mtime": 1794785128.3257036,
+    "seen": 1794785311.7547827,
+    "ast_hash": "2861d2b55a6e7f28b9043ecde583265e",
     "semantic_hash": ""
   },
   "design/gdd/choice-system.md": {
@@ -3487,9 +3487,9 @@
     "semantic_hash": ""
   },
   "tests/fixtures/story/hero_stub/chapters/ch_f1.json": {
-    "mtime": 1794740592.5792346,
-    "seen": 1794784960.8995728,
-    "ast_hash": "b54a7badb9fe6db7c85831d8840d5c92",
+    "mtime": 1794785244.8577106,
+    "seen": 1794785311.7541938,
+    "ast_hash": "1b167b674aa0358fe26ace23dd1fb410",
     "semantic_hash": ""
   },
   "tests/fixtures/story/hero_stub/hero.json": {
@@ -4237,9 +4237,33 @@
     "semantic_hash": ""
   },
   "docs/architecture/adr-0001-scene-data-format.md": {
-    "mtime": 1794741126.1382208,
-    "seen": 1794784960.9001439,
-    "ast_hash": "522873ca639f07e3156701b9b0e39c22",
+    "mtime": 1794785138.551825,
+    "seen": 1794785311.7547886,
+    "ast_hash": "e67b15a274c490a7b18da9072f4f53f4",
+    "semantic_hash": ""
+  },
+  "tests/fixtures/story/hero_lists/chapters/m_quiet.json": {
+    "mtime": 1794785250.797711,
+    "seen": 1794785311.7541847,
+    "ast_hash": "76e4dd2142c8fad282b91909cf1083e0",
+    "semantic_hash": ""
+  },
+  "tests/fixtures/story/hero_lists/hero.json": {
+    "mtime": 1794785247.1817107,
+    "seen": 1794785311.7541864,
+    "ast_hash": "fd9528fe6e93e23944ef8f74c8934e3e",
+    "semantic_hash": ""
+  },
+  "tests/fixtures/story/hero_nochapters/hero.json": {
+    "mtime": 1794785252.6497111,
+    "seen": 1794785311.7541878,
+    "ast_hash": "9322833a1ed2b693e76303d83a657284",
+    "semantic_hash": ""
+  },
+  "design/gdd/scene-illustrations.md": {
+    "mtime": 1794785157.8017056,
+    "seen": 1794785311.7547798,
+    "ast_hash": "126d66f059c8553ce7873aa7c7e53881",
     "semantic_hash": ""
   }
 }

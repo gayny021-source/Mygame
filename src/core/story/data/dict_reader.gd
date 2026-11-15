@@ -52,6 +52,12 @@ func has(key: String) -> bool:
 	return _data.has(key)
 
 
+## True when `key` holds an array. A list that is absent or of another type already
+## has its DT finding, so checks that depend on it are skipped.
+func has_list(key: String) -> bool:
+	return _data.get(key) is Array
+
+
 ## First call on the root object of a file. Checks `schema_version` (absent is
 ## DT-03, not a whole number is DT-02, another version is DT-07), then the keys:
 ## a file of another version is not read any further.
@@ -112,22 +118,20 @@ func integer(key: String) -> int:
 	return int(number)
 
 
-## Required whole number above zero; DT-02 for zero and below.
-func positive(key: String) -> int:
-	var before: int = _issues.size()
-	var value: int = integer(key)
-	if _issues.size() == before and value <= 0:
-		issue("DT-02", key, "ожидалось целое число больше нуля, получено %d" % value)
-	return value
-
-
 ## Array of strings; an element of another type is DT-02 and is skipped.
 func strings(key: String, required: bool = true) -> PackedStringArray:
-	var result: PackedStringArray = []
+	return PackedStringArray(strings_by_index(key, required).values())
+
+
+## Strings of the array under `key` by their index in the JSON array, in file order.
+## An element of another type is DT-02 and is skipped, so the indexes may have gaps:
+## a finding about an element names the index the writer sees in the file.
+func strings_by_index(key: String, required: bool = true) -> Dictionary:
+	var result: Dictionary = {}
 	var items: Array = _list(key, required)
 	for i: int in items.size():
 		if items[i] is String:
-			result.append(items[i])
+			result[i] = items[i]
 		else:
 			issue("DT-02", "%s/%d" % [key, i], "ожидалась строка")
 	return result

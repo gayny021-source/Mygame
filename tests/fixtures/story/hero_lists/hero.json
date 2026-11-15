@@ -1,0 +1,9 @@
+{
+  "_note": "Битые списки героя: stats нет (DT-03), endings — число (DT-02), в chapters первым стоит число (DT-02 на chapters/0), вторым — глава без файла (BS-01 на chapters/1). Глава m_quiet ссылается на stat и концовку: вторичных BS-01 по битым спискам быть не должно.",
+  "schema_version": 1,
+  "id": "hero_lists",
+  "endings": 5,
+  "chapters": [7, "m_gone", "m_quiet"],
+  "portrait": "portrait_stub",
+  "accent": "cobalt"
+}

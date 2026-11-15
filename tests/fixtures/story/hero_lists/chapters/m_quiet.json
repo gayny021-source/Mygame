@@ -1,0 +1,32 @@
+{
+  "_note": "Глава героя hero_lists: сама по себе верна; её проверка бросается по stat strength, а переход ведёт в концовку end_x — у героя оба списка битые.",
+  "schema_version": 1,
+  "id": "m_quiet",
+  "title": "Тихая глава",
+  "goal": "Цель",
+  "starts": [
+    {"id": "st_main", "scene": "q_s1"}
+  ],
+  "scenes": [
+    {
+      "id": "q_s1",
+      "paragraphs": ["Сцена."],
+      "illustration": "ill_a",
+      "options": [
+        {
+          "id": "q_risk",
+          "text": "Рискнуть",
+          "kind": "risky",
+          "check": {"id": "q_c1", "stat": "strength", "level": "medium", "success": "q_ok", "failure": "q_fail"}
+        }
+      ]
+    }
+  ],
+  "outcomes": [
+    {"id": "q_ok", "routes": [{"transition": "q_t_end"}]},
+    {"id": "q_fail", "routes": [{"transition": "q_t_end"}]}
+  ],
+  "transitions": [
+    {"id": "q_t_end", "to": "ending:end_x"}
+  ]
+}

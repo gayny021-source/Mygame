@@ -6,6 +6,7 @@ extends GdUnitTestSuite
 const HERO_REFS_BS01 := 7
 const HERO_WRONG_BS01 := 3
 const HERO_LINKS_BS01 := 3
+const HERO_LISTS_ISSUES := 4
 const STUB_STAT_IDS: Array[String] = ["strength", "charisma", "mind", "faith"]
 const STUB_BONUSES: Array[int] = [4, 2, 0, -1]
 
@@ -192,6 +193,33 @@ func test_load_hero_wrong_empty_chapters_returns_bs01() -> void:
 	# Assert
 	var path: String = StoryFixtures.DIR + "/hero_wrong/hero.json/chapters"
 	assert_array(_paths(result, "BS-01")).contains([path])
+
+
+func test_load_hero_nochapters_chapters_of_wrong_type_returns_only_dt02() -> void:
+	# Act
+	var result: LoadResult = _load("hero_nochapters")
+	# Assert: no BS-01 «нет ни одной главы» on top of the type finding
+	assert_object(result.data).is_null()
+	assert_array(_paths(result, "DT-02")).is_equal([StoryFixtures.DIR + "/hero_nochapters/hero.json/chapters"])
+	assert_int(result.issues.size()).is_equal(1)
+
+
+func test_load_hero_lists_broken_stats_and_endings_return_one_finding_each() -> void:
+	# Act
+	var result: LoadResult = _load("hero_lists")
+	# Assert: m_quiet uses a stat and an ending, yet no BS-01 repeats the broken lists
+	var hero_json: String = StoryFixtures.DIR + "/hero_lists/hero.json"
+	assert_array(_paths(result, "DT-03")).is_equal([hero_json + "/stats"])
+	assert_array(_paths(result, "DT-02")).is_equal([hero_json + "/chapters/0", hero_json + "/endings"])
+	assert_int(_count(result, "BS-01")).is_equal(1)
+	assert_int(result.issues.size()).is_equal(HERO_LISTS_ISSUES)
+
+
+func test_load_hero_lists_finding_path_keeps_json_index_after_skipped_element() -> void:
+	# Act
+	var result: LoadResult = _load("hero_lists")
+	# Assert: m_gone is chapters[1] in the file, though it is the first string of the list
+	assert_array(_paths(result, "BS-01")).is_equal([StoryFixtures.DIR + "/hero_lists/hero.json/chapters/1"])
 
 
 func test_load_hero_links_returns_three_bs01_and_nothing_else() -> void:
