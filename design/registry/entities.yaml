@@ -388,6 +388,29 @@ constants:
     notes: "V_max, chapter-goal.md F1 (proposal, readability limit; one row of dots fits up to 14 at 200 %). A breach is a data check failure (BS-27)."
     added: 2026-11-14
     revised: ""
+  - name: save_wait_timeout_ms
+    status: active
+    source: design/gdd/save-system.md
+    referenced_by:
+      - design/gdd/save-system.md
+      - design/gdd/choice-system.md
+      - design/gdd/branching-story.md
+    value: 2000
+    unit: ms
+    notes: "T_ожид, save-system.md F3 (candidate until measured on device; DD-009, DD-014, DD-015). A decisive screen waits for write completion: OK, ERROR or this timeout; the write itself continues. Review after 2 timeouts in a row."
+    added: 2026-11-15
+    revised: ""
+  - name: save_write_p95_budget_ms
+    status: active
+    source: design/gdd/save-system.md
+    referenced_by:
+      - design/gdd/save-system.md
+      - design/gdd/run-state.md
+    value: 100
+    unit: ms
+    notes: "save-system.md F5: p95 of one whole-file write on the target device (candidate; measured by a device AC)."
+    added: 2026-11-15
+    revised: ""
 
 # Example:
 #

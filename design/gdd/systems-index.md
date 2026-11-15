@@ -77,7 +77,7 @@
 | 7 | Жетоны вдохновения | Gameplay | Vertical Slice | Not Started | — | Проверки d20 |
 | 8 | Концовки и эпилог | Narrative | Vertical Slice | Not Started | — | Ветвящаяся история, Состояние прохождения |
 | 9 | Галерея и счётчик веток | Progression | Vertical Slice | Not Started | — | Концовки и эпилог, Сохранение, Иллюстрации сцен |
-| 10 | Сохранение | Persistence | MVP | Not Started | — | Ветвящаяся история, Состояние прохождения, Герои, Проверки d20 |
+| 10 | Сохранение | Persistence | MVP | Designed | [save-system.md](save-system.md) | Ветвящаяся история, Состояние прохождения, Герои, Проверки d20 |
 | 11 | Настройки (inferred) | Persistence | Alpha | Not Started | — | Сохранение, Экран чтения, Музыка и звуки |
 | 12 | Экран чтения (inferred) | UI | MVP | Not Started | — | Ветвящаяся история, Система выбора, Цель главы и маркер прогресса, Иллюстрации сцен |
 | 13 | Экран броска | UI | MVP | Not Started | — | Проверки d20, Система выбора, Жетоны вдохновения |
@@ -230,10 +230,10 @@ Effort: S = 1 сессия, M = 2–3 сессии, L = 4+ сессий. Вет�
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 20 |
-| Design docs started | 6 |
+| Design docs started | 7 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 6/10 |
+| MVP systems designed | 7/10 |
 | Vertical Slice systems designed | 0/5 |
 
 ---
