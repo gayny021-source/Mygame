@@ -4,6 +4,8 @@ extends RefCounted
 ## wrong type, a missing or an unknown key becomes a DataIssue, never a crash.
 
 const SCHEMA_VERSION: int = 1
+## 2^53: above it a JSON number (a float) no longer holds every whole number.
+const MAX_WHOLE: float = 9007199254740992.0
 
 static var _id_pattern: RegEx = RegEx.create_from_string("^[a-z][a-z0-9_]*$")
 
@@ -45,6 +47,11 @@ func has_text(key: String) -> bool:
 	return _data.get(key) is String
 
 
+## True when the object has the key `key`, whatever its value.
+func has(key: String) -> bool:
+	return _data.has(key)
+
+
 ## First call on the root object of a file. Checks `schema_version` (absent is
 ## DT-03, not a whole number is DT-02, another version is DT-07), then the keys:
 ## a file of another version is not read any further.
@@ -60,26 +67,27 @@ func schema_ok(known_keys: PackedStringArray) -> bool:
 	return true
 
 
-## Required `id`; DT-06 when it does not match the id pattern.
+## Required `id`; DT-06 when it does not match the id pattern (an empty id too).
 func id() -> String:
-	var value: String = text("id")
+	var value: String = _string("id", true)
 	if has_text("id") and not is_id(value):
 		issue("DT-06", "id", "id «%s» не подходит под ^[a-z][a-z0-9_]*$" % value)
 	return value
 
 
 ## String value; empty when the key is absent or holds another type.
+## An empty required string is DT-02.
 func text(key: String, required: bool = true) -> String:
-	var value: Variant = _typed(key, TYPE_STRING, required)
-	if value == null:
-		return ""
+	var value: String = _string(key, required)
+	if required and value.is_empty() and has_text(key):
+		issue("DT-02", key, "обязательная строка пуста")
 	return value
 
 
-## Required string from `allowed`; DT-05 for any other string.
+## Required string from `allowed`; DT-05 for any other non-empty string.
 func one_of(key: String, allowed: PackedStringArray) -> String:
 	var value: String = text(key)
-	if has_text(key) and not allowed.has(value):
+	if not value.is_empty() and not allowed.has(value):
 		issue("DT-05", key, "значение «%s» не из списка: %s" % [value, ", ".join(allowed)])
 	return value
 
@@ -89,8 +97,8 @@ func flag(key: String) -> bool:
 	return _typed(key, TYPE_BOOL, false) == true
 
 
-## Required whole number. JSON gives every number as float, so a fraction is DT-02;
-## an int comes only from a Dictionary built in code.
+## Required whole number. JSON gives every number as float, so a fraction or a
+## value beyond ±2^53 is DT-02; an int comes only from a Dictionary built in code.
 func integer(key: String) -> int:
 	if _data.get(key) is int:
 		return _data[key]
@@ -98,10 +106,19 @@ func integer(key: String) -> int:
 	if value == null:
 		return 0
 	var number: float = value
-	if number != floorf(number):
-		issue("DT-02", key, "ожидалось целое число, получено %s" % number)
+	if number != floorf(number) or absf(number) > MAX_WHOLE:
+		issue("DT-02", key, "ожидалось целое число в пределах ±2^53, получено %s" % number)
 		return 0
 	return int(number)
+
+
+## Required whole number above zero; DT-02 for zero and below.
+func positive(key: String) -> int:
+	var before: int = _issues.size()
+	var value: int = integer(key)
+	if _issues.size() == before and value <= 0:
+		issue("DT-02", key, "ожидалось целое число больше нуля, получено %d" % value)
+	return value
 
 
 ## Array of strings; an element of another type is DT-02 and is skipped.
@@ -152,6 +169,13 @@ func _check_keys(known_keys: PackedStringArray) -> void:
 	for key: String in _data:
 		if not key.begins_with("_") and not known_keys.has(key):
 			issue("DT-04", key, "неизвестный ключ")
+
+
+func _string(key: String, required: bool) -> String:
+	var value: Variant = _typed(key, TYPE_STRING, required)
+	if value == null:
+		return ""
+	return value
 
 
 func _list(key: String, required: bool) -> Array:

@@ -600,6 +600,10 @@
    "target": "design/gdd/game-concept.md"
   },
   {
+   "source": ".claude/agents/lore-inquisitor.md",
+   "target": "design/narrative/chapter-writing-rules.md"
+  },
+  {
    "source": ".claude/agents/mobile-ux-validator.md",
    "target": ".claude/skills/tscn-handcrafter/SKILL.md"
   },
@@ -1562,6 +1566,10 @@
   {
    "source": "design/narrative/voices/rovend.md",
    "target": "design/gdd/heroes.md"
+  },
+  {
+   "source": "design/narrative/voices/rovend.md",
+   "target": "design/narrative/chapter-writing-rules.md"
   },
   {
    "source": "project.godot",

@@ -16,6 +16,7 @@ const ROUTE_KEYS: PackedStringArray = ["if", "transition"]
 const TRANSITION_KEYS: PackedStringArray = ["id", "to", "bridge", "coda", "early", "deprecated"]
 const BRIDGE_KEYS: PackedStringArray = ["base", "inserts"]
 const INSERT_KEYS: PackedStringArray = ["if", "text"]
+const REQUIRED_LISTS: PackedStringArray = ["starts", "scenes", "outcomes", "transitions"]
 
 
 ## Reads and loads the chapter file at `path`. The chapter is in `data` only when there are no issues.
@@ -39,6 +40,7 @@ static func load_from_dict(data: Dictionary, source: String) -> LoadResult:
 
 ## Reads a JSON file whose root is an object. On failure adds DT-01 (no file,
 ## bad syntax; the path ends with `:<line>`) or DT-02 (root is not an object).
+## A contract between the loaders (ChapterLoader, HeroLoader), not for other code.
 static func read_object(path: String, issues: Array[DataIssue]) -> Dictionary:
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file == null:
@@ -58,6 +60,7 @@ static func read_object(path: String, issues: Array[DataIssue]) -> Dictionary:
 ## Builds the chapter and appends its findings to `issues`. Returns null when the
 ## schema version is not readable; otherwise the chapter, possibly incomplete —
 ## HeroLoader needs it to check hero-wide references even in a broken chapter.
+## A contract between the loaders (ChapterLoader, HeroLoader), not for other code.
 static func parse(data: Dictionary, source: String, issues: Array[DataIssue]) -> ChapterData:
 	var reader: DictReader = DictReader.new(data, source, issues)
 	if not reader.schema_ok(CHAPTER_KEYS):
@@ -77,12 +80,17 @@ static func parse(data: Dictionary, source: String, issues: Array[DataIssue]) ->
 		chapter.outcomes.append(_outcome(item))
 	for item: DictReader in reader.children("transitions", TRANSITION_KEYS):
 		chapter.transitions.append(_transition(item))
+	for key: String in REQUIRED_LISTS:
+		# без обязательного списка (о нём уже есть DT-03) проверка ссылок дала бы только вторичные BS-01
+		if not reader.has(key):
+			return chapter
 	_check_references(chapter, source, issues)
 	return chapter
 
 
 ## Ids that must be unique in the hero's data: scenes, options, checks, outcomes
 ## and transitions of the chapter (branching-story.md, Core Rules 2–6).
+## A contract between the loaders (ChapterLoader, HeroLoader), not for other code.
 static func owned_ids(chapter: ChapterData) -> PackedStringArray:
 	var ids: PackedStringArray = []
 	for scene: SceneData in chapter.scenes:
@@ -110,7 +118,7 @@ static func _start(reader: DictReader) -> StartData:
 static func _milestone(reader: DictReader) -> MilestoneData:
 	var milestone: MilestoneData = MilestoneData.new()
 	milestone.id = reader.id()
-	milestone.step = reader.integer("step")
+	milestone.step = reader.positive("step")
 	return milestone
 
 
@@ -151,6 +159,11 @@ static func _option(reader: DictReader) -> OptionData:
 		option.check = _check(check_reader)
 	option.outcome = reader.text("outcome", false)
 	option.exception = reader.text("exception", false)
+	# только форма; согласованность kind и check — BS-02, история S4
+	if reader.has("outcome") and reader.has("check"):
+		reader.issue("BS-01", "outcome", "у варианта заданы и outcome, и check — нужен ровно один")
+	elif not reader.has("outcome") and not reader.has("check"):
+		reader.issue("BS-01", "outcome", "у варианта нет ни outcome, ни check — нужен ровно один")
 	return option
 
 
@@ -205,7 +218,7 @@ static func _read_target(transition: TransitionData, reader: DictReader) -> void
 	elif with_id and (parts[0] == TransitionData.TO_SCENE or parts[0] == TransitionData.TO_ENDING):
 		transition.to_kind = parts[0]
 		transition.to_id = parts[1]
-	elif reader.has_text("to"):
+	elif not to.is_empty():
 		reader.issue("DT-05", "to", "значение «%s» — не scene:<id>, chapter_end или ending:<id>" % to)
 
 
@@ -215,22 +228,11 @@ static func _check_references(chapter: ChapterData, source: String, issues: Arra
 		issues.append(DataIssue.new("BS-01", source + "/starts", chapter.id, "в главе нет ни одной записи starts"))
 	if chapter.scenes.is_empty():
 		issues.append(DataIssue.new("BS-01", source + "/scenes", chapter.id, "в главе нет ни одной сцены"))
-	var start_ids: PackedStringArray = []
-	var milestone_ids: PackedStringArray = []
-	var scene_ids: PackedStringArray = []
-	var outcome_ids: PackedStringArray = []
-	var transition_ids: PackedStringArray = []
-	for start: StartData in chapter.starts:
-		start_ids.append(start.id)
-	for milestone: MilestoneData in chapter.milestones:
-		milestone_ids.append(milestone.id)
-	for scene: SceneData in chapter.scenes:
-		scene_ids.append(scene.id)
-	for outcome: OutcomeData in chapter.outcomes:
-		outcome_ids.append(outcome.id)
-	for transition: TransitionData in chapter.transitions:
-		transition_ids.append(transition.id)
-	_report_repeats(start_ids, source + "/starts", issues)
+	var milestone_ids: PackedStringArray = _ids(chapter.milestones)
+	var scene_ids: PackedStringArray = _ids(chapter.scenes)
+	var outcome_ids: PackedStringArray = _ids(chapter.outcomes)
+	var transition_ids: PackedStringArray = _ids(chapter.transitions)
+	_report_repeats(_ids(chapter.starts), source + "/starts", issues)
 	_report_repeats(milestone_ids, source + "/milestones", issues)
 	_report_repeats(owned_ids(chapter), source, issues)
 	for i: int in chapter.starts.size():
@@ -240,6 +242,7 @@ static func _check_references(chapter: ChapterData, source: String, issues: Arra
 	for i: int in chapter.scenes.size():
 		var scene: SceneData = chapter.scenes[i]
 		var scene_path: String = "%s/scenes/%s" % [source, DictReader.label(scene.id, i)]
+		_require(scene.milestone, milestone_ids, scene_path + "/milestone", scene.id, issues)
 		for j: int in scene.options.size():
 			var option: OptionData = scene.options[j]
 			var option_path: String = "%s/options/%s" % [scene_path, DictReader.label(option.id, j)]
@@ -260,6 +263,14 @@ static func _check_references(chapter: ChapterData, source: String, issues: Arra
 			_require(transition.to_id, scene_ids, transition_path + "/to", transition.id, issues)
 
 
+static func _ids(items: Array) -> PackedStringArray:
+	var ids: PackedStringArray = []
+	for item: RefCounted in items:
+		var id: String = item.get("id")
+		ids.append(id)
+	return ids
+
+
 static func _report_repeats(ids: PackedStringArray, prefix: String, issues: Array[DataIssue]) -> void:
 	var seen: PackedStringArray = []
 	for id: String in ids:
@@ -271,6 +282,7 @@ static func _report_repeats(ids: PackedStringArray, prefix: String, issues: Arra
 
 
 static func _require(target: String, known: PackedStringArray, path: String, owner_id: String, issues: Array[DataIssue]) -> void:
-	if known.has(target):
+	# пустая ссылка: ключа нет (необязательный) или о нём уже есть DT-находка
+	if target.is_empty() or known.has(target):
 		return
 	issues.append(DataIssue.new("BS-01", path, owner_id, "ссылка на несуществующий id «%s»" % target))

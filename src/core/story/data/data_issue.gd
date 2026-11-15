@@ -3,7 +3,6 @@ extends RefCounted
 ## One finding about story data: a loader code DT-NN or a graph code BS-NN (ADR-0001, Key Interfaces).
 
 const ERROR := "error"
-const WARNING := "warning"
 
 var code: String
 var severity: String = ERROR

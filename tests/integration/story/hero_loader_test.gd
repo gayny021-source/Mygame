@@ -1,8 +1,12 @@
 extends GdUnitTestSuite
-## Unit tests for HeroLoader (ADR-0001 §4, story S1): hero.json, its chapters and
-## the hero part of BS-01 (branching-story.md, AC-01). flags.json is story S3.
+## Integration tests for HeroLoader on fixture folders (ADR-0001 §4, story S1):
+## hero.json, its chapters and the hero part of BS-01 (branching-story.md, AC-01).
+## flags.json is story S3.
 
-const HERO_REFS_BS01 := 6
+const HERO_REFS_BS01 := 7
+const HERO_WRONG_BS01 := 3
+const HERO_LINKS_BS01 := 3
+const STUB_STAT_IDS: Array[String] = ["strength", "charisma", "mind", "faith"]
 const STUB_BONUSES: Array[int] = [4, 2, 0, -1]
 
 
@@ -40,18 +44,23 @@ func test_load_hero_stub_returns_hero_without_issues() -> void:
 	assert_array(_lines(result)).is_empty()
 	var hero: HeroData = result.data
 	assert_str(hero.id).is_equal("hero_stub")
-	assert_array(Array(hero.stat_ids)).is_equal(["strength", "charisma", "mind", "faith"])
 	assert_array(Array(hero.endings)).is_equal(["end_a", "end_b", "end_c", "end_d"])
 	assert_str(hero.accent).is_equal("carmine")
 	assert_int(hero.chapters.size()).is_equal(1)
 	assert_str(hero.chapters[0].id).is_equal("ch_f1")
 
 
-func test_load_hero_stub_bonuses_are_whole_ints() -> void:
+func test_load_hero_stub_stats_keep_ids_and_whole_int_bonuses() -> void:
 	# Act
 	var hero: HeroData = _load("hero_stub").data
 	# Assert
-	assert_array(Array(hero.stat_bonuses)).is_equal(STUB_BONUSES)
+	var ids: Array[String] = []
+	var bonuses: Array[int] = []
+	for stat: StatData in hero.stats:
+		ids.append(stat.id)
+		bonuses.append(stat.bonus)
+	assert_array(ids).is_equal(STUB_STAT_IDS)
+	assert_array(bonuses).is_equal(STUB_BONUSES)
 
 
 func test_load_hero_missing_hero_returns_dt01() -> void:
@@ -63,10 +72,24 @@ func test_load_hero_missing_hero_returns_dt01() -> void:
 	assert_str(result.issues[0].code).is_equal("DT-01")
 
 
-func test_load_hero_refs_returns_six_bs01() -> void:
+@warning_ignore("unused_parameter")
+func test_load_hero_id_that_is_not_an_id_returns_dt06_and_reads_no_file(hero_id: String, test_parameters := [
+	["hero_stub/../hero_stub"],
+	["../story/hero_stub"],
+	[""],
+]) -> void:
+	# Act: the first two would reach a real hero.json if the id went into the path unchecked
+	var result: LoadResult = _load(hero_id)
+	# Assert
+	assert_object(result.data).is_null()
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-06")
+
+
+func test_load_hero_refs_returns_seven_bs01() -> void:
 	# Act
 	var result: LoadResult = _load("hero_refs")
-	# Assert: four inside m_refs, ending:ghost, id o_a in two chapters
+	# Assert: four inside m_refs, ending:ghost, id o_a in two chapters, m_absent without a file
 	assert_object(result.data).is_null()
 	assert_int(_count(result, "BS-01")).is_equal(HERO_REFS_BS01)
 
@@ -87,12 +110,13 @@ func test_load_hero_refs_id_in_two_chapters_returns_bs01() -> void:
 	assert_array(_paths(result, "BS-01")).contains([path])
 
 
-func test_load_hero_refs_missing_chapter_file_returns_dt01() -> void:
+func test_load_hero_refs_listed_chapter_without_file_returns_bs01_not_dt01() -> void:
 	# Act
 	var result: LoadResult = _load("hero_refs")
-	# Assert
-	var path: String = StoryFixtures.DIR + "/hero_refs/chapters/m_absent.json"
-	assert_array(_paths(result, "DT-01")).is_equal([path])
+	# Assert: m_absent is the third entry of hero.chapters — a broken link, not a broken file
+	var path: String = StoryFixtures.DIR + "/hero_refs/hero.json/chapters/2"
+	assert_array(_paths(result, "BS-01")).contains([path])
+	assert_int(_count(result, "DT-01")).is_equal(0)
 
 
 func test_load_hero_bad_fractional_bonus_returns_dt02() -> void:
@@ -118,3 +142,87 @@ func test_load_hero_bad_chapter_id_with_path_returns_dt06_and_reads_no_file() ->
 	# Assert: the id is not turned into a file path, so nothing is read (no DT-01)
 	assert_int(_count(result, "DT-06")).is_equal(1)
 	assert_int(_count(result, "DT-01")).is_equal(0)
+
+
+func test_load_hero_v2_schema_version_two_returns_only_dt07() -> void:
+	# Act
+	var result: LoadResult = _load("hero_v2")
+	# Assert
+	assert_object(result.data).is_null()
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-07")
+	assert_str(result.issues[0].path).is_equal(StoryFixtures.DIR + "/hero_v2/hero.json/schema_version")
+
+
+func test_load_hero_wrong_missing_portrait_returns_dt03() -> void:
+	# Act
+	var result: LoadResult = _load("hero_wrong")
+	# Assert
+	var path: String = StoryFixtures.DIR + "/hero_wrong/hero.json/portrait"
+	assert_object(result.data).is_null()
+	assert_array(_paths(result, "DT-03")).is_equal([path])
+
+
+func test_load_hero_wrong_returns_three_bs01() -> void:
+	# Act
+	var result: LoadResult = _load("hero_wrong")
+	# Assert: id differs from the folder, strength twice, no chapters
+	assert_int(_count(result, "BS-01")).is_equal(HERO_WRONG_BS01)
+
+
+func test_load_hero_wrong_id_other_than_folder_returns_bs01() -> void:
+	# Act
+	var result: LoadResult = _load("hero_wrong")
+	# Assert
+	var path: String = StoryFixtures.DIR + "/hero_wrong/hero.json/id"
+	assert_array(_paths(result, "BS-01")).contains([path])
+
+
+func test_load_hero_wrong_repeated_stat_id_returns_bs01() -> void:
+	# Act
+	var result: LoadResult = _load("hero_wrong")
+	# Assert
+	var path: String = StoryFixtures.DIR + "/hero_wrong/hero.json/stats/strength/id"
+	assert_array(_paths(result, "BS-01")).contains([path])
+
+
+func test_load_hero_wrong_empty_chapters_returns_bs01() -> void:
+	# Act
+	var result: LoadResult = _load("hero_wrong")
+	# Assert
+	var path: String = StoryFixtures.DIR + "/hero_wrong/hero.json/chapters"
+	assert_array(_paths(result, "BS-01")).contains([path])
+
+
+func test_load_hero_links_returns_three_bs01_and_nothing_else() -> void:
+	# Act
+	var result: LoadResult = _load("hero_links")
+	# Assert: m_alien listed twice, its file holds id m_other, its check rolls on stat luck.
+	# The repeated chapter is not loaded again, so its ids do not count as repeats.
+	assert_object(result.data).is_null()
+	assert_int(_count(result, "BS-01")).is_equal(HERO_LINKS_BS01)
+	assert_int(result.issues.size()).is_equal(HERO_LINKS_BS01)
+
+
+func test_load_hero_links_chapter_listed_twice_returns_bs01() -> void:
+	# Act
+	var result: LoadResult = _load("hero_links")
+	# Assert
+	var path: String = StoryFixtures.DIR + "/hero_links/hero.json/chapters/1"
+	assert_array(_paths(result, "BS-01")).contains([path])
+
+
+func test_load_hero_links_chapter_file_with_another_id_returns_bs01() -> void:
+	# Act
+	var result: LoadResult = _load("hero_links")
+	# Assert
+	var path: String = StoryFixtures.DIR + "/hero_links/chapters/m_alien.json/id"
+	assert_array(_paths(result, "BS-01")).contains([path])
+
+
+func test_load_hero_links_check_stat_outside_hero_stats_returns_bs01() -> void:
+	# Act
+	var result: LoadResult = _load("hero_links")
+	# Assert
+	var path: String = StoryFixtures.DIR + "/hero_links/chapters/m_alien.json/scenes/al_s1/options/al_risk/check/stat"
+	assert_array(_paths(result, "BS-01")).contains([path])
