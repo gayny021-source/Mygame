@@ -7,7 +7,7 @@ var flags: PackedStringArray = []
 ## Categories that have at least one flag set.
 var categories: PackedStringArray = []
 ## Group id -> id of the flag standing in it.
-var groups: Dictionary = {}
+var groups: Dictionary[String, String] = {}
 
 
 func has_flag(id: String) -> bool:
@@ -19,5 +19,4 @@ func any_in_category(category: String) -> bool:
 
 
 func flag_in_group(group: String) -> String:
-	var standing: String = groups.get(group, "")
-	return standing
+	return groups.get(group, "")

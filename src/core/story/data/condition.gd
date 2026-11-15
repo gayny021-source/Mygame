@@ -33,7 +33,9 @@ func evaluate(ctx: ConditionContext) -> bool:
 			return not children[0].evaluate(ctx)
 		Kind.AND:
 			return _all_children(ctx)
-	return _any_child(ctx)
+		Kind.OR:
+			return _any_child(ctx)
+	return false
 
 
 func _any_flag(ctx: ConditionContext) -> bool:

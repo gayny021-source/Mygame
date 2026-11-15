@@ -2,8 +2,9 @@ class_name ConditionParser
 extends RefCounted
 ## Parses the text of an `if` key into a Condition tree (ADR-0001 §5). Data is a
 ## trust boundary: a syntax error is one DT-08 finding, a name the hero does not
-## declare is BS-01, never a crash. A finding's message starts with the 1-based
-## position in the text; `path` and `object_id` are left empty for the loader to fill.
+## declare is BS-01 (once per name), never a crash. A finding's message starts with
+## the 1-based position in the text; `path` and `object_id` are left empty for the
+## loader to fill.
 ##
 ## Usage: [code]var parsed := ConditionParser.parse("f_a and not f_b", known)[/code],
 ## then [code]parsed.condition.evaluate(ctx)[/code] when [code]parsed.issues[/code] is empty.
@@ -11,8 +12,11 @@ extends RefCounted
 ## Deepest nesting of brackets and `not` together. Keeps the recursion of the
 ## parser and of Condition.evaluate far below the GDScript call stack limit.
 const MAX_DEPTH: int = 32
+## Longest condition text, in symbols; a longer one is DT-08 and is not read.
+const MAX_LENGTH: int = 1000
 ## Words of the language; none of them can be a flag, category or group id.
 const RESERVED: PackedStringArray = ["and", "or", "not", "any", "cat", "group"]
+const WHITESPACE: PackedStringArray = [" ", "\t", "\r", "\n"]
 const END := ""
 
 var _tokens: PackedStringArray = []
@@ -21,6 +25,8 @@ var _index: int = 0
 var _depth: int = 0
 var _known: ConditionVocabulary
 var _issues: Array[DataIssue] = []
+# Сообщения BS-01 без позиции: повтор того же имени не даёт второй находки.
+var _unknown: PackedStringArray = []
 
 
 ## Result of `parse`: `condition` is the tree, or null when `issues` is not empty.
@@ -43,13 +49,18 @@ static func parse(text: String, known: ConditionVocabulary) -> ParseResult:
 
 
 func _root(text: String) -> Condition:
+	if text.length() > MAX_LENGTH:
+		_issue("DT-08", MAX_LENGTH + 1, "условие длиннее %d символов" % MAX_LENGTH)
+		return null
 	if not _tokenize(text):
 		return null
 	if _peek() == END:
-		return _fail("пустое условие; если условия нет, уберите ключ if")
+		_fail("пустое условие; если условия нет, уберите ключ if")
+		return null
 	var root: Condition = _chain()
 	if root != null and _peek() != END:
-		return _fail("ожидалась связка and / or или конец условия, получено %s" % _shown())
+		_fail("ожидалась связка and / or или конец условия, получено %s" % _shown())
+		return null
 	return root
 
 
@@ -58,7 +69,7 @@ func _tokenize(text: String) -> bool:
 	var i: int = 0
 	while i < length:
 		var symbol: String = text[i]
-		if symbol == " " or symbol == "\t":
+		if WHITESPACE.has(symbol):
 			i += 1
 			continue
 		var start: int = i
@@ -69,7 +80,9 @@ func _tokenize(text: String) -> bool:
 		elif _is_lower(symbol):
 			i = _word_end(text, i)
 		else:
-			_issue("DT-08", start + 1, "недопустимый символ «%s»; имена — по ^[a-z][a-z0-9_]*$" % symbol)
+			# Код символа — чтобы сценарист увидел невидимое (U+00A0 и т. п.).
+			var shown: String = "«%s» (U+%04X)" % [symbol, symbol.unicode_at(0)]
+			_issue("DT-08", start + 1, "недопустимый символ %s; имена — по ^[a-z][a-z0-9_]*$" % shown)
 			return false
 		_tokens.append(text.substr(start, i - start))
 		_positions.append(start + 1)
@@ -110,7 +123,8 @@ func _chain() -> Condition:
 			return null
 		node.children.append(operand)
 	if _peek() == "and" or _peek() == "or":
-		return _fail("and и or в одной цепочке без скобок; напишите (a and b) or c")
+		_fail("and и or в одной цепочке без скобок; напишите (a and b) or c")
+		return null
 	return node
 
 
@@ -149,7 +163,9 @@ func _brackets() -> Condition:
 		return null
 	var inner: Condition = _chain()
 	_depth -= 1
-	if inner == null or not _expect(")"):
+	if inner == null:
+		return null
+	if not _expect(")"):
 		return null
 	return inner
 
@@ -177,10 +193,12 @@ func _category() -> Condition:
 		return null
 	var position: int = _positions[_index]
 	node.name = _name("категории")
-	if node.name.is_empty() or not _expect(")"):
+	if node.name.is_empty():
+		return null
+	if not _expect(")"):
 		return null
 	if _known != null and not _known.categories.has(node.name):
-		_issue("BS-01", position, "категория «%s» не объявлена у героя" % node.name)
+		_report_unknown(position, "категория «%s» не объявлена у героя" % node.name)
 	return node
 
 
@@ -191,10 +209,14 @@ func _group() -> Condition:
 		return null
 	var position: int = _positions[_index]
 	node.name = _name("группы")
-	if node.name.is_empty() or not _expect(")") or not _expect("=="):
+	if node.name.is_empty():
+		return null
+	if not _expect(")"):
+		return null
+	if not _expect("=="):
 		return null
 	if _known != null and not _known.groups.has(node.name):
-		_issue("BS-01", position, "группа «%s» не объявлена у героя" % node.name)
+		_report_unknown(position, "группа «%s» не объявлена у героя" % node.name)
 	if not _flag(node):
 		return null
 	return node
@@ -208,7 +230,7 @@ func _flag(node: Condition) -> bool:
 		return false
 	node.flags.append(id)
 	if _known != null and not _known.flags.has(id):
-		_issue("BS-01", position, "флаг «%s» не объявлен у героя" % id)
+		_report_unknown(position, "флаг «%s» не объявлен у героя" % id)
 	return true
 
 
@@ -248,10 +270,17 @@ func _shown() -> String:
 	return "конец условия" if _peek() == END else "«%s»" % _peek()
 
 
-# DT-08 на текущем токене; null — чтобы вызывающий сразу вернул отказ.
-func _fail(message: String) -> Condition:
+# DT-08 на текущем токене.
+func _fail(message: String) -> void:
 	_issue("DT-08", _positions[_index], message)
-	return null
+
+
+# BS-01 один раз на имя, с позицией первого вхождения.
+func _report_unknown(position: int, message: String) -> void:
+	if _unknown.has(message):
+		return
+	_unknown.append(message)
+	_issue("BS-01", position, message)
 
 
 func _issue(code: String, position: int, message: String) -> void:

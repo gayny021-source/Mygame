@@ -2,9 +2,6 @@ extends GdUnitTestSuite
 ## Unit tests for Condition.evaluate (ADR-0001 §5, story S2; branching-story.md,
 ## Core Rules 7) over FakeFlags, the test stand-in for RunState.
 
-const LONG_CHAIN_TERMS: int = 2000
-
-
 func _flags(set_flags: PackedStringArray) -> FakeFlags:
 	var ctx: FakeFlags = FakeFlags.new()
 	ctx.flags = set_flags
@@ -16,13 +13,6 @@ func _eval(text: String, ctx: ConditionContext) -> bool:
 	var result: ConditionParser.ParseResult = ConditionParser.parse(text, null)
 	assert_array(result.issues).is_empty()
 	return result.condition.evaluate(ctx)
-
-
-func _repeat(part: String, times: int) -> String:
-	var parts: PackedStringArray = []
-	parts.resize(times)
-	parts.fill(part)
-	return "".join(parts)
 
 
 func test_evaluate_flag_is_true_only_when_flag_is_set() -> void:
@@ -100,11 +90,12 @@ func test_evaluate_mixed_atoms_in_one_condition() -> void:
 
 func test_evaluate_long_chain_and_max_depth_do_not_overflow() -> void:
 	# Arrange
-	var chain: String = "f_a" + _repeat(" or f_b", LONG_CHAIN_TERMS)
+	var chain: String = ConditionFixtures.or_chain()
 	var depth: int = ConditionParser.MAX_DEPTH
-	var nested: String = _repeat("(", depth) + "f_b" + _repeat(")", depth)
-	var negated: String = _repeat("not ", depth) + "f_b"
+	var nested: String = "(".repeat(depth) + "f_b" + ")".repeat(depth)
+	var negated: String = "not ".repeat(depth) + "f_b"
 	# Act + Assert
 	assert_bool(_eval(chain, _flags(["f_b"]))).is_true()
+	assert_bool(_eval(chain, _flags(["f_c"]))).is_false()
 	assert_bool(_eval(nested, _flags(["f_b"]))).is_true()
 	assert_bool(_eval(negated, _flags(["f_b"]))).is_true()

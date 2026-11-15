@@ -3,13 +3,14 @@ extends GdUnitTestSuite
 ## syntax with the 1-based position in the text, BS-01 for names the hero does not
 ## declare (branching-story.md, AC-01). No file is read.
 
-const LONG_CHAIN_TERMS: int = 2000
 const UNKNOWN_FLAG_POSITION: int = 13
+## More brackets than MAX_DEPTH, still under MAX_LENGTH.
+const DEEP_BRACKETS: int = 500
 
 
 func _known() -> ConditionVocabulary:
 	var known: ConditionVocabulary = ConditionVocabulary.new()
-	known.flags = ["f_a", "f_b", "f_c", "f_d"]
+	known.flags = ["f_a", "f_b", "f_c", "f_d", "android", "notary", "order"]
 	known.categories = ["wound"]
 	known.groups = ["mood"]
 	return known
@@ -38,16 +39,8 @@ func _assert_syntax_error(text: String, position: int) -> void:
 	var result: ConditionParser.ParseResult = _parse(text)
 	assert_array(_codes(result)).is_equal(["DT-08"] as Array[String])
 	assert_object(result.condition).is_null()
-	if result.issues.size() == 1:
-		assert_str(result.issues[0].message).starts_with("позиция %d:" % position)
-		assert_str(result.issues[0].severity).is_equal(DataIssue.ERROR)
-
-
-func _repeat(part: String, times: int) -> String:
-	var parts: PackedStringArray = []
-	parts.resize(times)
-	parts.fill(part)
-	return "".join(parts)
+	assert_str(result.issues[0].message).starts_with("позиция %d:" % position)
+	assert_str(result.issues[0].severity).is_equal(DataIssue.ERROR)
 
 
 # --- atoms ---
@@ -89,12 +82,51 @@ func test_parse_group_returns_group_node_with_expected_flag() -> void:
 	assert_array(Array(result.condition.flags)).is_equal(["f_a"])
 
 
+func test_parse_ids_that_start_with_a_keyword_are_plain_flags() -> void:
+	# Act
+	var result: ConditionParser.ParseResult = _parse("android and notary and order")
+	# Assert
+	assert_array(_lines(result)).is_empty()
+	assert_int(result.condition.children.size()).is_equal(3)
+	assert_array(Array(result.condition.children[1].flags)).is_equal(["notary"])
+
+
+# --- whitespace ---
+
 func test_parse_spaces_and_tabs_around_tokens_are_ignored() -> void:
 	# Act
 	var result: ConditionParser.ParseResult = _parse("  group ( mood )==f_a\tand any( f_b ) ")
 	# Assert
 	assert_array(_lines(result)).is_empty()
 	assert_int(result.condition.children.size()).is_equal(2)
+
+
+func test_parse_line_breaks_are_whitespace() -> void:
+	# Act
+	var windows: ConditionParser.ParseResult = _parse("f_a\r\nand f_b\r\n")
+	var unix: ConditionParser.ParseResult = _parse("f_a\nand\nf_b")
+	# Assert
+	assert_array(_lines(windows)).is_empty()
+	assert_array(_lines(unix)).is_empty()
+	assert_int(windows.condition.children.size()).is_equal(2)
+	assert_int(unix.condition.children.size()).is_equal(2)
+
+
+func test_parse_line_break_between_ids_does_not_join_them() -> void:
+	_assert_syntax_error("f_a\nf_b", 5)
+
+
+func test_parse_invisible_symbol_is_dt08_with_its_code() -> void:
+	# Act
+	var nbsp: ConditionParser.ParseResult = _parse("f_a and f_b")
+	var zero_width: ConditionParser.ParseResult = _parse("f_a ​and f_b")
+	# Assert
+	assert_array(_codes(nbsp)).is_equal(["DT-08"] as Array[String])
+	assert_str(nbsp.issues[0].message).starts_with("позиция 4:")
+	assert_str(nbsp.issues[0].message).contains("U+00A0")
+	assert_array(_codes(zero_width)).is_equal(["DT-08"] as Array[String])
+	assert_str(zero_width.issues[0].message).starts_with("позиция 5:")
+	assert_str(zero_width.issues[0].message).contains("U+200B")
 
 
 # --- connectives, precedence, brackets ---
@@ -177,6 +209,7 @@ func test_parse_empty_text_is_dt08() -> void:
 
 func test_parse_blank_text_is_dt08() -> void:
 	_assert_syntax_error("  \t ", 5)
+	_assert_syntax_error("\r\n", 3)
 
 
 # --- unknown names ---
@@ -226,13 +259,28 @@ func test_parse_every_unknown_name_gets_its_own_bs01() -> void:
 	assert_array(_codes(result)).is_equal(["BS-01", "BS-01", "BS-01", "BS-01"] as Array[String])
 
 
+func test_parse_repeated_unknown_name_is_one_bs01_at_first_use() -> void:
+	# Act
+	var result: ConditionParser.ParseResult = _parse("f_a and f_x and any(f_x, f_x) and not f_x")
+	# Assert
+	assert_array(_codes(result)).is_equal(["BS-01"] as Array[String])
+	assert_str(result.issues[0].message).starts_with("позиция 9:")
+
+
+func test_parse_same_unknown_name_as_flag_and_category_is_two_bs01() -> void:
+	# Act
+	var result: ConditionParser.ParseResult = _parse("f_x and cat(f_x) and cat(f_x)")
+	# Assert
+	assert_array(_codes(result)).is_equal(["BS-01", "BS-01"] as Array[String])
+
+
 func test_parse_without_vocabulary_checks_syntax_only() -> void:
 	# Act
-	var result: ConditionParser.ParseResult = ConditionParser.parse("f_zzz and cat(c_x)", null)
+	var result: ConditionParser.ParseResult = ConditionParser.parse("f_zzz and cat(c_x) and group(g_x) == f_y", null)
 	var broken: ConditionParser.ParseResult = ConditionParser.parse("f_zzz and", null)
 	# Assert
 	assert_array(_lines(result)).is_empty()
-	assert_object(result.condition).is_not_null()
+	assert_int(result.condition.children.size()).is_equal(3)
 	assert_array(_codes(broken)).is_equal(["DT-08"] as Array[String])
 
 
@@ -274,7 +322,6 @@ func test_parse_foreign_symbols_are_dt08() -> void:
 	_assert_syntax_error("f_a && f_b", 5)
 	_assert_syntax_error("f_a = f_b", 5)
 	_assert_syntax_error("!f_a", 1)
-	_assert_syntax_error("f_a\nand f_b", 4)
 	_assert_syntax_error("f_a > 2", 5)
 
 
@@ -310,6 +357,7 @@ func test_parse_broken_any_is_dt08() -> void:
 func test_parse_broken_cat_is_dt08() -> void:
 	_assert_syntax_error("cat()", 5)
 	_assert_syntax_error("cat(wound, wound)", 10)
+	_assert_syntax_error("cat wound", 5)
 
 
 func test_parse_broken_group_is_dt08() -> void:
@@ -317,32 +365,53 @@ func test_parse_broken_group_is_dt08() -> void:
 	_assert_syntax_error("group(mood) f_a", 13)
 	_assert_syntax_error("group(mood) ==", 15)
 	_assert_syntax_error("group(mood) == (f_a)", 16)
+	_assert_syntax_error("group mood == f_a", 7)
+	_assert_syntax_error("group(mood == f_a", 12)
 
+
+func test_parse_single_equals_after_group_is_dt08() -> void:
+	_assert_syntax_error("group(mood) = f_a", 13)
+
+
+# --- length and depth ---
 
 func test_parse_long_flat_chain_is_accepted() -> void:
+	# Act
+	var result: ConditionParser.ParseResult = _parse(ConditionFixtures.or_chain())
+	# Assert
+	assert_array(_lines(result)).is_empty()
+	assert_int(result.condition.children.size()).is_equal(ConditionFixtures.CHAIN_TERMS + 1)
+
+
+func test_parse_text_of_max_length_is_accepted() -> void:
 	# Arrange
-	var text: String = "f_a" + _repeat(" or f_b", LONG_CHAIN_TERMS)
+	var chain: String = ConditionFixtures.or_chain()
+	var text: String = chain + " ".repeat(ConditionParser.MAX_LENGTH - chain.length())
 	# Act
 	var result: ConditionParser.ParseResult = _parse(text)
 	# Assert
+	assert_int(text.length()).is_equal(ConditionParser.MAX_LENGTH)
 	assert_array(_lines(result)).is_empty()
-	assert_int(result.condition.children.size()).is_equal(LONG_CHAIN_TERMS + 1)
+
+
+func test_parse_text_over_max_length_is_dt08_at_first_extra_symbol() -> void:
+	# Arrange
+	var chain: String = ConditionFixtures.or_chain()
+	var text: String = chain + " ".repeat(ConditionParser.MAX_LENGTH + 1 - chain.length())
+	# Act + Assert
+	_assert_syntax_error(text, ConditionParser.MAX_LENGTH + 1)
 
 
 func test_parse_long_garbage_is_one_dt08() -> void:
-	# Arrange
-	var text: String = _repeat("f_a ", LONG_CHAIN_TERMS)
-	# Act
-	var result: ConditionParser.ParseResult = _parse(text)
-	# Assert
-	assert_array(_codes(result)).is_equal(["DT-08"] as Array[String])
+	_assert_syntax_error("f_a ".repeat(ConditionParser.MAX_LENGTH), ConditionParser.MAX_LENGTH + 1)
+	_assert_syntax_error("f_a ".repeat(ConditionFixtures.CHAIN_TERMS), 5)
 
 
 func test_parse_nesting_at_max_depth_is_accepted() -> void:
 	# Arrange
 	var depth: int = ConditionParser.MAX_DEPTH
-	var brackets: String = _repeat("(", depth) + "f_a" + _repeat(")", depth)
-	var negations: String = _repeat("not ", depth) + "f_a"
+	var brackets: String = "(".repeat(depth) + "f_a" + ")".repeat(depth)
+	var negations: String = "not ".repeat(depth) + "f_a"
 	# Act
 	var bracketed: ConditionParser.ParseResult = _parse(brackets)
 	var negated: ConditionParser.ParseResult = _parse(negations)
@@ -355,18 +424,15 @@ func test_parse_brackets_over_max_depth_are_dt08_at_first_extra_level() -> void:
 	# Arrange
 	var depth: int = ConditionParser.MAX_DEPTH + 1
 	# Act + Assert
-	_assert_syntax_error(_repeat("(", depth) + "f_a" + _repeat(")", depth), depth)
+	_assert_syntax_error("(".repeat(depth) + "f_a" + ")".repeat(depth), depth)
 
 
 func test_parse_negations_over_max_depth_are_dt08_at_first_extra_level() -> void:
 	# Arrange
 	var depth: int = ConditionParser.MAX_DEPTH
 	# Act + Assert
-	_assert_syntax_error(_repeat("not ", depth + 1) + "f_a", depth * 4 + 1)
+	_assert_syntax_error("not ".repeat(depth + 1) + "f_a", depth * 4 + 1)
 
 
 func test_parse_very_deep_nesting_is_one_dt08_not_a_crash() -> void:
-	# Arrange
-	var text: String = _repeat("(", LONG_CHAIN_TERMS) + "f_a"
-	# Act + Assert
-	_assert_syntax_error(text, ConditionParser.MAX_DEPTH + 1)
+	_assert_syntax_error("(".repeat(DEEP_BRACKETS) + "f_a", ConditionParser.MAX_DEPTH + 1)
