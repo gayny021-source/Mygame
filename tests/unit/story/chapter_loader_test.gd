@@ -1,12 +1,11 @@
 extends GdUnitTestSuite
-## Unit tests for ChapterLoader (ADR-0001 §4, story S1): DT-01…DT-07 and the
+## Unit tests for ChapterLoader (ADR-0001 §4, story S1): DT-02…DT-07 and the
 ## chapter part of BS-01 (branching-story.md, AC-01). A test on a code looks only
 ## at findings with that code, as the GDD Acceptance Criteria preamble requires.
+## The tests that read a file are in tests/integration/story/chapter_loader_file_test.gd.
 
 const SOURCE := "test"
-const CH_F1_SCENES := 12
-const CH_F1_FINAL_OPTIONS := 3
-const M_REFS_CHAPTER_ERRORS := 4
+const MAX_WHOLE_STEP := 9007199254740992.0
 
 
 func _count(result: LoadResult, code: String) -> int:
@@ -36,50 +35,6 @@ func _load(chapter: Dictionary) -> LoadResult:
 
 
 # --- valid data ---
-
-func test_load_file_ch_f1_returns_chapter_without_issues() -> void:
-	# Act
-	var result: LoadResult = ChapterLoader.load_file(StoryFixtures.CH_F1)
-	# Assert
-	assert_array(_lines(result)).is_empty()
-	var chapter: ChapterData = result.data
-	assert_str(chapter.id).is_equal("ch_f1")
-	assert_int(chapter.scenes.size()).is_equal(CH_F1_SCENES)
-	assert_int(chapter.starts.size()).is_equal(1)
-	var final_scene: SceneData = chapter.scenes[CH_F1_SCENES - 1]
-	assert_str(final_scene.id).is_equal("s11")
-	assert_bool(final_scene.final).is_true()
-	assert_bool(final_scene.node).is_true()
-	assert_int(final_scene.options.size()).is_equal(CH_F1_FINAL_OPTIONS)
-
-
-func test_load_file_ch_f1_keeps_condition_text_and_check() -> void:
-	# Act
-	var chapter: ChapterData = ChapterLoader.load_file(StoryFixtures.CH_F1).data
-	# Assert
-	var final_scene: SceneData = chapter.scenes[CH_F1_SCENES - 1]
-	var risky: OptionData = final_scene.options[0]
-	var open: OptionData = final_scene.options[CH_F1_FINAL_OPTIONS - 1]
-	assert_str(open.condition).is_equal("f_past")
-	assert_object(open.check).is_null()
-	assert_str(risky.check.success).is_equal("o_s11_win")
-	assert_str(risky.check.failure).is_equal("o_s11_fail")
-	assert_str(risky.outcome).is_empty()
-
-
-func test_load_file_ch_f1_reads_transition_targets() -> void:
-	# Act
-	var chapter: ChapterData = ChapterLoader.load_file(StoryFixtures.CH_F1).data
-	# Assert
-	var first: TransitionData = chapter.transitions[0]
-	var last: TransitionData = chapter.transitions[chapter.transitions.size() - 1]
-	assert_str(first.to_kind).is_equal(TransitionData.TO_SCENE)
-	assert_str(first.to_id).is_equal("s02")
-	assert_object(first.bridge).is_not_null()
-	assert_str(last.to_kind).is_equal(TransitionData.TO_ENDING)
-	assert_str(last.to_id).is_equal("end_d")
-	assert_object(last.bridge).is_null()
-
 
 func test_load_from_dict_minimal_chapter_returns_chapter_without_issues() -> void:
 	# Act
@@ -122,38 +77,7 @@ func test_load_from_dict_underscore_key_is_ignored() -> void:
 	assert_array(_lines(result)).is_empty()
 
 
-# --- DT-01: JSON syntax, file access ---
-
-func test_load_file_broken_json_returns_dt01_with_line() -> void:
-	# Act
-	var result: LoadResult = ChapterLoader.load_file(StoryFixtures.DT01_BROKEN)
-	# Assert: the comma is missing before line 5 of the file
-	assert_object(result.data).is_null()
-	assert_int(result.issues.size()).is_equal(1)
-	assert_str(result.issues[0].code).is_equal("DT-01")
-	assert_str(result.issues[0].severity).is_equal(DataIssue.ERROR)
-	assert_str(result.issues[0].path).is_equal(StoryFixtures.DT01_BROKEN + ":5")
-
-
-func test_load_file_missing_file_returns_dt01() -> void:
-	# Act
-	var result: LoadResult = ChapterLoader.load_file(StoryFixtures.MISSING_FILE)
-	# Assert
-	assert_object(result.data).is_null()
-	assert_int(result.issues.size()).is_equal(1)
-	assert_str(result.issues[0].code).is_equal("DT-01")
-	assert_str(result.issues[0].path).is_equal(StoryFixtures.MISSING_FILE)
-
-
 # --- DT-02: types ---
-
-func test_load_file_root_array_returns_dt02() -> void:
-	# Act
-	var result: LoadResult = ChapterLoader.load_file(StoryFixtures.DT02_ROOT_ARRAY)
-	# Assert
-	assert_object(result.data).is_null()
-	assert_int(_count(result, "DT-02")).is_equal(1)
-
 
 func test_load_from_dict_number_instead_of_string_returns_dt02() -> void:
 	# Arrange
@@ -202,6 +126,113 @@ func test_load_from_dict_whole_float_step_becomes_int() -> void:
 	assert_int(loaded.milestones[0].step).is_equal(2)
 
 
+@warning_ignore("unused_parameter")
+func test_load_from_dict_step_outside_whole_range_returns_dt02(step: float, test_parameters := [
+	[1e20],
+	[9007199254740994.0],
+	[-1e20],
+]) -> void:
+	# Arrange: above 2^53 a float no longer holds every whole number (ADR-0001 §4)
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["milestones"] = [{"id": "m1", "step": step}]
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_object(result.data).is_null()
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-02")
+	assert_str(result.issues[0].path).is_equal("test/milestones/m1/step")
+
+
+func test_load_from_dict_step_two_to_the_53rd_becomes_int() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["milestones"] = [{"id": "m1", "step": MAX_WHOLE_STEP}]
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_array(_lines(result)).is_empty()
+	var loaded: ChapterData = result.data
+	assert_int(loaded.milestones[0].step).is_equal(int(MAX_WHOLE_STEP))
+
+
+@warning_ignore("unused_parameter")
+func test_load_from_dict_step_not_above_zero_returns_dt02(step: float, test_parameters := [
+	[0.0],
+	[-1.0],
+]) -> void:
+	# Arrange: provisional rule, until the GDD section «Цель главы» says otherwise
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["milestones"] = [{"id": "m1", "step": step}]
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_object(result.data).is_null()
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-02")
+	assert_str(result.issues[0].path).is_equal("test/milestones/m1/step")
+
+
+func test_load_from_dict_empty_title_returns_dt02() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["title"] = ""
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_object(result.data).is_null()
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-02")
+	assert_str(result.issues[0].path).is_equal("test/title")
+
+
+func test_load_from_dict_empty_paragraph_text_returns_dt02() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["scenes"][0]["paragraphs"] = [{"text": ""}]
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-02")
+	assert_str(result.issues[0].path).is_equal("test/scenes/s1/paragraphs/0/text")
+
+
+func test_load_from_dict_empty_start_scene_returns_dt02_without_bs01() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["starts"][0]["scene"] = ""
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-02")
+	assert_str(result.issues[0].path).is_equal("test/starts/st_main/scene")
+
+
+func test_load_from_dict_empty_to_returns_dt02_without_dt05() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["transitions"][0]["to"] = ""
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-02")
+	assert_str(result.issues[0].path).is_equal("test/transitions/t_end/to")
+
+
+func test_load_from_dict_empty_scene_id_returns_dt06_without_dt02() -> void:
+	# Arrange: an empty id is an id of a wrong format, not an empty required string
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["scenes"][0]["id"] = ""
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_int(_count(result, "DT-06")).is_equal(1)
+	assert_int(_count(result, "DT-02")).is_equal(0)
+
+
 # --- DT-03: required keys ---
 
 func test_load_from_dict_missing_goal_returns_dt03() -> void:
@@ -238,6 +269,49 @@ func test_load_from_dict_missing_schema_version_returns_dt03_and_no_chapter() ->
 	assert_object(result.data).is_null()
 	assert_int(_count(result, "DT-03")).is_equal(1)
 	assert_int(_count(result, "DT-07")).is_equal(0)
+
+
+@warning_ignore("unused_parameter")
+func test_load_from_dict_missing_required_list_returns_only_dt03(key: String, test_parameters := [
+	["starts"],
+	["scenes"],
+	["outcomes"],
+	["transitions"],
+]) -> void:
+	# Arrange: the missing list is the cause; broken references to it would only repeat it
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter.erase(key)
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_object(result.data).is_null()
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-03")
+	assert_str(result.issues[0].path).is_equal("test/" + key)
+
+
+func test_load_from_dict_missing_start_scene_returns_only_dt03() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["starts"][0].erase("scene")
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert: no BS-01 about a reference to the id «»
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-03")
+	assert_str(result.issues[0].path).is_equal("test/starts/st_main/scene")
+
+
+func test_load_from_dict_missing_check_success_returns_only_dt03() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.chapter_with_check()
+	chapter["scenes"][0]["options"][0]["check"].erase("success")
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-03")
+	assert_str(result.issues[0].path).is_equal("test/scenes/s1/options/s1_risk/check/success")
 
 
 # --- DT-04: unknown keys ---
@@ -294,8 +368,8 @@ func test_load_from_dict_malformed_to_returns_dt05(to: String, test_parameters :
 	["scene"],
 	["scene:"],
 	["ending:"],
+	["scene:a:b"],
 	["chapter_end:s1"],
-	[""],
 ]) -> void:
 	# Arrange
 	var chapter: Dictionary = StoryFixtures.minimal_chapter()
@@ -372,24 +446,65 @@ func test_load_from_dict_fractional_schema_version_returns_dt02() -> void:
 
 # --- BS-01: references and unique ids inside a chapter (AC-01, S1 part) ---
 
-func test_load_file_m_refs_returns_four_bs01() -> void:
-	# Act
-	var result: LoadResult = ChapterLoader.load_file(StoryFixtures.M_REFS)
-	# Assert: start -> nope, option -> o_missing, scene:ghost, two objects with id a
-	assert_object(result.data).is_null()
-	assert_int(_count(result, "BS-01")).is_equal(M_REFS_CHAPTER_ERRORS)
-	assert_int(result.issues.size()).is_equal(M_REFS_CHAPTER_ERRORS)
-
-
-func test_load_from_dict_m_refs_with_one_error_fixed_returns_one_bs01_less() -> void:
+func test_load_from_dict_option_without_outcome_and_check_returns_bs01() -> void:
 	# Arrange
-	var issues: Array[DataIssue] = []
-	var chapter: Dictionary = ChapterLoader.read_object(StoryFixtures.M_REFS, issues)
-	chapter["starts"][0]["scene"] = "a"
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["scenes"][0]["options"][0].erase("outcome")
 	# Act
 	var result: LoadResult = _load(chapter)
 	# Assert
-	assert_int(_count(result, "BS-01")).is_equal(M_REFS_CHAPTER_ERRORS - 1)
+	assert_object(result.data).is_null()
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("BS-01")
+	assert_str(result.issues[0].path).is_equal("test/scenes/s1/options/s1_go/outcome")
+	assert_str(result.issues[0].object_id).is_equal("s1_go")
+
+
+func test_load_from_dict_option_with_outcome_and_check_returns_bs01() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.chapter_with_check()
+	chapter["scenes"][0]["options"][0]["outcome"] = "o1"
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("BS-01")
+	assert_str(result.issues[0].path).is_equal("test/scenes/s1/options/s1_risk/outcome")
+
+
+func test_load_from_dict_risky_option_with_outcome_and_no_check_returns_no_issues() -> void:
+	# Arrange: whether kind agrees with check is BS-02, story S4 — the loader checks the form only
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["scenes"][0]["options"][0]["kind"] = "risky"
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_array(_lines(result)).is_empty()
+
+
+func test_load_from_dict_scene_milestone_outside_milestones_returns_bs01() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["milestones"] = [{"id": "m1", "step": 1}]
+	chapter["scenes"][0]["milestone"] = "m_ghost"
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("BS-01")
+	assert_str(result.issues[0].path).is_equal("test/scenes/s1/milestone")
+	assert_str(result.issues[0].object_id).is_equal("s1")
+
+
+func test_load_from_dict_scene_milestone_from_milestones_returns_no_issues() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["milestones"] = [{"id": "m1", "step": 1}]
+	chapter["scenes"][0]["milestone"] = "m1"
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_array(_lines(result)).is_empty()
 
 
 func test_load_from_dict_start_to_missing_scene_returns_bs01_with_field_and_id() -> void:

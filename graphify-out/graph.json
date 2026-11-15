@@ -1649,6 +1649,10 @@
   },
   {
    "source": "tests/unit/story/chapter_loader_test.gd",
+   "target": "tests/integration/story/chapter_loader_file_test.gd"
+  },
+  {
+   "source": "tests/unit/story/chapter_loader_test.gd",
    "target": "tests/unit/story/story_json_engine_test.gd"
   },
   {
