@@ -460,6 +460,19 @@ func test_load_from_dict_option_without_outcome_and_check_returns_bs01() -> void
 	assert_str(result.issues[0].object_id).is_equal("s1_go")
 
 
+func test_load_from_dict_option_with_empty_outcome_and_no_check_returns_dt02() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["scenes"][0]["options"][0]["outcome"] = ""
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_object(result.data).is_null()
+	assert_int(result.issues.size()).is_equal(1)
+	assert_str(result.issues[0].code).is_equal("DT-02")
+	assert_str(result.issues[0].path).is_equal("test/scenes/s1/options/s1_go/outcome")
+
+
 func test_load_from_dict_option_with_outcome_and_check_returns_bs01() -> void:
 	# Arrange
 	var chapter: Dictionary = StoryFixtures.chapter_with_check()

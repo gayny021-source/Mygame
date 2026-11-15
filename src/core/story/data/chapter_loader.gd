@@ -160,7 +160,9 @@ static func _option(reader: DictReader) -> OptionData:
 	option.outcome = reader.text("outcome", false)
 	option.exception = reader.text("exception", false)
 	# только форма; согласованность kind и check — BS-02, история S4
-	if reader.has("outcome") and reader.has("check"):
+	if reader.has_text("outcome") and option.outcome.is_empty():
+		reader.issue("DT-02", "outcome", "строка outcome пуста")
+	elif reader.has("outcome") and reader.has("check"):
 		reader.issue("BS-01", "outcome", "у варианта заданы и outcome, и check — нужен ровно один")
 	elif not reader.has("outcome") and not reader.has("check"):
 		reader.issue("BS-01", "outcome", "у варианта нет ни outcome, ни check — нужен ровно один")
