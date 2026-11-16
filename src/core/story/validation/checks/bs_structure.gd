@@ -76,41 +76,28 @@ static func _option_problem(option: OptionData) -> String:
 static func _single_use(graph: StoryGraph, issues: Array[DataIssue]) -> void:
 	var outcome_owner: Dictionary[String, String] = {}
 	var transition_owner: Dictionary[String, String] = {}
-	var reported: PackedStringArray = []
+	var reported: Dictionary[String, bool] = {}
 	for scene: SceneData in graph.chapter.scenes:
 		for option: OptionData in scene.options:
-			var used: PackedStringArray = _outcome_ids(option)
-			for outcome_id: String in used:
-				var owner: String = outcome_owner.get(outcome_id, option.id)
+			var option_key: String = "%s/%s" % [scene.id, option.id]
+			for outcome_id: String in graph.option_outcomes(option):
+				var owner: String = outcome_owner.get(outcome_id, option_key)
 				outcome_owner[outcome_id] = owner
-				if owner != option.id and not reported.has(outcome_id):
-					reported.append(outcome_id)
-					GraphValidator.report(issues, "BS-02", "%s/outcomes/%s" % [graph.chapter.id, outcome_id], outcome_id, "исход назван вариантами «%s» и «%s»" % [owner, option.id])
-			for outcome_id: String in used:
+				if owner != option_key and not reported.has("o:" + outcome_id):
+					reported["o:" + outcome_id] = true
+					GraphValidator.report(issues, "BS-02", "%s/outcomes/%s" % [graph.chapter.id, outcome_id], outcome_id, "исход назван вариантами «%s» и «%s»" % [owner, option_key])
 				_claim_transitions(graph, scene, outcome_id, transition_owner, reported, issues)
 
 
-static func _outcome_ids(option: OptionData) -> PackedStringArray:
-	var ids: PackedStringArray = []
-	if option.check != null:
-		ids.append(option.check.success)
-		if option.check.failure != option.check.success:
-			ids.append(option.check.failure)
-	if not option.outcome.is_empty() and not ids.has(option.outcome):
-		ids.append(option.outcome)
-	return ids
-
-
-static func _claim_transitions(graph: StoryGraph, scene: SceneData, outcome_id: String, owner: Dictionary[String, String], reported: PackedStringArray, issues: Array[DataIssue]) -> void:
+static func _claim_transitions(graph: StoryGraph, scene: SceneData, outcome_id: String, owner: Dictionary[String, String], reported: Dictionary[String, bool], issues: Array[DataIssue]) -> void:
 	var outcome: OutcomeData = graph.outcome_by_id.get(outcome_id)
 	if outcome == null:
 		return
 	for route: RouteData in outcome.routes:
 		var first: String = owner.get(route.transition, scene.id)
 		owner[route.transition] = first
-		var key: String = "t:" + route.transition
-		if first != scene.id and not reported.has(key):
-			reported.append(key)
+		if first != scene.id and not reported.has("t:" + route.transition):
+			reported["t:" + route.transition] = true
 			GraphValidator.report(issues, "BS-02", "%s/transitions/%s" % [graph.chapter.id, route.transition], route.transition, "переход назван исходами сцен «%s» и «%s»" % [first, scene.id])
 
 

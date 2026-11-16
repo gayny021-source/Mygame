@@ -4,7 +4,6 @@ extends GdUnitTestSuite
 ## Each case is a fresh mini-chapter from GraphFixtures.
 
 const FLAG_A := "f_a"
-const WARNING := "warning"
 
 
 func _flags() -> Array:
@@ -90,6 +89,20 @@ func test_bs02_transition_named_by_outcomes_of_two_scenes_is_an_error() -> void:
 	data["scenes"][0]["options"].append(GraphFixtures.normal("s1_alt", "o_alt"))
 	data["outcomes"].append(GraphFixtures.outcome("o_alt", ["t_to_s2"]))
 	data["transitions"].append(GraphFixtures.to_scene("t_to_s2", "s2"))
+	# Act / Assert
+	assert_int(_errors(data, "BS-02")).is_equal(1)
+
+
+func test_bs02_two_outcomes_of_a_foreign_scene_on_one_transition_are_one_error() -> void:
+	# Arrange
+	var data: Dictionary = GraphFixtures.chain(["s1", "s2", "s3"])
+	data["transitions"][0] = GraphFixtures.to_scene("t_s1", "s3")
+	data["outcomes"][1]["routes"] = [{"transition": "t_s1"}]
+	data["scenes"][1]["options"].append(GraphFixtures.normal("s2_alt", "o_alt"))
+	data["outcomes"].append(GraphFixtures.outcome("o_alt", ["t_s1"]))
+	data["scenes"][0]["options"].append(GraphFixtures.normal("s1_to2", "o_to2"))
+	data["outcomes"].append(GraphFixtures.outcome("o_to2", ["t_to2"]))
+	data["transitions"].append(GraphFixtures.to_scene("t_to2", "s2"))
 	# Act / Assert
 	assert_int(_errors(data, "BS-02")).is_equal(1)
 
