@@ -31,10 +31,11 @@
 GDD (все Designed, ждут независимого ревью): run-state, d20-checks, heroes, branching-story, choice-system, chapter-goal, save-system, scene-illustrations. MVP 8/10 в `design/gdd/systems-index.md`. Решения директоров — `design/DIRECTOR_DECISIONS.md` (последний DD-017).
 
 ## Открытые задачи
+- Техдолг (DD-021): бонус героя −1…+5 не проверяет `hero_loader.gd:39` — привязать при следующей правке загрузчика героя.
+- История Сохранения (DD-021): `RunState.to_dict/from_dict`, commit перехода 1 с удалением записи о броске, атомарность файла; не закрывать без теста «запись applied + снимок через to_dict → загрузка → исход один раз, флаги стоят».
 - gdUnit4: при провале теста остальные тесты набора иногда не запускаются (виден 1 из 30); настройки fail-fast в `project.godot` нет. Зелёный прогон выполняет все. Разобрать (qa-lead или @opus-solver), иначе Red-прогон прячет падения.
 - Проверка прямой `"` (НП-62) пока только в мостах; распространять ли на все тексты — решить technical-director при первой главе.
 - Вопрос game-designer: толкование BS-07, BS-11, BS-14, BS-16 в коде S5 — список в отчёте S5 (в репозитории нет; при нужде восстановить из `checks/`).
-- ADR-0001: `k_budget`, `k_min`, `s_path_min` временно в `story_limits.json` — перенести в конфиг d20, когда он появится (формула 7 d20-checks).
 - Техдолг S5: CLI не подключён к CI; `DirAccess.rename_absolute` с перезаписью, `FileAccess`/`DirAccess`/`JSON`/`Time` в CLI не покрыты справкой движка (проверены только headless на 4.7.2 Linux); диапазоны конфига проверяются только на знак и min ≤ max.
 - Правки под рамку тона 12+ (11 мест в GDD/ADR; список в scratchpad `tone_followups.md`, если файла нет — искать по НП-55…61 в `design/narrative/chapter-writing-rules.md`): game-concept ×3, d20-checks ×1 (развести «титр крита» и «картуш сцены»), branching-story ×2, ADR-0001 (ключ метки картуша); заменить тексты прототипа, нарушающие 12+.
 - GDD branching-story: BS-05 и AC-10 расходятся про отсутствие `финал` (код: только BS-10) — выровнять текст.

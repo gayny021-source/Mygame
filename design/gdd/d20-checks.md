@@ -1239,7 +1239,7 @@ The crit_phrase_limit formula is defined as:
 
 ## Acceptance Criteria
 
-Метки: **[U]** — юнит-тест gdUnit4 в `tests/unit/d20_checks/` (Logic, BLOCKING). Грани даёт
+Метки: **[U]** — юнит-тест gdUnit4 в `tests/unit/checks/` (путь по ADR-0001) (Logic, BLOCKING). Грани даёт
 только `ScriptedD20Source` (правило 10; `docs/engine-reference/godot/modules/random.md`) с
 запасным «счётным источником», который всегда отдаёт 7 и считает вызовы. Логгер, Система
 выбора, Состояние прохождения, Жетоны и приёмник Сохранения подставные, со счётчиками
