@@ -12,7 +12,8 @@ func _known() -> ConditionVocabulary:
 	var known: ConditionVocabulary = ConditionVocabulary.new()
 	known.flags = ["f_a", "f_b", "f_c", "f_d", "android", "notary", "order"]
 	known.categories = ["wound"]
-	known.groups = ["mood"]
+	known.groups = ["mood", "temper"]
+	known.flag_groups = {"f_a": "mood", "f_b": "mood", "f_c": "temper"}
 	return known
 
 
@@ -250,6 +251,35 @@ func test_parse_unknown_flag_after_group_is_bs01() -> void:
 	var result: ConditionParser.ParseResult = _parse("group(mood) == mood")
 	# Assert
 	assert_array(_codes(result)).is_equal(["BS-01"] as Array[String])
+
+
+func test_parse_flag_of_another_group_is_bs01() -> void:
+	# Act
+	var result: ConditionParser.ParseResult = _parse("group(mood) == f_c")
+	# Assert
+	assert_array(_codes(result)).is_equal(["BS-01"] as Array[String])
+	assert_str(result.issues[0].message).contains("f_c").contains("mood")
+
+
+func test_parse_flag_without_group_after_group_is_bs01() -> void:
+	# Act
+	var result: ConditionParser.ParseResult = _parse("group(mood) == f_d")
+	# Assert
+	assert_array(_codes(result)).is_equal(["BS-01"] as Array[String])
+
+
+func test_parse_flag_of_the_named_group_is_clean() -> void:
+	# Act
+	var result: ConditionParser.ParseResult = _parse("group(temper) == f_c")
+	# Assert
+	assert_array(_lines(result)).is_empty()
+
+
+func test_parse_group_membership_is_not_checked_without_vocabulary() -> void:
+	# Act
+	var result: ConditionParser.ParseResult = ConditionParser.parse("group(mood) == f_c", null)
+	# Assert
+	assert_array(_lines(result)).is_empty()
 
 
 func test_parse_every_unknown_name_gets_its_own_bs01() -> void:

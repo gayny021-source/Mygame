@@ -581,6 +581,16 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/story/flag_loader_test.gd",
+   "label": "flag_loader_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/run_state_test.gd",
+   "label": "run_state_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/story/story_json_engine_test.gd",
    "label": "story_json_engine_test.gd",
    "group": "GDScript"
@@ -1779,6 +1789,14 @@
   {
    "source": "tests/unit/story/condition_test.gd",
    "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/unit/story/flag_loader_test.gd",
+   "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "tests/unit/story/run_state_test.gd",
+   "target": "design/gdd/run-state.md"
   },
   {
    "source": "tests/unit/story/story_json_engine_test.gd",

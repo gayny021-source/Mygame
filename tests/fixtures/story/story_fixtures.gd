@@ -38,3 +38,23 @@ static func chapter_with_check() -> Dictionary:
 	chapter["scenes"][0]["options"] = [{"id": "s1_risk", "text": "Рискнуть", "kind": "risky", "check": check}]
 	chapter["outcomes"].append({"id": "o2", "routes": [{"transition": "t_end"}]})
 	return chapter
+
+
+## One flag declaration with the required keys only.
+static func flag(id: String, category: String = "story") -> Dictionary:
+	return {"id": id, "category": category, "title": "Название " + id}
+
+
+## flags.json content for the given declarations.
+static func flags_file(flags: Array) -> Dictionary:
+	return {"schema_version": 1, "flags": flags}
+
+
+## Vocabulary of flags f_known (group mood) and f_other, with the categories story and wound.
+static func vocabulary() -> ConditionVocabulary:
+	var known: ConditionVocabulary = ConditionVocabulary.new()
+	known.flags = ["f_known", "f_other"]
+	known.categories = ["story", "wound"]
+	known.groups = ["mood"]
+	known.flag_groups = {"f_known": "mood"}
+	return known
