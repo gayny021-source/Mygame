@@ -1,0 +1,40 @@
+# Передача сессии — «Критический провал»
+
+Обновлено: 2026-11-16. Ветка: `ccr-36f1f186-x6q1nl` (пушить только в неё, PR не создавать).
+
+## Первое действие новой сессии
+1. Прочитать `CLAUDE.md`, `USER_PREFERENCES.md`, `production/session-state/active.md` (последние записи внизу).
+2. Сказать пользователю одной строкой, что сессия восстановлена, и продолжить конвейер ниже. Новых тем без слова CEO не начинать.
+
+## Роли и правила
+- Пользователь — Гендиректор (CEO), последнее слово за ним. Claude — Зам (COO): оркестрирует агентов, экономит лимиты. К CEO идут только вопросы по дизайну, сюжету, персонажам. Общение по-русски; отчёт CEO — 3–5 строк, стиль caveman.
+- Технику и код решает Зам. Код и сцены пишут только агенты-программисты (`gameplay-programmer`); правка до 30 строк в 1–2 известных файлах — Зам сам. Аудиторы только читают.
+- Каждый промпт агента заканчивать: «Ответ строго до 8 строк: только баги/решения без кусков кода».
+- Аудит после кода: `godot-mobile-auditor` + `chaos-monkey` параллельно, максимум 2 раунда (Loop Guard). Нет консенсуса — `[DIRECTOR OVERRIDE]` с парой DS + DD.
+- Журналы `design/DISSENT_LOG.md`, `design/DIRECTOR_DECISIONS.md`, `USER_PREFERENCES.md` — дописывать только `Bash >>`.
+- Перед коммитом: `python3 scripts/update_visual_graph.py >/dev/null 2>&1`. В коммитах не указывать идентификаторы моделей; атрибуция — по системной подсказке сессии.
+- Нельзя: `rm -rf`, `.git/hooks/`, коммит ключей/keystore, чтение целиком `GRAPH_REPORT.md` и `graph.json`.
+- Агенты упираются в лимит 20 шагов — возобновлять через `SendMessage` («продолжай, запиши отчёт»). Лимит API (429) — подождать сброса.
+
+## Команды
+- Импорт после новых `class_name`: `godot --headless --path . --import`
+- Тесты: `godot --headless -s -d --remote-debug tcp://127.0.0.1:0 res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode` (две строки ERROR про remote debugger безвредны)
+- Парс-проверка: `.claude/scripts/godot-parse-check.gd`
+
+## Где мы
+Код ядра по ADR-0001 (`docs/architecture/adr-0001-scene-data-format.md`), тесты 365 зелёные на момент S4:
+- S1 загрузчики данных, S2 язык условий, S3 RunState/FlagLoader/`if` в ChapterLoader, S4 граф главы и структурные проверки BS-02…10 — закрыты, аудит 2 раунда.
+- S5 (смысловые проверки, `released_ids`, CLI `tools/validate_data.gd`, линтер дублей ключей/BOM, лимиты F1/F4/F8 из конфига, F4-предупреждения и пунктуация моста UR-1) — в работе, агент `gameplay-programmer` abc3e573b357642fb может быть жив; отчёт `s5_report.md` в scratchpad. Если сессия новая — проверить `git status`/`git log`, прогнать тесты, доделать или перезапустить S5.
+- Дальше: S6 (позиция и навигатор; chaos-monkey обязателен), S7 (d20).
+
+GDD (все Designed, ждут независимого ревью): run-state, d20-checks, heroes, branching-story, choice-system, chapter-goal, save-system, scene-illustrations. MVP 8/10 в `design/gdd/systems-index.md`. Решения директоров — `design/DIRECTOR_DECISIONS.md` (последний DD-017).
+
+## Открытые задачи
+- Правки под рамку тона 12+ (11 мест в GDD/ADR; список в scratchpad `tone_followups.md`, если файла нет — искать по НП-55…61 в `design/narrative/chapter-writing-rules.md`): game-concept ×3, d20-checks ×1 (развести «титр крита» и «картуш сцены»), branching-story ×2, ADR-0001 (ключ метки картуша); заменить тексты прототипа, нарушающие 12+.
+- GDD branching-story: BS-05 и AC-10 расходятся про отсутствие `финал` (код: только BS-10) — выровнять текст.
+- Вопрос к game-designer/CEO: правило для пустых `endings` («каждая концовка героя — цель перехода») — в спеке нет.
+- Дизайн систем: «Экран чтения», «Экран броска» (MVP); дальше VS/Alpha/FV по `systems-index.md`. Арт-библия разделы 5–8 пусты.
+- Независимое ревью `/design-review` в новой сессии для всех GDD выше, затем `/consistency-check`, позже `/gate-check`.
+- Техдолг S1/S3: массив с неверными типами всех элементов даёт DT-02 + BS-01; индекс sets/clears в пути BS-01 сдвигается при не-строках; decl с пустым id попадает в flags; `RunState.new` напрямую не ловит дубль id.
+- Сборка APK ни разу не запускалась; `package/unique_name` = `com.example.kritproval` до релиза; потоки, SHA-256, FileAccess и Safe Area на Android не проверены (нужна проба на устройстве).
+- Решения CEO: TalkBack исключён; рейтинг 12+ по содержанию (подробности — `USER_PREFERENCES.md`).

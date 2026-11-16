@@ -586,6 +586,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/fixtures/story/meaning_fixtures.gd",
+   "label": "meaning_fixtures.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/fixtures/story/story_fixtures.gd",
    "label": "story_fixtures.gd",
    "group": "GDScript"
@@ -621,8 +626,33 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/story/bs_budget_test.gd",
+   "label": "bs_budget_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/bs_early_test.gd",
+   "label": "bs_early_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/bs_ids_test.gd",
+   "label": "bs_ids_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/bs_limits_test.gd",
+   "label": "bs_limits_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/story/bs_structure_test.gd",
    "label": "bs_structure_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/bs_traces_test.gd",
+   "label": "bs_traces_test.gd",
    "group": "GDScript"
   },
   {
@@ -656,6 +686,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/story/json_lint_test.gd",
+   "label": "json_lint_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/story/run_state_test.gd",
    "label": "run_state_test.gd",
    "group": "GDScript"
@@ -668,6 +703,11 @@
   {
    "id": "tests/unit/story/story_json_engine_test.gd",
    "label": "story_json_engine_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/validator_options_test.gd",
+   "label": "validator_options_test.gd",
    "group": "GDScript"
   },
   {
@@ -1858,6 +1898,10 @@
    "target": "src/core/story/data/condition_context.gd"
   },
   {
+   "source": "tests/fixtures/story/meaning_fixtures.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
    "source": "tests/integration/boot/boot_smoke_test.gd",
    "target": "src/boot/boot.gd"
   },
@@ -1890,7 +1934,23 @@
    "target": "tests/unit/story/story_json_engine_test.gd"
   },
   {
+   "source": "tests/unit/story/bs_budget_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/unit/story/bs_early_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/unit/story/bs_ids_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
    "source": "tests/unit/story/bs_structure_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/unit/story/bs_traces_test.gd",
    "target": "design/gdd/branching-story.md"
   },
   {
