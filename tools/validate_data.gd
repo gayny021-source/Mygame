@@ -154,7 +154,8 @@ func _freeze(hero: HeroData, path: String, snapshot: ReleasedIds.Snapshot, has_e
 		return
 	var moved: Error = DirAccess.rename_absolute(temp, path)
 	if moved != OK:
-		_fail("%s: не переименован в %s (%s)" % [temp, path, error_string(moved)])
+		DirAccess.remove_absolute(temp)
+		_fail("%s: не переименован в %s (%s), %s не изменён" % [temp, path, error_string(moved), path])
 		return
 	print("герой %s: записан %s" % [hero.id, path])
 

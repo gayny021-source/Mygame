@@ -23,11 +23,13 @@ class PathInfo extends RefCounted:
 
 ## True when the graph has a loop: then `paths` is empty and the path checks say so.
 var has_loop: bool = false
-## True when the walk stopped at `limit` paths: `paths` is incomplete and the path checks say so.
+## True when the walk stopped at `limit` paths or at `limit` × scenes walk steps: `paths` is incomplete and
+## the path checks say so.
 var truncated: bool = false
 var paths: Array[PathInfo] = []
 var _graph: StoryGraph
 var _limit: int
+var _walked: int = 0
 
 
 ## `limit` is ValidatorOptions.path_enum_max; 0 walks every path.
@@ -67,6 +69,11 @@ static func is_risky(scene: SceneData) -> bool:
 # Depth-first over successors; the graph has no loop, so the depth is at most the scene count.
 func _walk(prefix: PackedStringArray) -> void:
 	if truncated:
+		return
+	_walked += 1
+	# `limit` complete paths have at most limit × scenes prefixes; more steps mean dead-end prefixes (BS-03)
+	if _limit > 0 and _walked > _limit * _graph.chapter.scenes.size():
+		truncated = true
 		return
 	var last: String = prefix[-1]
 	for next: String in _graph.successors(last):
