@@ -55,6 +55,15 @@ func test_load_hero_without_flags_json_treats_every_flag_as_undeclared() -> void
 	assert_str(_lines(result, "BS-01")[0]).contains("f_x")
 
 
+func test_load_hero_with_unreadable_flags_json_is_dt01_and_gives_no_hero() -> void:
+	# Act
+	var result: LoadResult = _load("hero_flags_json")
+	# Assert
+	assert_array(_codes(result)).is_equal(["DT-01"] as Array[String])
+	assert_str(_lines(result, "DT-01")[0]).contains("flags.json")
+	assert_object(result.data).is_null()
+
+
 func test_load_hero_with_broken_flags_json_reports_it_and_skips_flag_references() -> void:
 	# Act
 	var result: LoadResult = _load("hero_flags_bad")

@@ -42,7 +42,7 @@ static func chapter_with_check() -> Dictionary:
 
 ## One flag declaration with the required keys only.
 static func flag(id: String, category: String = "story") -> Dictionary:
-	return {"id": id, "category": category, "title": "Название " + id}
+	return {"id": id, "category": category, "title": "Название " + id, "visible": false}
 
 
 ## flags.json content for the given declarations.

@@ -29,6 +29,7 @@ static func parse(data: Dictionary, source: String, stat_ids: PackedStringArray,
 		var decl: FlagDecl = _flag(item, stat_ids)
 		if not decl.id.is_empty() and seen.has(decl.id):
 			item.issue("BS-01", "id", "флаг «%s» объявлен повторно" % decl.id)
+			continue
 		seen.append(decl.id)
 		flags.append(decl)
 	return flags
@@ -58,7 +59,7 @@ static func _flag(reader: DictReader, stat_ids: PackedStringArray) -> FlagDecl:
 	if reader.has("scope"):
 		decl.scope = reader.one_of("scope", FlagDecl.SCOPES)
 	decl.group = _group(reader)
-	decl.visible = reader.flag("visible")
+	decl.visible = reader.flag("visible", true)
 	decl.exception = reader.text("exception", false)
 	decl.deprecated = reader.flag("deprecated")
 	if reader.has("blocks"):
@@ -93,7 +94,8 @@ static func _check_blocks(reader: DictReader, decl: FlagDecl, stat_ids: PackedSt
 	for stat: String in decl.blocks:
 		if not stat_ids.has(stat):
 			reader.issue("BS-01", "blocks", "характеристики «%s» нет в stats героя" % stat)
-	if not decl.visible:
+	# без ключа visible уже есть DT-03: ложное «false» второй находки не даёт
+	if reader.has("visible") and not decl.visible:
 		reader.issue("BS-01", "visible", "у флага с blocks поле visible обязано быть true")
 	if not reader.has("scope"):
 		reader.issue("BS-01", "scope", "у флага с blocks поле scope обязательно, умолчания run нет")

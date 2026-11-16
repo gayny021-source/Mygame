@@ -1,5 +1,5 @@
 {
   "_note": "Одна находка: категория вне семи. Ссылки главы на флаги тогда не сверяются.",
   "schema_version": 1,
-  "flags": [{"id": "f_a", "category": "mood", "title": "Флаг"}]
+  "flags": [{"id": "f_a", "category": "mood", "title": "Флаг", "visible": false}]
 }

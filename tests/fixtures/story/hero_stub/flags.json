@@ -2,10 +2,10 @@
   "_note": "Флаги героя-фикстуры: ровно те, что читает и ставит ch_f1.",
   "schema_version": 1,
   "flags": [
-    {"id": "price_s02", "category": "price", "title": "Цена сцены s02"},
-    {"id": "price_s04", "category": "price", "title": "Цена сцены s04"},
-    {"id": "price_s07", "category": "price", "title": "Цена сцены s07"},
-    {"id": "price_s11", "category": "price", "title": "Цена сцены s11"},
-    {"id": "f_past", "category": "story", "title": "Прошлое помнит"}
+    {"id": "price_s02", "category": "price", "title": "Цена сцены s02", "visible": false},
+    {"id": "price_s04", "category": "price", "title": "Цена сцены s04", "visible": false},
+    {"id": "price_s07", "category": "price", "title": "Цена сцены s07", "visible": false},
+    {"id": "price_s11", "category": "price", "title": "Цена сцены s11", "visible": false},
+    {"id": "f_past", "category": "story", "title": "Прошлое помнит", "visible": false}
   ]
 }

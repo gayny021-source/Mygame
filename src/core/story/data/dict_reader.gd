@@ -91,10 +91,10 @@ func text(key: String, required: bool = true) -> String:
 
 
 ## Optional `if` text. A present but empty string is DT-08 (no condition means no key).
-func condition(key: String = "if") -> String:
-	var value: String = text(key, false)
-	if has_text(key) and value.is_empty():
-		issue("DT-08", key, "пустая строка if; если условия нет, уберите ключ")
+func condition() -> String:
+	var value: String = text("if", false)
+	if has_text("if") and value.is_empty():
+		issue("DT-08", "if", "пустая строка if; если условия нет, уберите ключ")
 	return value
 
 
@@ -106,9 +106,9 @@ func one_of(key: String, allowed: PackedStringArray) -> String:
 	return value
 
 
-## Optional bool, false by default.
-func flag(key: String) -> bool:
-	return _typed(key, TYPE_BOOL, false) == true
+## Bool, false by default; with `required` an absent key is DT-03.
+func flag(key: String, required: bool = false) -> bool:
+	return _typed(key, TYPE_BOOL, required) == true
 
 
 ## Required whole number. JSON gives every number as float, so a fraction or a

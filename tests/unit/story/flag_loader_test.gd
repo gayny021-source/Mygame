@@ -146,6 +146,35 @@ func test_parse_duplicate_id_is_bs01() -> void:
 	assert_str(_first(result, "BS-01").path).contains("f_a")
 
 
+func test_parse_duplicate_id_is_declared_once() -> void:
+	# Act
+	_parse(StoryFixtures.flags_file([StoryFixtures.flag("f_a"), StoryFixtures.flag("f_a")]))
+	# Assert
+	assert_int(_flags.size()).is_equal(1)
+
+
+func test_parse_missing_visible_is_dt03() -> void:
+	# Arrange
+	var flag: Dictionary = StoryFixtures.flag("f_a")
+	flag.erase("visible")
+	# Act
+	var result: LoadResult = _parse(_with(flag))
+	# Assert
+	assert_array(_codes(result)).is_equal(["DT-03"] as Array[String])
+	assert_str(_first(result, "DT-03").path).ends_with("/visible")
+
+
+func test_parse_blocks_without_visible_is_dt03_and_no_false_bs01() -> void:
+	# Arrange
+	var flag: Dictionary = StoryFixtures.flag("w_a", "wound")
+	flag.merge({"scope": "run", "blocks": ["strength"]})
+	flag.erase("visible")
+	# Act
+	var result: LoadResult = _parse(_with(flag))
+	# Assert
+	assert_array(_codes(result)).is_equal(["DT-03"] as Array[String])
+
+
 func test_parse_category_outside_the_seven_is_dt05() -> void:
 	# Act
 	var result: LoadResult = _parse(_with(StoryFixtures.flag("f_a", "mood")))
@@ -186,15 +215,15 @@ func test_parse_empty_title_is_dt02_and_missing_title_is_dt03() -> void:
 func test_parse_blocks_need_a_known_stat_visibility_and_scope() -> void:
 	# Arrange
 	var good: Dictionary = StoryFixtures.flag("w_ok", "wound")
-	good.merge({"visible": true, "scope": "run", "blocks": ["strength"]})
+	good.merge({"visible": true, "scope": "run", "blocks": ["strength"]}, true)
 	var empty: Dictionary = StoryFixtures.flag("w_empty", "wound")
-	empty.merge({"visible": true, "scope": "run", "blocks": []})
+	empty.merge({"visible": true, "scope": "run", "blocks": []}, true)
 	var unknown: Dictionary = StoryFixtures.flag("w_luck", "wound")
-	unknown.merge({"visible": true, "scope": "run", "blocks": ["luck"]})
+	unknown.merge({"visible": true, "scope": "run", "blocks": ["luck"]}, true)
 	var hidden: Dictionary = StoryFixtures.flag("w_hidden", "wound")
 	hidden.merge({"scope": "run", "blocks": ["faith"]})
 	var no_scope: Dictionary = StoryFixtures.flag("w_noscope", "wound")
-	no_scope.merge({"visible": true, "blocks": ["faith"]})
+	no_scope.merge({"visible": true, "blocks": ["faith"]}, true)
 	# Act
 	var result: LoadResult = _parse(StoryFixtures.flags_file([good, empty, unknown, hidden, no_scope]))
 	# Assert

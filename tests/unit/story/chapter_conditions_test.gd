@@ -129,6 +129,18 @@ func test_load_undeclared_sets_and_clears_are_bs01_with_index_path() -> void:
 	assert_array(_paths(result, "BS-01")).is_equal(["test/outcomes/o1/sets/1", "test/outcomes/o1/clears/0"] as Array[String])
 
 
+func test_load_empty_id_inside_sets_and_clears_is_dt02() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["outcomes"][0]["sets"] = ["f_known", ""]
+	chapter["outcomes"][0]["clears"] = [""]
+	# Act
+	var result: LoadResult = _load(chapter, StoryFixtures.vocabulary())
+	# Assert
+	assert_array(_paths(result, "DT-02")).is_equal(["test/outcomes/o1/sets/1", "test/outcomes/o1/clears/0"] as Array[String])
+	assert_array(_codes(result)).is_equal(["DT-02", "DT-02"] as Array[String])
+
+
 func test_load_undeclared_goal_fail_flag_is_bs01() -> void:
 	# Arrange
 	var chapter: Dictionary = StoryFixtures.minimal_chapter()

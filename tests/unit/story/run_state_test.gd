@@ -22,12 +22,12 @@ func _state(decls: Array[FlagDecl]) -> RunState:
 	return RunState.new(decls, sink)
 
 
-func _apply_set(state: RunState, ids: Array[String], outcome: String = "o1", scene: String = "s1") -> bool:
-	return state.apply_outcome(scene, outcome, PackedStringArray(ids), PackedStringArray())
+func _apply_set(state: RunState, ids: Array[String], outcome: String = "o1", scene: String = "s1") -> void:
+	state.apply_outcome(scene, outcome, PackedStringArray(ids), PackedStringArray())
 
 
-func _apply_clear(state: RunState, ids: Array[String], outcome: String = "o1", scene: String = "s1") -> bool:
-	return state.apply_outcome(scene, outcome, PackedStringArray(), PackedStringArray(ids))
+func _apply_clear(state: RunState, ids: Array[String], outcome: String = "o1", scene: String = "s1") -> void:
+	state.apply_outcome(scene, outcome, PackedStringArray(), PackedStringArray(ids))
 
 
 func _ids(flags: Array[FlagDecl]) -> Array[String]:
@@ -55,7 +55,6 @@ func test_new_state_has_no_flags_and_no_journal() -> void:
 	assert_bool(state.has_flag("a")).is_false()
 	assert_array(state.active_flags()).is_empty()
 	assert_array(state.journal()).is_empty()
-	assert_bool(state.is_finished()).is_false()
 
 
 func test_apply_outcome_sets_flags_and_lists_them_with_titles() -> void:
@@ -127,9 +126,8 @@ func test_setting_a_standing_flag_again_changes_nothing_and_logs_nothing() -> vo
 	var state: RunState = _state(_groups())
 	_apply_set(state, ["d"])
 	# Act
-	var applied: bool = _apply_set(state, ["d"], "o2")
+	_apply_set(state, ["d"], "o2")
 	# Assert
-	assert_bool(applied).is_true()
 	assert_array(_journal_lines(state)).is_equal(["d set"] as Array[String])
 	assert_array(_logs).is_empty()
 
@@ -138,9 +136,8 @@ func test_clearing_a_flag_that_is_not_set_changes_nothing_and_logs_nothing() -> 
 	# Arrange
 	var state: RunState = _state(_groups())
 	# Act
-	var applied: bool = _apply_clear(state, ["d"])
+	_apply_clear(state, ["d"])
 	# Assert
-	assert_bool(applied).is_true()
 	assert_array(state.journal()).is_empty()
 	assert_array(_logs).is_empty()
 
@@ -196,9 +193,8 @@ func test_end_chapter_clears_only_chapter_scope_flags() -> void:
 	var state: RunState = _state([_decl("r"), _decl("c", "story", "chapter"), _decl("n")])
 	_apply_set(state, ["r", "c", "n"])
 	# Act
-	var applied: bool = state.end_chapter()
+	state.end_chapter()
 	# Assert
-	assert_bool(applied).is_true()
 	assert_bool(state.has_flag("c")).is_false()
 	assert_bool(state.has_flag("r")).is_true()
 	assert_bool(state.has_flag("n")).is_true()
@@ -257,7 +253,6 @@ func test_queries_do_not_change_flags_or_journal() -> void:
 	state.flag_in_group("g")
 	state.active_flags()
 	state.visible_flags()
-	state.blocked_stats()
 	# Assert
 	assert_array(_journal_lines(state)).is_equal(["a set"] as Array[String])
 	assert_array(_ids(state.active_flags())).is_equal(["a"] as Array[String])
@@ -267,12 +262,11 @@ func test_outcome_with_an_undeclared_flag_skips_it_and_logs_its_id() -> void:
 	# Arrange
 	var state: RunState = _state([_decl("y")])
 	# Act
-	var applied: bool = _apply_set(state, ["x", "y"])
+	_apply_set(state, ["x", "y"])
 	# Assert
-	assert_bool(applied).is_true()
 	assert_bool(state.has_flag("y")).is_true()
-	assert_int(_logs.size()).is_equal(1)
-	assert_str(_logs[0]).contains("x")
+	assert_bool(state.has_flag("x")).is_false()
+	assert_array(_logs).is_equal(["флаг «x» не объявлен у героя"] as Array[String])
 
 
 func test_condition_over_an_undeclared_flag_is_false_and_logs_its_id() -> void:
@@ -282,51 +276,26 @@ func test_condition_over_an_undeclared_flag_is_false_and_logs_its_id() -> void:
 	var holds: bool = ConditionParser.parse("x", null).condition.evaluate(state)
 	# Assert
 	assert_bool(holds).is_false()
-	assert_int(_logs.size()).is_equal(1)
-	assert_str(_logs[0]).contains("x")
+	assert_array(_logs).is_equal(["флаг «x» не объявлен у героя"] as Array[String])
 
 
-func test_blocked_stats_list_stats_closed_by_active_flags() -> void:
+func test_undeclared_flag_is_logged_once_per_id() -> void:
 	# Arrange
-	var hinder: FlagDecl = _decl("hinder", "wound", "run")
-	hinder.visible = true
-	hinder.blocks = PackedStringArray(["strength", "faith"])
-	var other: FlagDecl = _decl("other", "wound", "run")
-	other.blocks = PackedStringArray(["strength"])
-	var state: RunState = _state([hinder, other])
-	# Assert
-	assert_array(Array(state.blocked_stats())).is_empty()
-	_apply_set(state, ["hinder", "other"])
-	assert_array(Array(state.blocked_stats())).is_equal(["strength", "faith"])
-	_apply_clear(state, ["hinder", "other"])
-	assert_array(Array(state.blocked_stats())).is_empty()
-
-
-func test_finish_freezes_the_state_but_keeps_queries() -> void:
-	# Arrange
-	var state: RunState = _state([_decl("r"), _decl("c", "story", "chapter"), _decl("n")])
-	_apply_set(state, ["r", "c"])
+	var state: RunState = _state([_decl("y")])
 	# Act
-	var finished: bool = state.finish()
-	var applied: bool = _apply_set(state, ["n"])
-	var ended: bool = state.end_chapter()
+	state.has_flag("x")
+	state.has_flag("x")
+	_apply_set(state, ["x"])
+	state.has_flag("z")
 	# Assert
-	assert_bool(finished).is_true()
-	assert_bool(state.is_finished()).is_true()
-	assert_bool(applied).is_false()
-	assert_bool(ended).is_false()
-	assert_bool(state.has_flag("c")).is_true()
-	assert_bool(state.has_flag("n")).is_false()
-	assert_array(_journal_lines(state)).is_equal(["r set", "c set"] as Array[String])
-	assert_int(_logs.size()).is_equal(2)
+	assert_array(_logs).is_equal(["флаг «x» не объявлен у героя", "флаг «z» не объявлен у героя"] as Array[String])
 
 
-func test_finish_twice_is_refused_and_logged() -> void:
+func test_flag_in_group_with_empty_name_answers_none_even_with_ungrouped_flags_standing() -> void:
 	# Arrange
-	var state: RunState = _state([])
-	state.finish()
+	var state: RunState = _state(_groups())
+	_apply_set(state, ["d"])
 	# Act
-	var again: bool = state.finish()
+	var standing: String = state.flag_in_group("")
 	# Assert
-	assert_bool(again).is_false()
-	assert_int(_logs.size()).is_equal(1)
+	assert_str(standing).is_empty()

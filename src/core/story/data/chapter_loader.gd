@@ -21,17 +21,18 @@ const REQUIRED_LISTS: PackedStringArray = ["starts", "scenes", "outcomes", "tran
 
 
 ## Reads and loads the chapter file at `path`. The chapter is in `data` only when there are no issues.
-## `known` is the hero's flag vocabulary, or null to check the syntax only.
-static func load_file(path: String, known: ConditionVocabulary = null) -> LoadResult:
+## A lone chapter has no hero, so conditions get the syntax check only.
+static func load_file(path: String) -> LoadResult:
 	var result: LoadResult = LoadResult.new()
 	var data: Dictionary = read_object(path, result.issues)
 	if not result.issues.is_empty():
 		return result
-	return load_from_dict(data, path, known)
+	return load_from_dict(data, path)
 
 
 ## Loads a chapter from parsed JSON; `source` starts every finding's path.
-## The chapter is in `data` only when there are no issues.
+## The chapter is in `data` only when there are no issues. `known` is the hero's flag
+## vocabulary; with null only the syntax of conditions is checked.
 static func load_from_dict(data: Dictionary, source: String, known: ConditionVocabulary = null) -> LoadResult:
 	var result: LoadResult = LoadResult.new()
 	var chapter: ChapterData = parse(data, source, result.issues, known)
@@ -42,7 +43,7 @@ static func load_from_dict(data: Dictionary, source: String, known: ConditionVoc
 
 ## Reads a JSON file whose root is an object. On failure adds DT-01 (no file,
 ## bad syntax; the path ends with `:<line>`) or DT-02 (root is not an object).
-## A contract between the loaders (ChapterLoader, HeroLoader), not for other code.
+## A contract between the loaders (ChapterLoader, HeroLoader, FlagLoader), not for other code.
 static func read_object(path: String, issues: Array[DataIssue]) -> Dictionary:
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file == null:
@@ -62,6 +63,7 @@ static func read_object(path: String, issues: Array[DataIssue]) -> Dictionary:
 ## Builds the chapter and appends its findings to `issues`. Returns null when the
 ## schema version is not readable; otherwise the chapter, possibly incomplete —
 ## HeroLoader needs it to check hero-wide references even in a broken chapter.
+## `known` is the hero's flag vocabulary (null: syntax of conditions only).
 ## A contract between the loaders (ChapterLoader, HeroLoader), not for other code.
 static func parse(data: Dictionary, source: String, issues: Array[DataIssue], known: ConditionVocabulary = null) -> ChapterData:
 	var reader: DictReader = DictReader.new(data, source, issues)
@@ -192,8 +194,8 @@ static func _outcome(reader: DictReader) -> OutcomeData:
 	var outcome: OutcomeData = OutcomeData.new()
 	outcome.id = reader.id()
 	_append_paragraphs(outcome.paragraphs, reader.children("paragraphs", PARAGRAPH_KEYS, false, true))
-	outcome.sets = reader.strings("sets", false)
-	outcome.clears = reader.strings("clears", false)
+	outcome.sets = _flag_ids(reader, "sets")
+	outcome.clears = _flag_ids(reader, "clears")
 	for item: DictReader in reader.children("routes", ROUTE_KEYS):
 		var route: RouteData = RouteData.new()
 		route.condition = item.condition()
@@ -201,6 +203,15 @@ static func _outcome(reader: DictReader) -> OutcomeData:
 		outcome.routes.append(route)
 	outcome.deprecated = reader.flag("deprecated")
 	return outcome
+
+
+# Список id флагов; пустая строка в нём — DT-02, а не молчаливый пропуск.
+static func _flag_ids(reader: DictReader, key: String) -> PackedStringArray:
+	var by_index: Dictionary = reader.strings_by_index(key, false)
+	for i: int in by_index:
+		if by_index[i].is_empty():
+			reader.issue("DT-02", "%s/%d" % [key, i], "пустой id флага")
+	return PackedStringArray(by_index.values())
 
 
 static func _transition(reader: DictReader) -> TransitionData:
@@ -317,7 +328,7 @@ static func _check_condition(text: String, path: String, owner_id: String, known
 
 
 # Список id флагов (sets, clears, goal_fail_flag) против объявлений героя; без `known` не проверяется.
-# Пустой id: ключа нет или о нём уже есть DT-находка.
+# Пустой id: ключа нет (goal_fail_flag) или о нём уже есть DT-02 (sets, clears).
 static func _check_declared(ids: PackedStringArray, path: String, indexed: bool, owner_id: String, known: ConditionVocabulary, issues: Array[DataIssue]) -> void:
 	if known == null:
 		return
