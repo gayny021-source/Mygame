@@ -115,6 +115,24 @@ func test_bs10_two_entry_scenes_leading_to_the_same_common_scene_are_clean() -> 
 	assert_int(_shape_errors(data)).is_equal(0)
 
 
+func test_bs10_chapter_without_starts_is_an_error() -> void:
+	# Arrange
+	var data: Dictionary = GraphFixtures.f1_chapter()
+	data["starts"] = []
+	# Act / Assert
+	assert_int(_shape_errors(data)).is_equal(1)
+
+
+func test_bs10_chapter_missing_from_the_hero_chapter_list_is_a_warning() -> void:
+	# Arrange
+	var data: Dictionary = GraphFixtures.f1_chapter()
+	# Act
+	var issues: Array[DataIssue] = _issues(data, null, ["ch_other"])
+	# Assert
+	assert_int(GraphFixtures.count(issues, "BS-10", DataIssue.WARNING)).is_equal(1)
+	assert_int(GraphFixtures.count(issues, "BS-10", DataIssue.ERROR)).is_equal(0)
+
+
 # --- (в) exactly one final node ---
 
 func test_bs10_chapter_without_a_final_scene_is_an_error() -> void:

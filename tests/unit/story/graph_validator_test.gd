@@ -17,7 +17,16 @@ func test_options_defaults_hold_the_gdd_limits() -> void:
 	assert_int(options.branch_max).is_equal(2)
 
 
-func test_validate_collects_findings_of_every_check() -> void:
+func test_validate_collects_findings_of_the_structure_and_the_shape_checks() -> void:
+	# Arrange
+	var hero: HeroData = GraphFixtures.hero(GraphFixtures.chain(["s1", "s2"]))
+	# Act
+	var issues: Array[DataIssue] = GraphValidator.validate(hero, ValidatorOptions.new())
+	# Assert
+	assert_int(GraphFixtures.count(issues, "BS-10", DataIssue.ERROR)).is_greater(0)
+
+
+func test_validate_chapter_with_a_loop_skips_the_shape_check_and_says_so() -> void:
 	# Arrange
 	var data: Dictionary = GraphFixtures.chain(["s1", "s2"])
 	data["transitions"][1] = GraphFixtures.to_scene("t_s2", "s1")
@@ -26,7 +35,8 @@ func test_validate_collects_findings_of_every_check() -> void:
 	var issues: Array[DataIssue] = GraphValidator.validate(hero, ValidatorOptions.new())
 	# Assert
 	assert_int(GraphFixtures.count(issues, "BS-05", DataIssue.ERROR)).is_equal(1)
-	assert_int(GraphFixtures.count(issues, "BS-10", DataIssue.ERROR)).is_greater(0)
+	assert_int(GraphFixtures.count(issues, "BS-10", DataIssue.ERROR)).is_equal(0)
+	assert_int(GraphFixtures.count(issues, "BS-10", DataIssue.WARNING)).is_greater(0)
 
 
 func test_validate_hero_without_chapters_returns_no_findings() -> void:

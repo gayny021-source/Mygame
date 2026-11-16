@@ -107,7 +107,7 @@ static func _dead_ends(graph: StoryGraph, issues: Array[DataIssue]) -> void:
 		if not _has_open_option(scene):
 			GraphValidator.report(issues, "BS-03", _scene_path(graph, scene), scene.id, "нет варианта без проверки и без условия")
 		for option: OptionData in scene.options:
-			if option.check != null and _leads_into(graph, option.check.failure, scene.id):
+			if option.check != null and graph.outcome_leads_into(option.check.failure, scene.id):
 				GraphValidator.report(issues, "BS-03", _option_path(graph, scene, option), option.id, "провал проверки ведёт в сцену этой же проверки")
 	for outcome: OutcomeData in graph.chapter.outcomes:
 		if outcome.routes.is_empty():
@@ -121,33 +121,23 @@ static func _has_open_option(scene: SceneData) -> bool:
 	return false
 
 
-static func _leads_into(graph: StoryGraph, outcome_id: String, scene_id: String) -> bool:
-	var outcome: OutcomeData = graph.outcome_by_id.get(outcome_id)
-	if outcome == null:
-		return false
-	for route: RouteData in outcome.routes:
-		var transition: TransitionData = graph.transition_by_id.get(route.transition)
-		if transition != null and transition.to_kind == TransitionData.TO_SCENE and transition.to_id == scene_id:
-			return true
-	return false
-
-
 # BS-04: scenes reachable from the starts; outcomes named by an option; transitions named by such an outcome.
 static func _reachability(graph: StoryGraph, issues: Array[DataIssue]) -> void:
-	var seen: PackedStringArray = graph.reachable(graph.entry_scenes())
-	var named_outcomes: PackedStringArray = []
-	var named_transitions: PackedStringArray = []
+	var seen: Dictionary[String, bool] = StoryGraph.as_set(graph.reachable(graph.entry_scenes()))
+	var named_outcomes: Dictionary[String, bool] = {}
+	var named_transitions: Dictionary[String, bool] = {}
 	for scene: SceneData in graph.chapter.scenes:
 		if not seen.has(scene.id) and not scene.deprecated:
 			GraphValidator.report(issues, "BS-04", _scene_path(graph, scene), scene.id, "в сцену не ведёт ни одна запись starts и ни один переход")
-		named_outcomes.append_array(graph.scene_outcomes(scene))
+		for outcome_id: String in graph.scene_outcomes(scene):
+			named_outcomes[outcome_id] = true
 	for outcome: OutcomeData in graph.chapter.outcomes:
 		if not named_outcomes.has(outcome.id):
 			if not outcome.deprecated:
 				GraphValidator.report(issues, "BS-04", _outcome_path(graph, outcome), outcome.id, "исход не назван ни одним вариантом")
 			continue
 		for route: RouteData in outcome.routes:
-			named_transitions.append(route.transition)
+			named_transitions[route.transition] = true
 	for transition: TransitionData in graph.chapter.transitions:
 		if not named_transitions.has(transition.id) and not transition.deprecated:
 			GraphValidator.report(issues, "BS-04", _transition_path(graph, transition), transition.id, "на переход не ссылается ни один исход")

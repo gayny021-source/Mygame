@@ -24,12 +24,12 @@ static func check(hero: HeroData, graph: StoryGraph, options: ValidatorOptions, 
 		return
 	var final_id: String = finals[0]
 	var body: PackedStringArray = graph.reachable(PackedStringArray([common]))
-	if not body.has(final_id):
+	if not StoryGraph.as_set(body).has(final_id):
 		_error(issues, chapter, "финал «%s» недостижим из первой общей сцены «%s»" % [final_id, common])
 		return
-	var spine: PackedStringArray = _spine(graph, body, common, final_id)
+	var spine: Dictionary[String, bool] = _spine(graph, body, common, final_id)
 	_branches(graph, body, spine, final_id, options, issues)
-	_nodes(graph, body, spine, issues)
+	_nodes(graph, StoryGraph.as_set(body), spine, issues)
 	_finales(hero, graph, final_id, options, issues)
 
 
@@ -56,6 +56,8 @@ static func _warn_range(chapter: ChapterData, issues: Array[DataIssue], what: St
 # Every entry scene leads into exactly one scene, the same for all entries. "" when it does not.
 static func _common_scene(graph: StoryGraph, issues: Array[DataIssue]) -> String:
 	var common: String = ""
+	if graph.entry_scenes().is_empty():
+		_error(issues, graph.chapter, "в главе нет записей starts: нет варианта входа")
 	for entry: String in graph.entry_scenes():
 		var next: PackedStringArray = graph.successors(entry)
 		if next.size() != 1 or (not common.is_empty() and next[0] != common):
@@ -66,18 +68,18 @@ static func _common_scene(graph: StoryGraph, issues: Array[DataIssue]) -> String
 
 
 # Scenes that every way from the common scene to the final passes through.
-static func _spine(graph: StoryGraph, body: PackedStringArray, common: String, final_id: String) -> PackedStringArray:
-	var spine: PackedStringArray = []
+static func _spine(graph: StoryGraph, body: PackedStringArray, common: String, final_id: String) -> Dictionary[String, bool]:
+	var spine: Dictionary[String, bool] = {}
 	for id: String in body:
 		var on_every_way: bool = id == common or id == final_id
 		if not on_every_way:
-			on_every_way = not graph.reachable(PackedStringArray([common]), id).has(final_id)
+			on_every_way = not StoryGraph.as_set(graph.reachable(PackedStringArray([common]), id)).has(final_id)
 		if on_every_way:
-			spine.append(id)
+			spine[id] = true
 	return spine
 
 
-static func _branches(graph: StoryGraph, body: PackedStringArray, spine: PackedStringArray, final_id: String, options: ValidatorOptions, issues: Array[DataIssue]) -> void:
+static func _branches(graph: StoryGraph, body: PackedStringArray, spine: Dictionary[String, bool], final_id: String, options: ValidatorOptions, issues: Array[DataIssue]) -> void:
 	var side: PackedStringArray = []
 	for id: String in body:
 		if not spine.has(id):
@@ -93,40 +95,48 @@ static func _branches(graph: StoryGraph, body: PackedStringArray, spine: PackedS
 
 # Groups of side scenes that touch each other by an edge in either direction.
 static func _components(graph: StoryGraph, side: PackedStringArray) -> Array[PackedStringArray]:
+	var links: Dictionary[String, PackedStringArray] = {}
+	for id: String in side:
+		links[id] = PackedStringArray()
+	for id: String in side:
+		for target: String in graph.successors(id):
+			if links.has(target):
+				links[id].append(target)
+				links[target].append(id)
 	var parts: Array[PackedStringArray] = []
-	var placed: PackedStringArray = []
+	var placed: Dictionary[String, bool] = {}
 	for start: String in side:
 		if placed.has(start):
 			continue
 		var part: PackedStringArray = [start]
+		placed[start] = true
 		var head: int = 0
 		while head < part.size():
-			var current: String = part[head]
-			head += 1
-			for other: String in side:
-				var linked: bool = graph.successors(current).has(other) or graph.successors(other).has(current)
-				if linked and not part.has(other):
+			for other: String in links[part[head]]:
+				if not placed.has(other):
+					placed[other] = true
 					part.append(other)
-		placed.append_array(part)
+			head += 1
 		parts.append(part)
 	return parts
 
 
-static func _check_branch(graph: StoryGraph, part: PackedStringArray, spine: PackedStringArray, final_id: String, issues: Array[DataIssue]) -> void:
-	var leaves_from: PackedStringArray = []
+static func _check_branch(graph: StoryGraph, part: PackedStringArray, spine: Dictionary[String, bool], final_id: String, issues: Array[DataIssue]) -> void:
+	var inside: Dictionary[String, bool] = StoryGraph.as_set(part)
+	var leaves_from: Dictionary[String, bool] = {}
 	for id: String in spine:
 		for target: String in graph.successors(id):
-			if part.has(target) and not leaves_from.has(id):
-				leaves_from.append(id)
+			if inside.has(target):
+				leaves_from[id] = true
 	if leaves_from.size() != 1:
 		_error(issues, graph.chapter, "ответвление «%s» выходит из сцен хребта: %d, нужна одна" % [part[0], leaves_from.size()], part[0])
 	for id: String in part:
-		if not graph.reachable(PackedStringArray([id])).has(final_id):
+		if not StoryGraph.as_set(graph.reachable(PackedStringArray([id]))).has(final_id):
 			_error(issues, graph.chapter, "ответвление «%s» не возвращается на хребет" % part[0], part[0])
 			return
 
 
-static func _nodes(graph: StoryGraph, body: PackedStringArray, spine: PackedStringArray, issues: Array[DataIssue]) -> void:
+static func _nodes(graph: StoryGraph, body: Dictionary[String, bool], spine: Dictionary[String, bool], issues: Array[DataIssue]) -> void:
 	for scene: SceneData in graph.chapter.scenes:
 		if scene.node and body.has(scene.id) and not spine.has(scene.id):
 			_error(issues, graph.chapter, "узловая сцена вне хребта", scene.id)
@@ -140,7 +150,7 @@ static func _finales(hero: HeroData, graph: StoryGraph, final_id: String, option
 	var past: PackedStringArray = []
 	var terminals: Array[TransitionData] = []
 	for option: OptionData in graph.scene_by_id[final_id].options:
-		for outcome_id: String in _used_outcomes(option):
+		for outcome_id: String in graph.option_outcomes(option):
 			var outcome: OutcomeData = graph.outcome_by_id.get(outcome_id)
 			if outcome == null:
 				continue
@@ -162,20 +172,11 @@ static func _finales(hero: HeroData, graph: StoryGraph, final_id: String, option
 	_check_terminals(hero, graph.chapter, terminals, final_id, issues)
 
 
-static func _used_outcomes(option: OptionData) -> PackedStringArray:
-	var ids: PackedStringArray = []
-	if option.check != null:
-		ids.append(option.check.success)
-		ids.append(option.check.failure)
-	if not option.outcome.is_empty():
-		ids.append(option.outcome)
-	return ids
-
-
 # A chapter that is not the last one of the hero ends in chapter_end, the last one in an ending.
 static func _check_terminals(hero: HeroData, chapter: ChapterData, terminals: Array[TransitionData], final_id: String, issues: Array[DataIssue]) -> void:
 	var place: int = hero.chapter_ids.find(chapter.id)
 	if place < 0:
+		GraphValidator.report(issues, "BS-10", chapter.id, chapter.id, "главы нет в chapters героя: место финала не проверено", DataIssue.WARNING)
 		return
 	var is_last: bool = place == hero.chapter_ids.size() - 1
 	var wrong: String = TransitionData.TO_CHAPTER_END if is_last else TransitionData.TO_ENDING

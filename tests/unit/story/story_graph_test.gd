@@ -91,6 +91,21 @@ func test_back_edges_of_a_chain_are_empty() -> void:
 	assert_array(edges).is_empty()
 
 
+func test_back_edges_of_a_very_long_chain_are_found_without_recursion_limits() -> void:
+	# Arrange
+	var ids: Array = []
+	for i: int in 2000:
+		ids.append("s%d" % i)
+	var data: Dictionary = GraphFixtures.chain(ids)
+	data["transitions"][1999] = GraphFixtures.to_scene("t_s1999", "s0")
+	var graph: StoryGraph = _graph(data)
+	# Act
+	var edges: Array[PackedStringArray] = graph.back_edges()
+	# Assert
+	assert_int(edges.size()).is_equal(1)
+	assert_array(Array(edges[0])).is_equal(["s1999", "s0"])
+
+
 func test_back_edges_find_a_two_scene_loop_once() -> void:
 	# Arrange
 	var data: Dictionary = GraphFixtures.chain(["s1", "s2"])
