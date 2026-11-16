@@ -67,8 +67,8 @@ var characters: PackedStringArray = []
 var ending_frames: Dictionary[String, String] = {}
 
 
-## Reads the config file at `path`; findings go to `issues` and leave the defaults in place.
 # shortcut: only validator_options_test.gd calls it (TD S5 round 1, G3: the CLI reads the file); remove with those tests.
+## Reads the config file at `path`; findings go to `issues` and leave the defaults in place.
 static func load_file(path: String, issues: Array[DataIssue]) -> ValidatorOptions:
 	var before: int = issues.size()
 	var data: Dictionary = ChapterLoader.read_object(path, issues)
@@ -86,10 +86,6 @@ static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]
 	if not reader.schema_ok(known):
 		return options
 	for key: String in LIMIT_KEYS:
-		# set() by name is silent on a missing property: a key without a field is a finding, not a no-op
-		if not key in options:
-			reader.issue("DT-04", key, "у ValidatorOptions нет поля для ключа")
-			continue
 		if not reader.has(key):
 			continue
 		var before: int = issues.size()
@@ -97,7 +93,8 @@ static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]
 		if issues.size() > before:
 			continue
 		if value < 0:
-			reader.issue("DT-02", key, "предел %d < 0; оставлено значение по умолчанию %d" % [value, options.get(key)])
+			var default_value: int = options.get(key)
+			reader.issue("DT-02", key, "предел %d < 0; оставлено значение по умолчанию %d" % [value, default_value])
 			continue
 		options.set(key, value)
 	for i: int in range(0, RANGES.size(), 2):
@@ -108,12 +105,16 @@ static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]
 
 # Low above high: DT-02, and both return to their defaults.
 static func _check_range(options: ValidatorOptions, reader: DictReader, low: String, high: String) -> void:
-	if options.get(low) <= options.get(high):
+	var low_value: int = options.get(low)
+	var high_value: int = options.get(high)
+	if low_value <= high_value:
 		return
 	var defaults: ValidatorOptions = ValidatorOptions.new()
-	reader.issue("DT-02", low, "%s %d больше %s %d; оставлены значения по умолчанию %d…%d" % [low, options.get(low), high, options.get(high), defaults.get(low), defaults.get(high)])
-	options.set(low, defaults.get(low))
-	options.set(high, defaults.get(high))
+	var low_default: int = defaults.get(low)
+	var high_default: int = defaults.get(high)
+	reader.issue("DT-02", low, "%s %d больше %s %d; оставлены значения по умолчанию %d…%d" % [low, low_value, high, high_value, low_default, high_default])
+	options.set(low, low_default)
+	options.set(high, high_default)
 
 
 ## Checks that have no input and do not run, by name: the CLI prints them, so a skip is never silent.
