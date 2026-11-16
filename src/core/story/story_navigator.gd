@@ -23,6 +23,8 @@ var _chapter_index: int = -1
 var _state: RunState
 var _position: StoryPosition
 var _screen: StoryScreen
+## True while `chapter_finished` runs: start_run and resume are refused then.
+var _in_callback: bool = false
 
 
 ## `chapter_finished` takes the id of the chapter left; `log_error` takes one String
@@ -34,15 +36,21 @@ func _init(hero: HeroData, chapter_finished: Callable, log_error: Callable = Cal
 	_log_error = log_error
 
 
-## New run: the start of the first chapter over `state`.
+## New run: the start of the first chapter over `state`. Null from inside `chapter_finished`.
 func start_run(state: RunState) -> StoryScreen:
+	if _in_callback:
+		return null
 	_state = state
+	_position = null
 	return _enter_chapter(0)
 
 
 ## Load and «Начать отсюда»: the scene of `saved` without an edge of the graph, then its pending
 ## outcome when there is one. The outcome is not applied again: its flags are already in `state`.
+## Null from inside `chapter_finished`.
 func resume(saved: StoryPosition, state: RunState) -> StoryScreen:
+	if _in_callback:
+		return null
 	_state = state
 	_position = null
 	var index: int = _chapter_at(saved.chapter)
@@ -229,7 +237,9 @@ func _next_chapter() -> StoryScreen:
 		return _fail("нет обработчика конца главы «%s»" % finished)
 	# advance() from inside the callback is refused: no screen until the next chapter starts.
 	_screen = null
+	_in_callback = true
 	_chapter_finished.call(finished)
+	_in_callback = false
 	_state.end_chapter()
 	return _enter_chapter(next)
 
@@ -255,9 +265,7 @@ func _visible(paragraphs: Array[ParagraphData]) -> Array[ParagraphData]:
 
 func _parse(text: String) -> Condition:
 	var parsed: ConditionParser.ParseResult = ConditionParser.parse(text, _vocab)
-	if parsed.condition == null and parsed.issues.is_empty():
-		_log("условие «%s» не разобрано" % text)
-	elif parsed.condition == null:
+	if parsed.condition == null:
 		_log("условие «%s» не разобрано: %s" % [text, parsed.issues[0].message])
 	return parsed.condition
 

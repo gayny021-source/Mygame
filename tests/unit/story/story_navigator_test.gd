@@ -522,3 +522,45 @@ func test_holds_before_any_run_is_false() -> void:
 	# Act / Assert
 	assert_bool(run.nav.holds("f_a")).is_false()
 	assert_bool(run.nav.holds("")).is_false()
+
+
+# --- Audit round 2: stale position on start_run, callback guard ---
+
+func test_start_run_that_fails_drops_the_position_of_the_previous_run() -> void:
+	# Arrange
+	var data: Dictionary = StoryFixtures.nav_bridges()
+	data["starts"] = [{"id": "st_a", "if": "f_a", "scene": "s1"}]
+	var run: NavigatorHarness = NavigatorHarness.of([data])
+	run.set_flags(["f_a"])
+	run.nav.start_run(run.state)
+	var empty: NavigatorHarness.SpyRunState = NavigatorHarness.SpyRunState.new(run.hero.flags, run.events, Callable())
+	# Act
+	var screen: StoryScreen = run.nav.start_run(empty)
+	# Assert
+	assert_int(screen.kind).is_equal(KIND.ERROR)
+	assert_object(run.nav.position()).is_null()
+
+
+func test_chapter_finished_callback_calling_start_run_or_resume_is_refused() -> void:
+	# Arrange
+	var run: NavigatorHarness = _chapters()
+	var box: Array[StoryNavigator] = []
+	var during: Array = []
+	var state: RunState = run.state
+	var on_finished: Callable = func(_chapter_id: String) -> void:
+		if during.is_empty():
+			during.append(box[0].start_run(state))
+			during.append(box[0].resume(StoryPosition.new("ch_a", "a1"), state))
+	run.nav = StoryNavigator.new(run.hero, on_finished, NavigatorHarness._appender(run.errors, ""))
+	box.append(run.nav)
+	run.nav.start_run(run.state)
+	run.choose("o_win")
+	run.nav.advance()
+	# Act
+	var screen: StoryScreen = run.nav.advance()
+	box.clear()
+	# Assert
+	assert_array(during).contains_exactly([null, null])
+	assert_str(screen.scene.id).is_equal("b1")
+	assert_array(run.events).contains_exactly(["end_chapter"])
+	assert_dict(run.nav.position().to_dict()).is_equal({"chapter": "ch_b", "scene": "b1", "transition": "", "pending_outcome": ""})

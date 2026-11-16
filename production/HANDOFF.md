@@ -22,15 +22,17 @@
 - Парс-проверка: `.claude/scripts/godot-parse-check.gd`
 
 ## Где мы
-Код ядра по ADR-0001 (`docs/architecture/adr-0001-scene-data-format.md`), тесты 508 зелёные:
+Код ядра по ADR-0001 (`docs/architecture/adr-0001-scene-data-format.md`), тесты 571 зелёные:
 - S1 загрузчики данных, S2 язык условий, S3 RunState/FlagLoader/`if` в ChapterLoader, S4 граф главы и структурные проверки BS-02…10 — закрыты, аудит 2 раунда.
 - S5 закрыта 2026-11-16, аудит 2 раунда, override DD-018/DS-001, DD-019/DS-002: `DataValidator` (= GraphValidator + bs_traces/bs_budget/bs_limits/bs_ids), `ChapterPaths` (предел `path_enum_max`), `ReleasedIds` (Snapshot, read/compare), `JsonLint`, конфиг `assets/data/config/story_limits.json`, CLI `tools/validate_data.gd` (выход 0/1/2, `--freeze`, `--root=`). Тест AC-27 — `tests/integration/story/data_validator_test.gd`. Героев в `assets/data/heroes` пока нет (CLI выходит 2).
-- Дальше: S6 (позиция и навигатор; chaos-monkey обязателен), S7 (d20). Агентам давать точные строки, а не разделы: лимит 20 шагов уходил на чтение.
+- S6 закрыта 2026-11-16, аудит 2 раунда, DD-020/DS-003; типографика НП-62 (`design/narrative/chapter-writing-rules.md`): `StoryPosition`, `StoryScreen`, `StoryNavigator` в `src/core/story/`, `BridgeData.joined()/split()` (пробел у вставки ставит движок, решение CEO). Тесты 571 зелёные.
+- Дальше: S7 (d20). Обязательный критерий S7 (DD-020, ADR-0001 план S7): после загрузки с записью о броске «применён» — исход, не повторный бросок; при экране ERROR сохранение не пишется. Агентам давать точные строки, а не разделы: лимит 20 шагов уходил на чтение.
 
 GDD (все Designed, ждут независимого ревью): run-state, d20-checks, heroes, branching-story, choice-system, chapter-goal, save-system, scene-illustrations. MVP 8/10 в `design/gdd/systems-index.md`. Решения директоров — `design/DIRECTOR_DECISIONS.md` (последний DD-017).
 
 ## Открытые задачи
-- UR-1 (C6 аудита S5): решение CEO 2026-11-16 — пробел у вставки моста ставит движок (`USER_PREFERENCES.md`, ADR-0001 §1 «Вставка моста»). Сделать в начале S6: соединение в навигаторе, проверка `bs_limits.gd:77,93`, фикстура `ch_f1` (`слово {insert}`), текст GDD правило 6 и AC-52 — с «May I write» у CEO.
+- gdUnit4: при провале теста остальные тесты набора иногда не запускаются (виден 1 из 30); настройки fail-fast в `project.godot` нет. Зелёный прогон выполняет все. Разобрать (qa-lead или @opus-solver), иначе Red-прогон прячет падения.
+- Проверка прямой `"` (НП-62) пока только в мостах; распространять ли на все тексты — решить technical-director при первой главе.
 - Вопрос game-designer: толкование BS-07, BS-11, BS-14, BS-16 в коде S5 — список в отчёте S5 (в репозитории нет; при нужде восстановить из `checks/`).
 - ADR-0001: `k_budget`, `k_min`, `s_path_min` временно в `story_limits.json` — перенести в конфиг d20, когда он появится (формула 7 d20-checks).
 - Техдолг S5: CLI не подключён к CI; `DirAccess.rename_absolute` с перезаписью, `FileAccess`/`DirAccess`/`JSON`/`Time` в CLI не покрыты справкой движка (проверены только headless на 4.7.2 Linux); диапазоны конфига проверяются только на знак и min ≤ max.

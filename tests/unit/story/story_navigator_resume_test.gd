@@ -154,13 +154,24 @@ func test_load_with_a_pending_check_outcome_shows_it_without_applying_and_leads_
 		for target: String in targets:
 			var data: Dictionary = MeaningFixtures.risky_fork()
 			data["transitions"].append(GraphFixtures.to_ending("t_x", "end_x"))
-			GraphFixtures.find(data["outcomes"], outcome_id)["routes"] = [{"transition": target}]
+			var outcome: Dictionary = GraphFixtures.find(data["outcomes"], outcome_id)
+			outcome["routes"] = [{"transition": target}]
+			outcome["sets"] = ["f_a"]
 			var run: NavigatorHarness = NavigatorHarness.of([data], ["end_x"])
 			# Act
 			var shown: StoryScreen = run.nav.resume(StoryPosition.new("m_g", "s1", "", outcome_id), run.state)
+			var again: StoryScreen = run.nav.outcome_applied(outcome_id)
+			var other: StoryScreen = run.nav.outcome_applied("os")
+			var on_screen: StoryScreen = run.nav.screen()
 			var next: StoryScreen = run.nav.advance()
-			# Assert
+			# Assert: the outcome is shown, not the scene for a roll; nothing re-applies it
 			assert_int(shown.kind).is_equal(KIND.OUTCOME)
+			assert_str(shown.outcome.id).is_equal(outcome_id)
 			assert_str(shown.transition.id).is_equal(target)
-			assert_int(run.state.applied).is_equal(0)
+			assert_object(again).is_null()
+			assert_object(other).is_null()
+			assert_object(on_screen).is_same(shown)
+			assert_bool(run.state.has_flag("f_a")).is_false()
+			assert_array(run.state.journal()).is_empty()
 			assert_int(next.kind).is_equal(targets[target])
+			assert_bool(next.kind == KIND.SCENE and next.scene.id == "s1").is_false()

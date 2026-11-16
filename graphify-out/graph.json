@@ -1300,6 +1300,18 @@
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/story/story_navigator.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/story/story_position.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/story/validation/checks/bs_shape.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
    "target": "src/core/story/validation/json_lint.gd"
   },
   {
@@ -1373,6 +1385,10 @@
   {
    "source": "design/DISSENT_LOG.md",
    "target": "design/DIRECTOR_DECISIONS.md"
+  },
+  {
+   "source": "design/DISSENT_LOG.md",
+   "target": "src/core/story/story_position.gd"
   },
   {
    "source": "design/DISSENT_LOG.md",
