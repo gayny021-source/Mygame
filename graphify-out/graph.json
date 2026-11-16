@@ -1030,6 +1030,10 @@
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "design/gdd/scene-illustrations.md"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
    "target": "design/gdd/systems-index.md"
   },
   {
@@ -1295,6 +1299,10 @@
   {
    "source": "design/gdd/choice-system.md",
    "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "design/gdd/choice-system.md",
+   "target": "design/gdd/scene-illustrations.md"
   },
   {
    "source": "design/gdd/choice-system.md",
