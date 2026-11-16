@@ -53,6 +53,16 @@ func test_bs02_normal_option_without_outcome_is_an_error() -> void:
 	assert_int(_errors(data, "BS-02")).is_equal(1)
 
 
+func test_bs02_two_options_without_outcome_give_one_finding_each() -> void:
+	# Arrange
+	var data: Dictionary = GraphFixtures.chain(["s1", "s2"])
+	data["scenes"][0]["options"].append(GraphFixtures.normal("s1_alt", "o_s1"))
+	data["scenes"][0]["options"][0].erase("outcome")
+	data["scenes"][0]["options"][1].erase("outcome")
+	# Act / Assert
+	assert_int(_errors(data, "BS-02")).is_equal(2)
+
+
 func test_bs02_risky_option_with_an_outcome_is_an_error() -> void:
 	# Arrange
 	var data: Dictionary = GraphFixtures.chain(["s1", "s2"])
@@ -93,7 +103,7 @@ func test_bs02_transition_named_by_outcomes_of_two_scenes_is_an_error() -> void:
 	assert_int(_errors(data, "BS-02")).is_equal(1)
 
 
-func test_bs02_two_outcomes_of_a_foreign_scene_on_one_transition_are_one_error() -> void:
+func test_bs02_transition_shared_by_two_outcomes_of_a_foreign_scene_gives_one_finding() -> void:
 	# Arrange
 	var data: Dictionary = GraphFixtures.chain(["s1", "s2", "s3"])
 	data["transitions"][0] = GraphFixtures.to_scene("t_s1", "s3")

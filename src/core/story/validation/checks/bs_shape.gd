@@ -23,6 +23,10 @@ static func check(hero: HeroData, graph: StoryGraph, options: ValidatorOptions, 
 	if common.is_empty():
 		return
 	var final_id: String = finals[0]
+	if not graph.back_edges().is_empty():
+		GraphValidator.report(issues, "BS-10", chapter.id, chapter.id, "хребет, ответвления и узловые сцены не проверены: в графе цикл (BS-05)", DataIssue.WARNING)
+		_finales(hero, graph, final_id, options, issues)
+		return
 	var body: PackedStringArray = graph.reachable(PackedStringArray([common]))
 	if not StoryGraph.as_set(body).has(final_id):
 		_error(issues, chapter, "финал «%s» недостижим из первой общей сцены «%s»" % [final_id, common])
@@ -87,8 +91,8 @@ static func _branches(graph: StoryGraph, body: PackedStringArray, spine: Diction
 	var parts: Array[PackedStringArray] = _components(graph, side)
 	if parts.size() != 1:
 		_error(issues, graph.chapter, "ответвлений: %d, нужно одно" % parts.size())
-	for part: PackedStringArray in parts:
-		_check_branch(graph, part, spine, final_id, issues)
+	else:
+		_check_branch(graph, parts[0], spine, final_id, issues)
 	if side.size() > options.branch_max:
 		GraphValidator.report(issues, "BS-10", graph.chapter.id, graph.chapter.id, "в ответвлении сцен: %d, безопасно не больше %d" % [side.size(), options.branch_max], DataIssue.WARNING)
 

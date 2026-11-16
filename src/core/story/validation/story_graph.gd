@@ -10,6 +10,8 @@ var scene_by_id: Dictionary[String, SceneData] = {}
 var outcome_by_id: Dictionary[String, OutcomeData] = {}
 var transition_by_id: Dictionary[String, TransitionData] = {}
 var _next: Dictionary[String, PackedStringArray] = {}
+var _back_edges: Array[PackedStringArray] = []
+var _back_edges_found: bool = false
 
 
 func _init(source: ChapterData) -> void:
@@ -21,7 +23,12 @@ func _init(source: ChapterData) -> void:
 	for transition: TransitionData in chapter.transitions:
 		transition_by_id[transition.id] = transition
 	for scene: SceneData in chapter.scenes:
-		_next[scene.id] = _targets(scene)
+		var ids: PackedStringArray = []
+		for outcome_id: String in scene_outcomes(scene):
+			for target: String in _outcome_scenes(outcome_id):
+				if not ids.has(target):
+					ids.append(target)
+		_next[scene.id] = ids
 
 
 ## The ids as a set, for membership tests inside loops.
@@ -32,15 +39,15 @@ static func as_set(ids: PackedStringArray) -> Dictionary[String, bool]:
 	return set
 
 
-## Distinct outcome ids named by one option: both of a risky option, or its own.
+## Distinct non-empty outcome ids named by one option: both of a risky option, or its own.
 func option_outcomes(option: OptionData) -> PackedStringArray:
 	var ids: PackedStringArray = []
+	var named: PackedStringArray = [option.outcome]
 	if option.check != null:
-		ids.append(option.check.success)
-		if option.check.failure != option.check.success:
-			ids.append(option.check.failure)
-	if not option.outcome.is_empty() and not ids.has(option.outcome):
-		ids.append(option.outcome)
+		named.append_array([option.check.success, option.check.failure])
+	for id: String in named:
+		if not id.is_empty() and not ids.has(id):
+			ids.append(id)
 	return ids
 
 
@@ -91,8 +98,12 @@ func reachable(roots: PackedStringArray, banned: String = "") -> PackedStringArr
 
 
 ## Edges [from, to] that close a loop (depth-first search from every scene, without recursion).
+## Found on the first call, then kept.
 func back_edges() -> Array[PackedStringArray]:
-	var edges: Array[PackedStringArray] = []
+	if _back_edges_found:
+		return _back_edges
+	_back_edges_found = true
+	var edges: Array[PackedStringArray] = _back_edges
 	# 1 — on the current path, 2 — finished
 	var state: Dictionary[String, int] = {}
 	for scene: SceneData in chapter.scenes:
@@ -120,15 +131,6 @@ func back_edges() -> Array[PackedStringArray]:
 				path.append(target)
 				cursor.append(0)
 	return edges
-
-
-func _targets(scene: SceneData) -> PackedStringArray:
-	var ids: PackedStringArray = []
-	for outcome_id: String in scene_outcomes(scene):
-		for target: String in _outcome_scenes(outcome_id):
-			if not ids.has(target):
-				ids.append(target)
-	return ids
 
 
 # Existing scenes that the routes of the outcome lead into.
