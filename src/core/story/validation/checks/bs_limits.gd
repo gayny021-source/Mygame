@@ -74,17 +74,43 @@ static func _scene_screen(graph: StoryGraph, scene: SceneData, path: String, usa
 		_warn(issues, "F4/flags", path, scene.id, "проза сцены читает флагов %d, не больше %d" % [flags.size(), options.prose_flags_max])
 
 
-# F4 words of the bridge with its longest insert, and UR-1 on the base without the insert.
+# F4 words of the bridge with its longest insert; UR-1 on the spaces at the mark and on every joined
+# variant (hidden insert and each shown one), a problem reported once per bridge.
 static func _bridge(transition: TransitionData, path: String, options: ValidatorOptions, issues: Array[DataIssue]) -> void:
-	var base: String = transition.bridge.base.replace(BsStructure.INSERT_MARK, "")
+	var bridge: BridgeData = transition.bridge
+	var variants: PackedStringArray = [bridge.joined("")]
 	var longest: int = 0
-	for insert: ParagraphData in transition.bridge.inserts:
+	for insert: ParagraphData in bridge.inserts:
 		longest = maxi(longest, ChapterPaths.words(insert.text))
-	var count: int = ChapterPaths.words(base) + longest
+		variants.append(bridge.joined(insert.text))
+	var count: int = ChapterPaths.words(variants[0]) + longest
 	if count > options.paragraph_words_max:
 		_warn(issues, "F4/bridge", path, transition.id, "в мосте %d слов, не больше %d" % [count, options.paragraph_words_max])
-	for problem: String in _punctuation(base):
-		GraphValidator.report(issues, "BS-06", path, transition.id, "UR-1: мост «%s»: %s" % [base, problem])
+	for problem: String in _mark_spaces(bridge):
+		GraphValidator.report(issues, "BS-06", path, transition.id, "UR-1: " + problem)
+	var seen: Dictionary[String, bool] = {}
+	for text: String in variants:
+		for problem: String in _punctuation(text):
+			if seen.has(problem):
+				continue
+			seen[problem] = true
+			GraphValidator.report(issues, "BS-06", path, transition.id, "UR-1: мост «%s»: %s" % [text, problem])
+
+
+# Spaces next to the mark in `base` or at the edges of an insert (UR-1, CEO decision): BridgeData.joined adds them.
+static func _mark_spaces(bridge: BridgeData) -> PackedStringArray:
+	var problems: PackedStringArray = []
+	var at: int = bridge.base.find(BridgeData.INSERT_MARK)
+	if at < 0:
+		return problems
+	var left: String = bridge.base.left(at)
+	var right: String = bridge.base.substr(at + BridgeData.INSERT_MARK.length())
+	if left != left.strip_edges(false, true) or right != right.strip_edges(true, false):
+		problems.append("пробел у %s в основе моста" % BridgeData.INSERT_MARK)
+	for insert: ParagraphData in bridge.inserts:
+		if insert.text != insert.text.strip_edges():
+			problems.append("пробел по краю вставки «%s»" % insert.text)
+	return problems
 
 
 static func _punctuation(text: String) -> PackedStringArray:

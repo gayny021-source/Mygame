@@ -5,7 +5,7 @@ extends RefCounted
 ## entries, BS-06 paragraph structure, BS-09 the safe option with a price. Conditions are never evaluated.
 ## Not here: word and paragraph limits of F4 (warnings, story S5) and the proposed bridge punctuation check.
 
-const INSERT_MARK := "{insert}"
+const INSERT_MARK := BridgeData.INSERT_MARK
 const PRICE := "price"
 
 

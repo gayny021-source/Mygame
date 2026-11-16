@@ -2047,9 +2047,9 @@
     "semantic_hash": ""
   },
   "USER_PREFERENCES.md": {
-    "mtime": 1794805809.3414972,
-    "seen": 1794806944.8468146,
-    "ast_hash": "5ff41f4f1665992f6f3c1a7d5d424807",
+    "mtime": 1794830924.8121452,
+    "seen": 1794832718.3659647,
+    "ast_hash": "d97bd11a852419d769d0a8f26b232d79",
     "semantic_hash": ""
   },
   "design/CLAUDE.md": {
@@ -2059,15 +2059,15 @@
     "semantic_hash": ""
   },
   "design/DIRECTOR_DECISIONS.md": {
-    "mtime": 1794805809.3541756,
-    "seen": 1794806944.8468208,
-    "ast_hash": "a90a96ddb957f5286cacf49cc334936d",
+    "mtime": 1794807881.2572966,
+    "seen": 1794832718.3659708,
+    "ast_hash": "9620f3723bcc1e996f5e6b179703c8bf",
     "semantic_hash": ""
   },
   "design/DISSENT_LOG.md": {
-    "mtime": 1794805809.3541756,
-    "seen": 1794806944.8468218,
-    "ast_hash": "f6dee25c29dd8e7aebe0abc74e11cb9a",
+    "mtime": 1794807881.2572966,
+    "seen": 1794832718.365972,
+    "ast_hash": "a68455a421bc8bdea5f81549dfc4ff8d",
     "semantic_hash": ""
   },
   "design/accessibility-requirements.md": {
@@ -3319,9 +3319,9 @@
     "semantic_hash": ""
   },
   "design/gdd/branching-story.md": {
-    "mtime": 1794805809.3541756,
-    "seen": 1794806944.846826,
-    "ast_hash": "077692f37fe4ba5f2cc4f8745c0677bf",
+    "mtime": 1794831517.4013937,
+    "seen": 1794832718.3659754,
+    "ast_hash": "546c6a49fe6213cba9bb069b9d0b420e",
     "semantic_hash": ""
   },
   "tests/README.md": {
@@ -3487,9 +3487,9 @@
     "semantic_hash": ""
   },
   "tests/fixtures/story/hero_stub/chapters/ch_f1.json": {
-    "mtime": 1794807425.826308,
-    "seen": 1794807615.378584,
-    "ast_hash": "895e5ad19b87718d930121a7d21a6249",
+    "mtime": 1794832527.6846607,
+    "seen": 1794832718.3655162,
+    "ast_hash": "6cdbbc13062c54185b59b9013d23fc4b",
     "semantic_hash": ""
   },
   "tests/fixtures/story/hero_stub/hero.json": {
@@ -4237,9 +4237,9 @@
     "semantic_hash": ""
   },
   "docs/architecture/adr-0001-scene-data-format.md": {
-    "mtime": 1794805809.3650482,
-    "seen": 1794806944.8468442,
-    "ast_hash": "347c5966fa0013095068105a1dcc9139",
+    "mtime": 1794830937.2641459,
+    "seen": 1794832718.3659914,
+    "ast_hash": "152be5ca2cfc3370d42179b95433539f",
     "semantic_hash": ""
   },
   "tests/fixtures/story/hero_lists/chapters/m_quiet.json": {
@@ -4345,9 +4345,9 @@
     "semantic_hash": ""
   },
   "production/HANDOFF.md": {
-    "mtime": 1794805809.3751047,
-    "seen": 1794806944.8468952,
-    "ast_hash": "5d5df6feeb3a8bf83bd58d484046975e",
+    "mtime": 1794830944.9122393,
+    "seen": 1794832718.3660376,
+    "ast_hash": "e4761a6e0033d7fc7622ca1647111439",
     "semantic_hash": ""
   }
 }

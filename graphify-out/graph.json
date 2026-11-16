@@ -541,6 +541,21 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/story/story_navigator.gd",
+   "label": "story_navigator.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/story_position.gd",
+   "label": "story_position.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/story_screen.gd",
+   "label": "story_screen.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/story/validation/chapter_paths.gd",
    "label": "chapter_paths.gd",
    "group": "GDScript"
@@ -783,6 +798,11 @@
   {
    "id": "tests/unit/story/story_json_engine_test.gd",
    "label": "story_json_engine_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/story_navigator_resume_test.gd",
+   "label": "story_navigator_resume_test.gd",
    "group": "GDScript"
   },
   {
@@ -1967,6 +1987,10 @@
    "target": "src/core/story/data/condition_context.gd"
   },
   {
+   "source": "src/core/story/data/bridge_data.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
    "source": "src/core/story/data/chapter_data.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -2028,6 +2052,18 @@
   },
   {
    "source": "src/core/story/data/transition_data.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/story_navigator.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/story_position.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/story_screen.gd",
    "target": "design/gdd/branching-story.md"
   },
   {
@@ -2209,6 +2245,10 @@
   {
    "source": "tests/unit/story/story_json_engine_test.gd",
    "target": "tests/integration/story/story_file_engine_test.gd"
+  },
+  {
+   "source": "tests/unit/story/story_navigator_resume_test.gd",
+   "target": "design/gdd/branching-story.md"
   },
   {
    "source": "tests/unit/story/story_navigator_test.gd",

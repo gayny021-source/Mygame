@@ -15,7 +15,8 @@ func _tagged(data: Dictionary, tag: String, options: ValidatorOptions = null) ->
 	return total
 
 
-func _punctuation_errors(base: String, inserts: Array = []) -> int:
+## UR-1 errors of a bridge `base` with `inserts`; `prefix` narrows them by the start of the message.
+func _punctuation_errors(base: String, inserts: Array = [], prefix: String = "UR-1") -> int:
 	var data: Dictionary = MeaningFixtures.chain(["s1", "s2"])
 	var bridge: Dictionary = {"base": base}
 	if not inserts.is_empty():
@@ -23,7 +24,7 @@ func _punctuation_errors(base: String, inserts: Array = []) -> int:
 	GraphFixtures.find(data["transitions"], "t_s1")["bridge"] = bridge
 	var total: int = 0
 	for issue: DataIssue in _issues(data):
-		total += 1 if issue.code == "BS-06" and issue.severity == DataIssue.ERROR and issue.message.begins_with("UR-1") else 0
+		total += 1 if issue.code == "BS-06" and issue.severity == DataIssue.ERROR and issue.message.begins_with(prefix) else 0
 	return total
 
 
@@ -165,9 +166,30 @@ func test_ur1_sign_at_the_start_or_a_dangling_sign_at_the_end_is_an_error() -> v
 	assert_int(_punctuation_errors("Мост,")).is_equal(1)
 
 
-func test_ur1_bridge_with_an_insert_is_checked_without_the_insert() -> void:
+func test_ur1_clean_bridge_with_an_insert_passes() -> void:
 	# Arrange
 	var good: Array = [{"text": "и ветер", "if": "f_a"}]
 	# Act / Assert
-	assert_int(_punctuation_errors("Мост{insert} дальше.", good)).is_equal(0)
-	assert_int(_punctuation_errors("Мост {insert} дальше.", good)).is_equal(1)
+	assert_int(_punctuation_errors("Мост{insert}, дальше.", good)).is_equal(0)
+	assert_int(_punctuation_errors("Мост{insert}.", good)).is_equal(0)
+
+
+func test_ur1_space_at_the_mark_is_an_error() -> void:
+	# Arrange
+	var good: Array = [{"text": "и ветер", "if": "f_a"}]
+	# Act / Assert
+	assert_int(_punctuation_errors("Мост {insert}, дальше.", good, "UR-1: пробел")).is_equal(1)
+	assert_int(_punctuation_errors("Мост{insert} дальше.", good, "UR-1: пробел")).is_equal(1)
+
+
+func test_ur1_space_at_the_edge_of_an_insert_is_an_error() -> void:
+	# Arrange / Act / Assert
+	assert_int(_punctuation_errors("Мост{insert}.", [{"text": " и ветер", "if": "f_a"}], "UR-1: пробел")).is_equal(1)
+	assert_int(_punctuation_errors("Мост{insert}.", [{"text": "и ветер ", "if": "f_a"}], "UR-1: пробел")).is_equal(1)
+
+
+func test_ur1_signs_are_checked_on_every_joined_variant() -> void:
+	# Arrange / Act / Assert: the shown insert starts the bridge with a sign
+	assert_int(_punctuation_errors("{insert}мост.", [{"text": ", ветер", "if": "f_a"}])).is_equal(1)
+	# the hidden insert leaves a dangling sign at the end
+	assert_int(_punctuation_errors("Мост,{insert}", [{"text": "и ветер.", "if": "f_a"}])).is_equal(1)
