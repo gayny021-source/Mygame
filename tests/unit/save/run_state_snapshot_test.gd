@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## Unit tests for RunState.to_dict and from_dict (run-state.md, rule 11, AC-23, AC-30; save-system.md,
-## rule 2; ADR-0002 §3, §5 B3; story SV1): a snapshot is a copy, restore assigns the flags and the
-## journal without replaying outcomes, an undeclared flag is a finding.
+## rule 2; ADR-0002 §3; story SV1): a snapshot is a copy, restore assigns the flags and the
+## journal without replaying outcomes, an undeclared flag is dropped and logged once (AC-24).
 
 const PATH := "save/resume/state"
 
@@ -100,18 +100,20 @@ func test_same_outcome_after_restore_equals_run_without_snapshot() -> void:
 	assert_dict(restored.to_dict()).is_equal(straight.to_dict())
 
 
-func test_undeclared_flag_is_bs01_and_null() -> void:
-	# Arrange: torch stands and is in the journal, the hero's data no longer declare it (ADR-0002 B3)
+func test_undeclared_flag_is_dropped_with_its_journal_and_logged_once() -> void:
+	# Arrange: torch stands and is in the journal, the hero's data no longer declare it (run-state.md, AC-24, K2)
 	var decls: Array[FlagDecl] = SaveFixtures.decls()
 	decls.remove_at(1)
+	var raw: Dictionary = SaveFixtures.state().to_dict()
 	var issues: Array[DataIssue] = []
 	# Act
-	var restored: RunState = _restore(SaveFixtures.state().to_dict(), issues, decls)
+	var restored: RunState = _restore(raw, issues, decls)
 	# Assert
-	assert_object(restored).is_null()
-	assert_array(_codes(issues)).contains_exactly(["BS-01", "BS-01"])
-	assert_str(issues[0].path).is_equal(PATH + "/flags/1")
-	assert_str(issues[0].message).contains("torch")
+	assert_array(issues).is_empty()
+	assert_array(_ids(restored.active_flags())).contains_exactly(["leg_wound", "stance_calm"])
+	assert_int(restored.journal().size()).is_equal(raw["journal"].size() - 1)
+	assert_int(_logs.size()).is_equal(1)
+	assert_str(_logs[0]).contains("torch")
 
 
 func test_deprecated_flag_is_restored() -> void:

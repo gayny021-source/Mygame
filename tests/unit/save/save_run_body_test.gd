@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## Unit tests for RunBody through slot bytes (save-system.md, rule 2; ADR-0002 §3, §5 B1, B3, B4;
+## Unit tests for RunBody through slot bytes (save-system.md, rule 2; ADR-0002 §3, §5 B1, B4;
 ## story SV1): AC-04 and AC-05 without the writer, AC-61 on the body.
 
 const PATH := "save/run_rovend_a"
@@ -79,16 +79,21 @@ func test_snapshot_in_the_body_is_a_copy() -> void:
 	assert_dict(raw).is_equal(before)
 
 
-func test_undeclared_flag_in_a_schema_snapshot_is_bs01_and_null() -> void:
-	# Arrange: torch stands in the resume and in two schema snapshots, flag and journal (ADR-0002 B3)
+func test_undeclared_flag_is_dropped_from_every_snapshot() -> void:
+	# Arrange: torch stands in the resume and in two schema snapshots (run-state.md, AC-24)
 	var decls: Array[FlagDecl] = SaveFixtures.decls()
 	decls.remove_at(1)
+	var logs: Array[String] = []
+	var sink: Callable = func(message: String) -> void: logs.append(message)
 	var issues: Array[DataIssue] = []
 	# Act
-	var loaded: RunBody = _load(_decoded(SaveFixtures.body().to_dict()), issues, decls)
-	# Assert
-	assert_object(loaded).is_null()
-	assert_array(_codes(issues)).contains_exactly(["BS-01", "BS-01", "BS-01", "BS-01", "BS-01", "BS-01"])
+	var loaded: RunBody = RunBody.from_dict(_decoded(SaveFixtures.body().to_dict()), PATH, issues, decls, sink)
+	# Assert: one line per restored state that held it
+	assert_array(issues).is_empty()
+	assert_bool(loaded.resume.state.has_flag("leg_wound")).is_true()
+	for snapshot: RunBody.Snapshot in loaded.schema:
+		assert_array(snapshot.state.to_dict()["flags"]).not_contains(["torch"])
+	assert_int(logs.size()).is_equal(3)
 
 
 func test_broken_body_is_a_finding_and_null() -> void:

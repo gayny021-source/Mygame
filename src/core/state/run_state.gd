@@ -4,7 +4,7 @@ extends ConditionContext
 ## Only apply_outcome and end_chapter change it. Errors during play go to the injected
 ## `log_error` (push_error when none is given), never a crash; an undeclared id is
 ## logged once. Snapshot and restore: to_dict and from_dict (save-system.md, rule 2;
-## ADR-0002 §3, §5 B3; story SV1). The status "finished" is the ending story, not here.
+## ADR-0002 §3; story SV1). The status "finished" is the ending story, not here.
 ##
 ## Usage: [code]var state := RunState.new(hero.flags); state.apply_outcome("s1", "o1", sets, clears)[/code]
 
@@ -132,8 +132,9 @@ func to_dict() -> Dictionary:
 
 
 ## State restored from a snapshot (run-state.md, rule 11): flags and journal are assigned as they
-## are, outcomes are not replayed. Null when findings were appended to `issues`: DT-02, DT-03, DT-04,
-## DT-05 a wrong action, BS-01 a flag not declared for the hero (ADR-0002 B3: a refusal by id).
+## are, outcomes are not replayed. A flag no longer declared for the hero is dropped with its journal
+## records and logged once (run-state.md, AC-24; `deprecated` flags stay). Null when findings were
+## appended to `issues`: DT-02, DT-03, DT-04, DT-05 a wrong action.
 static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], declarations: Array[FlagDecl], log_error: Callable = Callable()) -> RunState:
 	var before: int = issues.size()
 	var state: RunState = RunState.new(declarations, log_error)
@@ -141,16 +142,15 @@ static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], d
 	for key: Variant in raw:
 		if not KEYS.has(key):
 			reader.issue("DT-04", str(key), "неизвестный ключ")
-	var flags: Dictionary = reader.strings_by_index("flags")
-	for i: int in flags:
-		if state._known(reader, "flags/%d" % i, flags[i]):
-			state._active[flags[i]] = true
+	for id: String in reader.strings("flags"):
+		if state._declared(id):
+			state._active[id] = true
 	for item: DictReader in reader.children("journal", ENTRY_KEYS):
 		var flag: String = item.text("flag")
 		var action: int = ACTIONS.find(item.one_of("action", ACTIONS))
 		var scene_id: String = item.text("scene", false)
 		var outcome_id: String = item.text("outcome")
-		if state._known(item, "flag", flag):
+		if not flag.is_empty() and state._declared(flag):
 			state._journal.append(Entry.new(flag, action as Entry.Action, scene_id, outcome_id))
 	if issues.size() > before:
 		return null
@@ -182,16 +182,6 @@ func _declared(id: String) -> bool:
 	if not _reported.has(id):
 		_reported[id] = true
 		_report("флаг «%s» не объявлен у героя" % id)
-	return false
-
-
-# Флаг снимка, не объявленный у героя, — отказ по id, а не пропуск с логом (ADR-0002 B3).
-# Пустой id уже получил находку DT-02 или DT-03.
-func _known(reader: DictReader, key: String, id: String) -> bool:
-	if _decls.has(id):
-		return true
-	if not id.is_empty():
-		reader.issue("BS-01", key, "флаг «%s» не объявлен у героя" % id)
 	return false
 
 

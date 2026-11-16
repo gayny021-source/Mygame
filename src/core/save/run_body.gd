@@ -46,9 +46,8 @@ func to_dict() -> Dictionary:
 	return raw
 
 
-## Body read from a slot; null when findings were appended to `issues` (DT-02, DT-03, DT-04, DT-06,
-## BS-01 an undeclared flag). The caller treats null as a refusal by id (rule 8, item 6; B3).
-## `log_error` goes to the restored states.
+## Body read from a slot; null when findings were appended to `issues` (DT-02, DT-03, DT-04, DT-05,
+## DT-06). `log_error` goes to the restored states: each logs a dropped undeclared flag once.
 static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], declarations: Array[FlagDecl], log_error: Callable = Callable()) -> RunBody:
 	var before: int = issues.size()
 	var reader: DictReader = DictReader.new(raw, path, issues)

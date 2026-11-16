@@ -2059,15 +2059,15 @@
     "semantic_hash": ""
   },
   "design/DIRECTOR_DECISIONS.md": {
-    "mtime": 1794807881.2572966,
-    "seen": 1794832718.3659708,
-    "ast_hash": "9620f3723bcc1e996f5e6b179703c8bf",
+    "mtime": 1794835506.5650938,
+    "seen": 1794837137.4905005,
+    "ast_hash": "8566e10ea2b3bcc7735939a4c74e688d",
     "semantic_hash": ""
   },
   "design/DISSENT_LOG.md": {
-    "mtime": 1794807881.2572966,
-    "seen": 1794832718.365972,
-    "ast_hash": "a68455a421bc8bdea5f81549dfc4ff8d",
+    "mtime": 1794835506.5650938,
+    "seen": 1794837137.4905028,
+    "ast_hash": "1d2dcccf400a58d21088c3afa6b2f246",
     "semantic_hash": ""
   },
   "design/accessibility-requirements.md": {
@@ -2077,9 +2077,9 @@
     "semantic_hash": ""
   },
   "design/gdd/d20-checks.md": {
-    "mtime": 1794805809.3568106,
-    "seen": 1794806944.8468301,
-    "ast_hash": "a802470ea882a220c0e3e8bd37a4fc60",
+    "mtime": 1794834330.3520882,
+    "seen": 1794837137.490517,
+    "ast_hash": "55c8acaaab25ecd289f8308f3c30c00e",
     "semantic_hash": ""
   },
   "design/gdd/game-concept.md": {
@@ -3415,9 +3415,9 @@
     "semantic_hash": ""
   },
   "design/narrative/chapter-writing-rules.md": {
-    "mtime": 1794805809.3602986,
-    "seen": 1794806944.8468385,
-    "ast_hash": "fed404440d98a7bce0b2279334e1a6b5",
+    "mtime": 1794833189.942611,
+    "seen": 1794837137.4905343,
+    "ast_hash": "734efd083e2cb6c64d434aa96fbfe740",
     "semantic_hash": ""
   },
   "design/gdd/choice-system.md": {
@@ -4231,15 +4231,15 @@
     "semantic_hash": ""
   },
   "design/gdd/save-system.md": {
-    "mtime": 1794805809.3568106,
-    "seen": 1794806944.8468347,
-    "ast_hash": "e95174c6104ee117987f8181a9983382",
+    "mtime": 1794837069.0877333,
+    "seen": 1794837137.4905286,
+    "ast_hash": "d1061129188f49faa503057a40dc123f",
     "semantic_hash": ""
   },
   "docs/architecture/adr-0001-scene-data-format.md": {
-    "mtime": 1794830937.2641459,
-    "seen": 1794832718.3659914,
-    "ast_hash": "152be5ca2cfc3370d42179b95433539f",
+    "mtime": 1794836367.4015453,
+    "seen": 1794837137.490545,
+    "ast_hash": "d81a2e65c9be2e678d49b9473083d30c",
     "semantic_hash": ""
   },
   "tests/fixtures/story/hero_lists/chapters/m_quiet.json": {
@@ -4345,9 +4345,27 @@
     "semantic_hash": ""
   },
   "production/HANDOFF.md": {
-    "mtime": 1794830944.9122393,
-    "seen": 1794832718.3660376,
-    "ast_hash": "e4761a6e0033d7fc7622ca1647111439",
+    "mtime": 1794835654.9115248,
+    "seen": 1794837137.4907036,
+    "ast_hash": "31af859271421f206f69a70a24c4b8bf",
+    "semantic_hash": ""
+  },
+  "assets/data/config/d20.json": {
+    "mtime": 1794835239.2227404,
+    "seen": 1794837137.4894185,
+    "ast_hash": "aa07e093a93cb0943380ad633dab8d1f",
+    "semantic_hash": ""
+  },
+  "tests/fixtures/checks/d20_hard_16.json": {
+    "mtime": 1794835165.3514307,
+    "seen": 1794837137.489441,
+    "ast_hash": "6b08841c9da3974f5769b257e8167e01",
+    "semantic_hash": ""
+  },
+  "docs/architecture/adr-0002-save-format.md": {
+    "mtime": 1794837043.5747283,
+    "seen": 1794837137.490547,
+    "ast_hash": "726865d5acf9dd028cdcea0a51f6a4fe",
     "semantic_hash": ""
   }
 }
