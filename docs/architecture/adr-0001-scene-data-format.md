@@ -233,13 +233,15 @@ tests/integration/story/       # загрузка настоящих данны�
 - `HeroLoader.load_hero(hero_id: String) -> LoadResult` (герой + флаги + главы)
 - `ConditionParser.parse(text: String, known: ConditionVocabulary) -> ParseResult` ; `Condition.evaluate(ctx: ConditionContext) -> bool`
 - `ConditionContext`: `has_flag(id: String) -> bool`, `any_in_category(category: String) -> bool`, `flag_in_group(group: String) -> String`
-- `GraphValidator.validate(hero: HeroData, options: ValidatorOptions) -> Array[DataIssue]` (`options` — переключатель строгости BS-25 и пределы F1–F8 из внешней конфигурации, не из кода)
-- `ReleasedIds.diff(hero: HeroData, released: Dictionary) -> Array[DataIssue]`
+- `DataValidator.validate(hero: HeroData, options: ValidatorOptions) -> Array[DataIssue]` (`GraphValidator` S4 + смысловые проверки S5; `options` — переключатель строгости BS-25 и пределы F1–F8 из внешней конфигурации, не из кода; `ValidatorOptions.from_dict(config, source, issues)` и `load_file(path, issues)` — загрузчики опций)
+- `ReleasedIds.read(raw: Dictionary, path: String, issues: Array[DataIssue]) -> ReleasedIds.Snapshot` (загрузчик: сырой `Dictionary` принимается только здесь; `Snapshot` — RefCounted: `released_at: String`, `ids: Dictionary[String, PackedStringArray]`)
+- `ReleasedIds.compare(hero: HeroData, snapshot: ReleasedIds.Snapshot, path: String) -> Array[DataIssue]` (BS-26; CLI вызывает `read` + `compare`)
+- `ReleasedIds.diff(hero: HeroData, released: Dictionary) -> Array[DataIssue]` (обёртка `read` + `compare` для тестов; CLI её не вызывает)
 - `DataIssue`: `code: String` (`BS-NN` или `DT-NN`), `severity`, `path: String`, `object_id: String`, `message: String`
 
 ### Implementation Guidelines
-- Загрузчик, парсер условий, валидатор и `story_navigator` **must** быть чистыми классами: без `Node`, `SceneTree`, автозагрузок и глобального состояния; `FileAccess` — только в `ChapterLoader.read_object` (чтение файла) и `HeroLoader` (`file_exists` перед чтением глав; справкой движка не покрыт, закреплён headless-тестом, на APK не проверен), `hero_loader`, `released_ids` и CLI.
-- Структуры данных **must** иметь статические типы всех полей; `Dictionary` **must never** выходить за пределы загрузчика.
+- Загрузчик, парсер условий, валидатор и `story_navigator` **must** быть чистыми классами: без `Node`, `SceneTree`, автозагрузок и глобального состояния; `FileAccess` — только в `ChapterLoader.read_object` (чтение файла) и `HeroLoader` (`file_exists` перед чтением глав; справкой движка не покрыт, закреплён headless-тестом, на APK не проверен), `hero_loader`, `ValidatorOptions.load_file` (через `ChapterLoader.read_object`) и CLI `tools/validate_data.gd`, который читает и пишет `released_ids.json`; `ReleasedIds` файлов не касается. Остальные классы `validation/` файлов не читают.
+- Структуры данных **must** иметь статические типы всех полей. Сырой `Dictionary` допускается только на входе загрузчиков (`ChapterLoader`, `HeroLoader`, `ValidatorOptions.from_dict`, `ReleasedIds.read`) и **must not** передаваться в валидаторы и `compare`: за границу загрузчика выходят типизированные объекты (`HeroData`, `ValidatorOptions`, `ReleasedIds.Snapshot`). Единственное исключение — тестовая обёртка `ReleasedIds.diff`.
 - Ошибка данных **must** оформляться как `DataIssue` с кодом из таблицы BS/DT; `assert`/`push_error`-падение вместо находки — **must never**.
 - Пределы F1–F8, `OPTIONS_MAX`, `P_EARLY_MAX` и т.п. **must** читаться из внешней конфигурации (`Gameplay values must be data-driven`), не быть константами в проверках.
 - Поля, которых нет в таблице соответствия, **must never** добавляться в файлы без правки этого ADR (или его редакции и `schema_version`).
