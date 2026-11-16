@@ -82,7 +82,7 @@
 | 12 | Экран чтения (inferred) | UI | MVP | Not Started | — | Ветвящаяся история, Система выбора, Цель главы и маркер прогресса, Иллюстрации сцен |
 | 13 | Экран броска | UI | MVP | Not Started | — | Проверки d20, Система выбора, Жетоны вдохновения |
 | 14 | Меню и выбор героя (partly inferred) | UI | Vertical Slice | Not Started | — | Герои, Сохранение |
-| 15 | Иллюстрации сцен | Presentation | MVP | Not Started | — | Ветвящаяся история |
+| 15 | Иллюстрации сцен | Presentation | MVP | Designed | design/gdd/scene-illustrations.md | Ветвящаяся история |
 | 16 | Эффект старой плёнки | Presentation | Full Vision | Not Started | — | Иллюстрации сцен |
 | 17 | Музыка и звуки | Audio | Full Vision | Not Started | — | Ветвящаяся история, Экран броска, Экран чтения, Герои |
 | 18 | Онбординг | Meta | Vertical Slice | Not Started | — | Ветвящаяся история, Проверки d20, Экран броска |
@@ -233,7 +233,7 @@ Effort: S = 1 сессия, M = 2–3 сессии, L = 4+ сессий. Вет�
 | Design docs started | 7 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 7/10 |
+| MVP systems designed | 8/10 |
 | Vertical Slice systems designed | 0/5 |
 
 ---

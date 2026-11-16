@@ -1605,6 +1605,10 @@
    "target": "design/gdd/save-system.md"
   },
   {
+   "source": "design/gdd/systems-index.md",
+   "target": "design/gdd/scene-illustrations.md"
+  },
+  {
    "source": "design/narrative/chapter-writing-rules.md",
    "target": "USER_PREFERENCES.md"
   },
