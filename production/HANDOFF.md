@@ -30,7 +30,7 @@
 GDD (все Designed, ждут независимого ревью): run-state, d20-checks, heroes, branching-story, choice-system, chapter-goal, save-system, scene-illustrations. MVP 8/10 в `design/gdd/systems-index.md`. Решения директоров — `design/DIRECTOR_DECISIONS.md` (последний DD-017).
 
 ## Открытые задачи
-- Вопрос CEO (UR-1, отложенный C6 аудита S5, срок — до начала S6): вставка в мост несёт свой ведущий пробел? Сейчас «Мост{insert}» + «и ветер» даёт «Мости ветер»; при вставке между пробелами `bs_limits.gd:77,93` ложно ловит двойной пробел.
+- UR-1 (C6 аудита S5): решение CEO 2026-11-16 — пробел у вставки моста ставит движок (`USER_PREFERENCES.md`, ADR-0001 §1 «Вставка моста»). Сделать в начале S6: соединение в навигаторе, проверка `bs_limits.gd:77,93`, фикстура `ch_f1` (`слово {insert}`), текст GDD правило 6 и AC-52 — с «May I write» у CEO.
 - Вопрос game-designer: толкование BS-07, BS-11, BS-14, BS-16 в коде S5 — список в отчёте S5 (в репозитории нет; при нужде восстановить из `checks/`).
 - ADR-0001: `k_budget`, `k_min`, `s_path_min` временно в `story_limits.json` — перенести в конфиг d20, когда он появится (формула 7 d20-checks).
 - Техдолг S5: CLI не подключён к CI; `DirAccess.rename_absolute` с перезаписью, `FileAccess`/`DirAccess`/`JSON`/`Time` в CLI не покрыты справкой движка (проверены только headless на 4.7.2 Linux); диапазоны конфига проверяются только на знак и min ≤ max.
