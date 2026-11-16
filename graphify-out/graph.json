@@ -636,6 +636,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/fixtures/story/navigator_harness.gd",
+   "label": "navigator_harness.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/fixtures/story/story_fixtures.gd",
    "label": "story_fixtures.gd",
    "group": "GDScript"
@@ -673,6 +678,11 @@
   {
    "id": "tests/integration/story/story_file_engine_test.gd",
    "label": "story_file_engine_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/bridge_join_test.gd",
+   "label": "bridge_join_test.gd",
    "group": "GDScript"
   },
   {
@@ -773,6 +783,16 @@
   {
    "id": "tests/unit/story/story_json_engine_test.gd",
    "label": "story_json_engine_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/story_navigator_test.gd",
+   "label": "story_navigator_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/story_position_test.gd",
+   "label": "story_position_test.gd",
    "group": "GDScript"
   },
   {
@@ -2115,6 +2135,10 @@
    "target": "tests/unit/story/story_json_engine_test.gd"
   },
   {
+   "source": "tests/unit/story/bridge_join_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
    "source": "tests/unit/story/bs_budget_test.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -2185,6 +2209,14 @@
   {
    "source": "tests/unit/story/story_json_engine_test.gd",
    "target": "tests/integration/story/story_file_engine_test.gd"
+  },
+  {
+   "source": "tests/unit/story/story_navigator_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/unit/story/story_position_test.gd",
+   "target": "design/gdd/branching-story.md"
   },
   {
    "source": "tests/unit/story/validate_data_args_test.gd",
