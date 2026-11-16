@@ -460,3 +460,65 @@ func test_f1_open_final_option_follows_f_past_and_leads_to_its_own_ending() -> v
 	assert_bool(past.nav.holds("f_past")).is_true()
 	assert_str(plain_end.transition.to_id).is_equal("end_c")
 	assert_str(past_end.transition.to_id).is_equal("end_d")
+
+
+# --- Audit round 1: C2, C6, G5 ---
+
+func test_chapter_finished_callback_calling_advance_is_refused_and_the_chapter_changes_once() -> void:
+	# Arrange
+	var run: NavigatorHarness = _chapters()
+	var box: Array[StoryNavigator] = []
+	var during: Array = []
+	var calls: Array[int] = [0]
+	var events: Array[String] = run.events
+	var on_finished: Callable = func(chapter_id: String) -> void:
+		events.append("finished:" + chapter_id)
+		calls[0] += 1
+		if calls[0] == 1:
+			during.append(box[0].advance())
+	run.nav = StoryNavigator.new(run.hero, on_finished, NavigatorHarness._appender(run.errors, ""))
+	box.append(run.nav)
+	run.nav.start_run(run.state)
+	run.choose("o_win")
+	run.nav.advance()
+	# Act
+	var screen: StoryScreen = run.nav.advance()
+	box.clear()
+	# Assert
+	assert_array(during).contains_exactly([null])
+	assert_array(run.events).contains_exactly(["finished:ch_a", "end_chapter"])
+	assert_str(screen.scene.id).is_equal("b1")
+
+
+func test_invalid_chapter_finished_callback_is_an_error_without_end_chapter() -> void:
+	# Arrange
+	var run: NavigatorHarness = _chapters()
+	run.nav = StoryNavigator.new(run.hero, Callable(), NavigatorHarness._appender(run.errors, ""))
+	run.nav.start_run(run.state)
+	run.choose("o_win")
+	run.nav.advance()
+	# Act
+	var screen: StoryScreen = run.nav.advance()
+	# Assert
+	assert_int(screen.kind).is_equal(KIND.ERROR)
+	assert_array(run.events).is_empty()
+	assert_int(run.errors.size()).is_equal(1)
+
+
+func test_start_run_of_a_hero_without_chapters_is_an_error() -> void:
+	# Arrange
+	var run: NavigatorHarness = NavigatorHarness.of([])
+	# Act
+	var screen: StoryScreen = run.nav.start_run(run.state)
+	# Assert
+	assert_int(screen.kind).is_equal(KIND.ERROR)
+	assert_int(run.errors.size()).is_equal(1)
+	assert_object(run.nav.position()).is_null()
+
+
+func test_holds_before_any_run_is_false() -> void:
+	# Arrange
+	var run: NavigatorHarness = _bridges()
+	# Act / Assert
+	assert_bool(run.nav.holds("f_a")).is_false()
+	assert_bool(run.nav.holds("")).is_false()

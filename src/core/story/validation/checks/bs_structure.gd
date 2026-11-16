@@ -5,7 +5,6 @@ extends RefCounted
 ## entries, BS-06 paragraph structure, BS-09 the safe option with a price. Conditions are never evaluated.
 ## Not here: word and paragraph limits of F4 (warnings, story S5) and the proposed bridge punctuation check.
 
-const INSERT_MARK := BridgeData.INSERT_MARK
 const PRICE := "price"
 
 
@@ -217,10 +216,10 @@ static func _check_bridge(transition: TransitionData, path: String, issues: Arra
 	var base: String = transition.bridge.base
 	if base.strip_edges().contains("\n"):
 		GraphValidator.report(issues, "BS-06", path, transition.id, "мост — больше одного абзаца")
-	var marks: int = base.count(INSERT_MARK)
+	var marks: int = base.count(BridgeData.INSERT_MARK)
 	var wanted: int = 1 if not transition.bridge.inserts.is_empty() else 0
 	if marks != wanted:
-		GraphValidator.report(issues, "BS-06", path, transition.id, "отметок %s: %d, нужно %d" % [INSERT_MARK, marks, wanted])
+		GraphValidator.report(issues, "BS-06", path, transition.id, "отметок %s: %d, нужно %d" % [BridgeData.INSERT_MARK, marks, wanted])
 
 
 # BS-09: a scene with a risky option has an unconditional safe option that sets exactly one `price` flag.

@@ -193,3 +193,12 @@ func test_ur1_signs_are_checked_on_every_joined_variant() -> void:
 	assert_int(_punctuation_errors("{insert}мост.", [{"text": ", ветер", "if": "f_a"}])).is_equal(1)
 	# the hidden insert leaves a dangling sign at the end
 	assert_int(_punctuation_errors("Мост,{insert}", [{"text": "и ветер.", "if": "f_a"}])).is_equal(1)
+
+
+func test_np62_straight_quote_in_a_bridge_base_or_insert_is_an_error() -> void:
+	# Arrange
+	var good: Array = [{"text": "и ветер", "if": "f_a"}]
+	# Act / Assert
+	assert_int(_punctuation_errors("Мост{insert}, \"тихий\".", good, "UR-1: НП-62")).is_equal(1)
+	assert_int(_punctuation_errors("Мост{insert}.", [{"text": "и \"ветер\"", "if": "f_a"}], "UR-1: НП-62")).is_equal(1)
+	assert_int(_punctuation_errors("Мост{insert}, «тихий».", good, "UR-1: НП-62")).is_equal(0)

@@ -7,6 +7,8 @@ extends RefCounted
 
 const SIGNS := ",.;:!?…"
 const DANGLING := ",;:-–—"
+## НП-62: a straight quote is ambiguous in game text.
+const STRAIGHT_QUOTE := "\""
 
 
 ## Appends the findings of one chapter to `issues`.
@@ -86,7 +88,7 @@ static func _bridge(transition: TransitionData, path: String, options: Validator
 	var count: int = ChapterPaths.words(variants[0]) + longest
 	if count > options.paragraph_words_max:
 		_warn(issues, "F4/bridge", path, transition.id, "в мосте %d слов, не больше %d" % [count, options.paragraph_words_max])
-	for problem: String in _mark_spaces(bridge):
+	for problem: String in _mark_spaces(bridge) + _straight_quotes(bridge):
 		GraphValidator.report(issues, "BS-06", path, transition.id, "UR-1: " + problem)
 	var seen: Dictionary[String, bool] = {}
 	for text: String in variants:
@@ -100,16 +102,27 @@ static func _bridge(transition: TransitionData, path: String, options: Validator
 # Spaces next to the mark in `base` or at the edges of an insert (UR-1, CEO decision): BridgeData.joined adds them.
 static func _mark_spaces(bridge: BridgeData) -> PackedStringArray:
 	var problems: PackedStringArray = []
-	var at: int = bridge.base.find(BridgeData.INSERT_MARK)
-	if at < 0:
+	var parts: PackedStringArray = bridge.split()
+	if parts.is_empty():
 		return problems
-	var left: String = bridge.base.left(at)
-	var right: String = bridge.base.substr(at + BridgeData.INSERT_MARK.length())
+	var left: String = parts[0]
+	var right: String = parts[1]
 	if left != left.strip_edges(false, true) or right != right.strip_edges(true, false):
 		problems.append("пробел у %s в основе моста" % BridgeData.INSERT_MARK)
 	for insert: ParagraphData in bridge.inserts:
 		if insert.text != insert.text.strip_edges():
 			problems.append("пробел по краю вставки «%s»" % insert.text)
+	return problems
+
+
+# НП-62 on the bridge only (base and inserts); other text fields are not checked yet.
+static func _straight_quotes(bridge: BridgeData) -> PackedStringArray:
+	var problems: PackedStringArray = []
+	if bridge.base.contains(STRAIGHT_QUOTE):
+		problems.append("НП-62: прямая кавычка в основе моста")
+	for insert: ParagraphData in bridge.inserts:
+		if insert.text.contains(STRAIGHT_QUOTE):
+			problems.append("НП-62: прямая кавычка во вставке «%s»" % insert.text)
 	return problems
 
 

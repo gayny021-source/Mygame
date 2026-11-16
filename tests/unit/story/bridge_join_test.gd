@@ -82,3 +82,21 @@ func test_join_without_a_mark_returns_base() -> void:
 	# Act / Assert
 	assert_str(bridge.joined("ветер")).is_equal("Мост дальше.")
 	assert_str(bridge.joined("")).is_equal("Мост дальше.")
+
+
+# --- Audit round 1: НП-62 quotes, split ---
+
+func test_join_russian_closing_quote_on_the_left_gets_a_space_and_on_the_right_none() -> void:
+	# Arrange
+	var after_quote: BridgeData = _bridge("„Мост“{insert}.")
+	var before_quote: BridgeData = _bridge("„Мост{insert}“ — сказал он.")
+	# Act / Assert
+	assert_str(after_quote.joined("и ветер")).is_equal("„Мост“ и ветер.")
+	assert_str(before_quote.joined("и ветер")).is_equal("„Мост и ветер“ — сказал он.")
+	assert_str(before_quote.joined("")).is_equal("„Мост“ — сказал он.")
+
+
+func test_split_gives_the_parts_around_the_mark_or_nothing() -> void:
+	# Arrange / Act / Assert
+	assert_array(Array(_bridge("Мост{insert}.").split())).contains_exactly(["Мост", "."])
+	assert_array(Array(_bridge("Мост.").split())).is_empty()

@@ -80,7 +80,7 @@ func test_load_with_a_pending_outcome_shows_it_again_without_applying_and_leads_
 
 # --- 14. Refused loads (AC-47) ---
 
-func test_load_refuses_a_missing_chapter_scene_or_pending_outcome_and_keeps_the_position() -> void:
+func test_load_refuses_a_missing_chapter_scene_or_pending_outcome_and_drops_the_old_position() -> void:
 	# Arrange
 	var refused: Array[StoryPosition] = [
 		StoryPosition.new("ch_gone", "s1"),
@@ -91,13 +91,12 @@ func test_load_refuses_a_missing_chapter_scene_or_pending_outcome_and_keeps_the_
 	for saved: StoryPosition in refused:
 		var run: NavigatorHarness = NavigatorHarness.of([StoryFixtures.nav_bridges()])
 		run.nav.start_run(run.state)
-		var before: Dictionary = run.nav.position().to_dict()
 		# Act
 		var screen: StoryScreen = run.nav.resume(saved, run.state)
 		# Assert
 		assert_int(screen.kind).is_equal(KIND.ERROR)
 		assert_int(run.errors.size()).is_equal(1)
-		assert_dict(run.nav.position().to_dict()).is_equal(before)
+		assert_object(run.nav.position()).is_null()
 		assert_object(run.nav.advance()).is_null()
 
 
@@ -144,3 +143,24 @@ func test_unload_on_a_coda_resumes_at_the_outcome_and_changes_the_chapter_once()
 	assert_int(coda.kind).is_equal(KIND.CODA)
 	assert_str(next.scene.id).is_equal("b1")
 	assert_array(fresh.events).contains_exactly(["finished:ch_a", "end_chapter"])
+
+
+# --- Audit round 1: C1 (check outcome pending at load, before S7) ---
+
+func test_load_with_a_pending_check_outcome_shows_it_without_applying_and_leads_the_same_way() -> void:
+	# Arrange
+	var targets: Dictionary = {"t_s1": KIND.SCENE, "t_s2": KIND.CODA, "t_x": KIND.ENDING}
+	for outcome_id: String in ["ow", "of"]:
+		for target: String in targets:
+			var data: Dictionary = MeaningFixtures.risky_fork()
+			data["transitions"].append(GraphFixtures.to_ending("t_x", "end_x"))
+			GraphFixtures.find(data["outcomes"], outcome_id)["routes"] = [{"transition": target}]
+			var run: NavigatorHarness = NavigatorHarness.of([data], ["end_x"])
+			# Act
+			var shown: StoryScreen = run.nav.resume(StoryPosition.new("m_g", "s1", "", outcome_id), run.state)
+			var next: StoryScreen = run.nav.advance()
+			# Assert
+			assert_int(shown.kind).is_equal(KIND.OUTCOME)
+			assert_str(shown.transition.id).is_equal(target)
+			assert_int(run.state.applied).is_equal(0)
+			assert_int(next.kind).is_equal(targets[target])

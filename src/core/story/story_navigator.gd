@@ -44,6 +44,7 @@ func start_run(state: RunState) -> StoryScreen:
 ## outcome when there is one. The outcome is not applied again: its flags are already in `state`.
 func resume(saved: StoryPosition, state: RunState) -> StoryScreen:
 	_state = state
+	_position = null
 	var index: int = _chapter_at(saved.chapter)
 	if index < 0:
 		return _fail("загрузка: главы «%s» нет у героя" % saved.chapter)
@@ -100,7 +101,10 @@ func screen() -> StoryScreen:
 
 
 ## True when `condition` holds over the run state; empty is true. For the `if` of options.
+## False before start_run or resume: there is no run state yet.
 func holds(condition: String) -> bool:
+	if _state == null:
+		return false
 	if condition.is_empty():
 		return true
 	if not _conditions.has(condition):
@@ -110,6 +114,8 @@ func holds(condition: String) -> bool:
 
 
 func _enter_chapter(index: int) -> StoryScreen:
+	if index >= _hero.chapters.size():
+		return _fail("у героя нет главы номер %d" % (index + 1))
 	_index_chapter(index)
 	var chapter: ChapterData = _hero.chapters[index]
 	var start: StartData = null
@@ -215,10 +221,15 @@ func _follow(transition: TransitionData) -> StoryScreen:
 
 
 func _next_chapter() -> StoryScreen:
+	var finished: String = _chapter().id
 	var next: int = _chapter_index + 1
 	if next >= _hero.chapters.size():
-		return _fail("после главы «%s» нет следующей главы" % _chapter().id)
-	_chapter_finished.call(_chapter().id)
+		return _fail("после главы «%s» нет следующей главы" % finished)
+	if not _chapter_finished.is_valid():
+		return _fail("нет обработчика конца главы «%s»" % finished)
+	# advance() from inside the callback is refused: no screen until the next chapter starts.
+	_screen = null
+	_chapter_finished.call(finished)
 	_state.end_chapter()
 	return _enter_chapter(next)
 
@@ -244,7 +255,9 @@ func _visible(paragraphs: Array[ParagraphData]) -> Array[ParagraphData]:
 
 func _parse(text: String) -> Condition:
 	var parsed: ConditionParser.ParseResult = ConditionParser.parse(text, _vocab)
-	if parsed.condition == null:
+	if parsed.condition == null and parsed.issues.is_empty():
+		_log("условие «%s» не разобрано" % text)
+	elif parsed.condition == null:
 		_log("условие «%s» не разобрано: %s" % [text, parsed.issues[0].message])
 	return parsed.condition
 

@@ -35,10 +35,13 @@ static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue]) -
 	for key: Variant in raw:
 		if not KEYS.has(key):
 			reader.issue("DT-04", str(key), "неизвестный ключ")
-	var result: StoryPosition = StoryPosition.new(_id(reader, "chapter"), _id(reader, "scene"), reader.text("transition", false), reader.text("pending_outcome", false))
+	var chapter_id: String = _id(reader, "chapter")
+	var scene_id: String = _id(reader, "scene")
+	var entry: String = reader.text("transition", false)
+	var pending: String = reader.text("pending_outcome", false)
 	if issues.size() > before:
 		return null
-	return result
+	return StoryPosition.new(chapter_id, scene_id, entry, pending)
 
 
 static func _id(reader: DictReader, key: String) -> String:

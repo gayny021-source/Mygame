@@ -154,7 +154,7 @@ static func _transition_words(transition: TransitionData, all: bool) -> int:
 	var total: int = paragraph_words(transition.coda, all)
 	if transition.bridge == null:
 		return total
-	total += words(transition.bridge.base.replace(BsStructure.INSERT_MARK, " "))
+	total += words(transition.bridge.base.replace(BridgeData.INSERT_MARK, " "))
 	var longest: int = 0
 	for insert: ParagraphData in transition.bridge.inserts:
 		longest = maxi(longest, words(insert.text))
