@@ -541,6 +541,16 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/story/validation/story_graph.gd",
+   "label": "story_graph.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/validation/validator_options.gd",
+   "label": "validator_options.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/ui/safe_area_margins.gd",
    "label": "safe_area_margins.gd",
    "group": "GDScript"
@@ -556,6 +566,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/fixtures/story/graph_fixtures.gd",
+   "label": "graph_fixtures.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/fixtures/story/story_fixtures.gd",
    "label": "story_fixtures.gd",
    "group": "GDScript"
@@ -563,6 +578,11 @@
   {
    "id": "tests/integration/boot/boot_smoke_test.gd",
    "label": "boot_smoke_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/integration/story/bs_shape_test.gd",
+   "label": "bs_shape_test.gd",
    "group": "GDScript"
   },
   {
@@ -583,6 +603,11 @@
   {
    "id": "tests/integration/story/story_file_engine_test.gd",
    "label": "story_file_engine_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/bs_structure_test.gd",
+   "label": "bs_structure_test.gd",
    "group": "GDScript"
   },
   {
@@ -611,8 +636,18 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/story/graph_validator_test.gd",
+   "label": "graph_validator_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/story/run_state_test.gd",
    "label": "run_state_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/story_graph_test.gd",
+   "label": "story_graph_test.gd",
    "group": "GDScript"
   },
   {
@@ -1788,6 +1823,14 @@
    "target": "design/gdd/branching-story.md"
   },
   {
+   "source": "src/core/story/validation/story_graph.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/validation/validator_options.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
    "source": "tests/fixtures/story/fake_flags.gd",
    "target": "src/core/story/data/condition_context.gd"
   },
@@ -1798,6 +1841,10 @@
   {
    "source": "tests/integration/boot/boot_smoke_test.gd",
    "target": "src/boot/boot.tscn"
+  },
+  {
+   "source": "tests/integration/story/bs_shape_test.gd",
+   "target": "design/gdd/branching-story.md"
   },
   {
    "source": "tests/integration/story/chapter_loader_file_test.gd",
@@ -1818,6 +1865,10 @@
   {
    "source": "tests/integration/story/story_file_engine_test.gd",
    "target": "tests/unit/story/story_json_engine_test.gd"
+  },
+  {
+   "source": "tests/unit/story/bs_structure_test.gd",
+   "target": "design/gdd/branching-story.md"
   },
   {
    "source": "tests/unit/story/chapter_loader_test.gd",
@@ -1850,6 +1901,14 @@
   {
    "source": "tests/unit/story/flag_loader_test.gd",
    "target": "tests/integration/story/hero_flags_test.gd"
+  },
+  {
+   "source": "tests/unit/story/graph_validator_test.gd",
+   "target": "tests/integration/story/bs_shape_test.gd"
+  },
+  {
+   "source": "tests/unit/story/graph_validator_test.gd",
+   "target": "tests/unit/story/bs_structure_test.gd"
   },
   {
    "source": "tests/unit/story/run_state_test.gd",

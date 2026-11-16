@@ -2,7 +2,9 @@ class_name OptionData
 extends RefCounted
 ## Option of a scene (branching-story.md, Core Rules 4). `check` is null when the file has none.
 
-const KINDS: PackedStringArray = ["normal", "risky", "safe"]
+const KIND_RISKY := "risky"
+const KIND_SAFE := "safe"
+const KINDS: PackedStringArray = ["normal", KIND_RISKY, KIND_SAFE]
 
 var id: String
 var text: String
