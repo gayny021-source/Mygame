@@ -7,6 +7,7 @@ extends RefCounted
 
 enum Kind { FLAG, ANY, CATEGORY, GROUP, NOT, AND, OR }
 
+## Node kind.
 var kind: Kind
 ## CATEGORY: the category id. GROUP: the group id.
 var name: String

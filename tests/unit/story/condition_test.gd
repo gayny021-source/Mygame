@@ -12,6 +12,8 @@ func _flags(set_flags: PackedStringArray) -> FakeFlags:
 func _eval(text: String, ctx: ConditionContext) -> bool:
 	var result: ConditionParser.ParseResult = ConditionParser.parse(text, null)
 	assert_array(result.issues).is_empty()
+	if result.condition == null:
+		return false
 	return result.condition.evaluate(ctx)
 
 

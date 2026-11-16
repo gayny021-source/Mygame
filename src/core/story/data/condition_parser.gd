@@ -114,7 +114,8 @@ func _chain() -> Condition:
 	var connective: String = _peek()
 	if connective != "and" and connective != "or":
 		return first
-	var node: Condition = Condition.new(Condition.Kind.AND if connective == "and" else Condition.Kind.OR)
+	var kind: Condition.Kind = Condition.Kind.AND if connective == "and" else Condition.Kind.OR
+	var node: Condition = Condition.new(kind)
 	node.children.append(first)
 	while _peek() == connective:
 		_index += 1
