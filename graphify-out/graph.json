@@ -541,6 +541,11 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/story/validation/chapter_paths.gd",
+   "label": "chapter_paths.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/story/validation/checks/bs_shape.gd",
    "label": "bs_shape.gd",
    "group": "GDScript"
@@ -548,6 +553,16 @@
   {
    "id": "src/core/story/validation/checks/bs_structure.gd",
    "label": "bs_structure.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/validation/checks/bs_traces.gd",
+   "label": "bs_traces.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/validation/flag_usage.gd",
+   "label": "flag_usage.gd",
    "group": "GDScript"
   },
   {
@@ -1883,11 +1898,23 @@
    "target": "design/gdd/branching-story.md"
   },
   {
+   "source": "src/core/story/validation/chapter_paths.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
    "source": "src/core/story/validation/checks/bs_shape.gd",
    "target": "design/gdd/branching-story.md"
   },
   {
    "source": "src/core/story/validation/checks/bs_structure.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/validation/checks/bs_traces.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/validation/flag_usage.gd",
    "target": "design/gdd/branching-story.md"
   },
   {

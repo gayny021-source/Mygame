@@ -173,24 +173,10 @@ static func _chapter_flag_read(text: String, known: ConditionVocabulary, flags: 
 	var parsed: ConditionParser.ParseResult = ConditionParser.parse(text, known)
 	if parsed.condition == null:
 		return ""
-	for id: String in _flags_read(parsed.condition, flags):
+	for id: String in FlagUsage.flags_in(parsed.condition, flags):
 		if flags[id].scope == FlagDecl.SCOPE_CHAPTER:
 			return id
 	return ""
-
-
-static func _flags_read(node: Condition, flags: Dictionary[String, FlagDecl]) -> PackedStringArray:
-	var ids: PackedStringArray = []
-	match node.kind:
-		Condition.Kind.FLAG, Condition.Kind.ANY, Condition.Kind.GROUP:
-			ids.append_array(node.flags)
-		Condition.Kind.CATEGORY:
-			for decl: FlagDecl in flags.values():
-				if decl.category == node.name:
-					ids.append(decl.id)
-	for child: Condition in node.children:
-		ids.append_array(_flags_read(child, flags))
-	return ids
 
 
 # BS-06: an unconditional paragraph in scenes and outcomes; a choice scene ends on one; at most OPTIONS_MAX options.
