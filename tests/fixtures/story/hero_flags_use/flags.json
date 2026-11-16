@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "flags": [
+    {"id": "f_wound", "category": "wound", "title": "Рана"},
+    {"id": "f_calm", "category": "story", "title": "Спокоен", "group": "mood"},
+    {"id": "f_angry", "category": "story", "title": "Зол", "group": "mood"},
+    {"id": "f_other", "category": "story", "title": "Другая группа", "group": "temper"}
+  ]
+}

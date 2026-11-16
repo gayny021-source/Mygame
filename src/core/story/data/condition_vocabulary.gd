@@ -9,3 +9,5 @@ var flags: PackedStringArray = []
 var categories: PackedStringArray = []
 ## Ids of the declared displacement groups, for `group(...) ==`.
 var groups: PackedStringArray = []
+## Flag id -> id of its group; a flag in no group is absent. For `group(...) == flag`.
+var flag_groups: Dictionary[String, String] = {}

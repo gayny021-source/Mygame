@@ -416,6 +416,16 @@
    "group": "Scenes"
   },
   {
+   "id": "src/core/state/flag_decl.gd",
+   "label": "flag_decl.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/state/run_state.gd",
+   "label": "run_state.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/story/data/bridge_data.gd",
    "label": "bridge_data.gd",
    "group": "GDScript"
@@ -463,6 +473,11 @@
   {
    "id": "src/core/story/data/dict_reader.gd",
    "label": "dict_reader.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/data/flag_loader.gd",
+   "label": "flag_loader.gd",
    "group": "GDScript"
   },
   {
@@ -556,6 +571,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/integration/story/hero_flags_test.gd",
+   "label": "hero_flags_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/integration/story/hero_loader_test.gd",
    "label": "hero_loader_test.gd",
    "group": "GDScript"
@@ -563,6 +583,11 @@
   {
    "id": "tests/integration/story/story_file_engine_test.gd",
    "label": "story_file_engine_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/chapter_conditions_test.gd",
+   "label": "chapter_conditions_test.gd",
    "group": "GDScript"
   },
   {
@@ -1687,6 +1712,18 @@
    "target": "src/ui/safe_area_margins.gd"
   },
   {
+   "source": "src/core/state/flag_decl.gd",
+   "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "src/core/state/run_state.gd",
+   "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "src/core/state/run_state.gd",
+   "target": "src/core/story/data/condition_context.gd"
+  },
+  {
    "source": "src/core/story/data/chapter_data.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -1709,6 +1746,14 @@
   {
    "source": "src/core/story/data/dict_reader.gd",
    "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/data/flag_loader.gd",
+   "target": "design/gdd/heroes.md"
+  },
+  {
+   "source": "src/core/story/data/flag_loader.gd",
+   "target": "design/gdd/run-state.md"
   },
   {
    "source": "src/core/story/data/hero_data.gd",
@@ -1759,6 +1804,14 @@
    "target": "tests/unit/story/chapter_loader_test.gd"
   },
   {
+   "source": "tests/integration/story/hero_flags_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/integration/story/hero_flags_test.gd",
+   "target": "design/gdd/run-state.md"
+  },
+  {
    "source": "tests/integration/story/hero_loader_test.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -1793,6 +1846,10 @@
   {
    "source": "tests/unit/story/flag_loader_test.gd",
    "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "tests/unit/story/flag_loader_test.gd",
+   "target": "tests/integration/story/hero_flags_test.gd"
   },
   {
    "source": "tests/unit/story/run_state_test.gd",

@@ -4,7 +4,8 @@ extends RefCounted
 ## Adds the hero part of BS-01: the hero's id is its folder name, stats and chapters
 ## are listed once, every listed chapter has a file, `ending:<id>` is one of the
 ## hero's endings, a check rolls on one of the hero's stats, ids are unique across
-## the hero's chapters. flags.json is not read yet (story S3).
+## the hero's chapters. flags.json (story S3, FlagLoader) gives the chapters the hero's
+## flag vocabulary for the BS-01 check of conditions, sets, clears and goal_fail_flag.
 
 const DATA_ROOT := "res://assets/data/heroes"
 const HERO_KEYS: PackedStringArray = ["schema_version", "id", "stats", "chapters", "endings", "portrait", "accent", "sum_exception"]
@@ -48,6 +49,7 @@ static func load_hero(hero_id: String, root: String = DATA_ROOT) -> LoadResult:
 	hero.portrait = reader.text("portrait")
 	hero.accent = reader.text("accent")
 	hero.sum_exception = reader.text("sum_exception", false)
+	var known: ConditionVocabulary = _load_flags(dir + "/flags.json", hero, stat_ids, result.issues)
 	var seen_ids: PackedStringArray = []
 	var listed: PackedStringArray = []
 	# i — индекс в массиве JSON: не-строки пропущены, а путь находки называет место в файле
@@ -66,7 +68,7 @@ static func load_hero(hero_id: String, root: String = DATA_ROOT) -> LoadResult:
 		if not FileAccess.file_exists(chapter_path):
 			reader.issue("BS-01", "chapters/%d" % i, "у главы «%s» нет файла %s" % [chapter_id, chapter_path])
 			continue
-		var chapter: ChapterData = _load_chapter(chapter_path, chapter_id, seen_ids, result.issues)
+		var chapter: ChapterData = _load_chapter(chapter_path, chapter_id, seen_ids, known, result.issues)
 		if chapter == null:
 			continue
 		hero.chapters.append(chapter)
@@ -80,12 +82,24 @@ static func load_hero(hero_id: String, root: String = DATA_ROOT) -> LoadResult:
 	return result
 
 
-static func _load_chapter(path: String, chapter_id: String, seen_ids: PackedStringArray, issues: Array[DataIssue]) -> ChapterData:
+# Без flags.json у героя нет флагов: любая ссылка на флаг тогда BS-01. Если в самом flags.json
+# есть находки, словарь не строится (null): сверка по неполным объявлениям дала бы вторичные BS-01.
+static func _load_flags(path: String, hero: HeroData, stat_ids: PackedStringArray, issues: Array[DataIssue]) -> ConditionVocabulary:
+	if not FileAccess.file_exists(path):
+		return ConditionVocabulary.new()
+	var before: int = issues.size()
+	hero.flags = FlagLoader.load_file(path, stat_ids, issues)
+	if issues.size() > before:
+		return null
+	return FlagLoader.vocabulary(hero.flags)
+
+
+static func _load_chapter(path: String, chapter_id: String, seen_ids: PackedStringArray, known: ConditionVocabulary, issues: Array[DataIssue]) -> ChapterData:
 	var before: int = issues.size()
 	var data: Dictionary = ChapterLoader.read_object(path, issues)
 	if issues.size() > before:
 		return null
-	var chapter: ChapterData = ChapterLoader.parse(data, path, issues)
+	var chapter: ChapterData = ChapterLoader.parse(data, path, issues, known)
 	if chapter == null:
 		return null
 	if chapter.id != chapter_id:

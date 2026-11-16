@@ -1,0 +1,16 @@
+{
+  "_note": "Четыре ошибки: f_ghost в абзаце, f_other не из группы mood, sets f_nope, clears f_gone. Старт чистый.",
+  "schema_version": 1,
+  "id": "m_cond",
+  "title": "Условия",
+  "goal": "Цель",
+  "starts": [{"id": "st_main", "scene": "s1", "if": "cat(wound) and group(mood) == f_calm"}],
+  "scenes": [{
+    "id": "s1",
+    "paragraphs": ["Абзац.", {"text": "Условный.", "if": "f_ghost"}],
+    "illustration": "ill_s1",
+    "options": [{"id": "s1_go", "text": "Дальше", "kind": "normal", "if": "group(mood) == f_other", "outcome": "o1"}]
+  }],
+  "outcomes": [{"id": "o1", "sets": ["f_calm", "f_nope"], "clears": ["f_gone"], "routes": [{"transition": "t_end"}]}],
+  "transitions": [{"id": "t_end", "to": "chapter_end", "coda": ["Кода."]}]
+}

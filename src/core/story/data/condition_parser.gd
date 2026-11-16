@@ -218,9 +218,20 @@ func _group() -> Condition:
 		return null
 	if _known != null and not _known.groups.has(node.name):
 		_report_unknown(position, "группа «%s» не объявлена у героя" % node.name)
+	var flag_position: int = _positions[_index]
 	if not _flag(node):
 		return null
+	_check_group_member(node, flag_position)
 	return node
+
+
+# Флаг не из названной группы никогда не стоял бы в ней: условие всегда ложно (S3).
+# Неизвестные имена уже названы BS-01, второй находки на них нет.
+func _check_group_member(node: Condition, position: int) -> void:
+	if _known == null or not _known.groups.has(node.name) or not _known.flags.has(node.flags[0]):
+		return
+	if _known.flag_groups.get(node.flags[0], "") != node.name:
+		_report_unknown(position, "флаг «%s» не из группы «%s»" % [node.flags[0], node.name])
 
 
 # Читает id флага в `node.flags`; необъявленный флаг — BS-01, разбор идёт дальше.

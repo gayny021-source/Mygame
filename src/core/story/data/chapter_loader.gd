@@ -1,8 +1,9 @@
 class_name ChapterLoader
 extends RefCounted
 ## Loads one chapter JSON into typed structures (ADR-0001 §4, story S1). Reports
-## DT-01…DT-07 and the chapter part of BS-01 as DataIssue. Conditions stay raw
-## text (story S2), flag ids are not resolved (story S3).
+## DT-01…DT-07 and the chapter part of BS-01 as DataIssue. `if` is parsed
+## (DT-08, story S2); with a vocabulary of the hero's flags `if`, sets, clears and
+## goal_fail_flag are checked against it (BS-01, story S3), without one only the syntax.
 
 const CHAPTER_KEYS: PackedStringArray = ["schema_version", "id", "title", "goal", "starts", "goal_fail_flag", "milestones", "scenes", "outcomes", "transitions"]
 const START_KEYS: PackedStringArray = ["id", "if", "scene", "goal"]
@@ -20,19 +21,20 @@ const REQUIRED_LISTS: PackedStringArray = ["starts", "scenes", "outcomes", "tran
 
 
 ## Reads and loads the chapter file at `path`. The chapter is in `data` only when there are no issues.
-static func load_file(path: String) -> LoadResult:
+## `known` is the hero's flag vocabulary, or null to check the syntax only.
+static func load_file(path: String, known: ConditionVocabulary = null) -> LoadResult:
 	var result: LoadResult = LoadResult.new()
 	var data: Dictionary = read_object(path, result.issues)
 	if not result.issues.is_empty():
 		return result
-	return load_from_dict(data, path)
+	return load_from_dict(data, path, known)
 
 
 ## Loads a chapter from parsed JSON; `source` starts every finding's path.
 ## The chapter is in `data` only when there are no issues.
-static func load_from_dict(data: Dictionary, source: String) -> LoadResult:
+static func load_from_dict(data: Dictionary, source: String, known: ConditionVocabulary = null) -> LoadResult:
 	var result: LoadResult = LoadResult.new()
-	var chapter: ChapterData = parse(data, source, result.issues)
+	var chapter: ChapterData = parse(data, source, result.issues, known)
 	if result.issues.is_empty():
 		result.data = chapter
 	return result
@@ -61,7 +63,7 @@ static func read_object(path: String, issues: Array[DataIssue]) -> Dictionary:
 ## schema version is not readable; otherwise the chapter, possibly incomplete —
 ## HeroLoader needs it to check hero-wide references even in a broken chapter.
 ## A contract between the loaders (ChapterLoader, HeroLoader), not for other code.
-static func parse(data: Dictionary, source: String, issues: Array[DataIssue]) -> ChapterData:
+static func parse(data: Dictionary, source: String, issues: Array[DataIssue], known: ConditionVocabulary = null) -> ChapterData:
 	var reader: DictReader = DictReader.new(data, source, issues)
 	if not reader.schema_ok(CHAPTER_KEYS):
 		return null
@@ -80,6 +82,8 @@ static func parse(data: Dictionary, source: String, issues: Array[DataIssue]) ->
 		chapter.outcomes.append(_outcome(item))
 	for item: DictReader in reader.children("transitions", TRANSITION_KEYS):
 		chapter.transitions.append(_transition(item))
+	# условия и флаги не зависят от ссылок между списками: проверка идёт и в неполной главе
+	_check_conditions(chapter, source, known, issues)
 	for key: String in REQUIRED_LISTS:
 		# без списка (о нём уже есть DT-03 или DT-02) проверка ссылок дала бы только вторичные BS-01
 		if not reader.has_list(key):
@@ -112,7 +116,7 @@ static func owned_ids(chapter: ChapterData) -> PackedStringArray:
 static func _start(reader: DictReader) -> StartData:
 	var start: StartData = StartData.new()
 	start.id = reader.id()
-	start.condition = reader.text("if", false)
+	start.condition = reader.condition()
 	start.scene = reader.text("scene")
 	start.goal = reader.text("goal", false)
 	return start
@@ -144,7 +148,7 @@ static func _append_paragraphs(target: Array[ParagraphData], readers: Array[Dict
 	for reader: DictReader in readers:
 		var paragraph: ParagraphData = ParagraphData.new()
 		paragraph.text = reader.text("text")
-		paragraph.condition = reader.text("if", false)
+		paragraph.condition = reader.condition()
 		paragraph.speaks = reader.text("speaks", false)
 		paragraph.damage = reader.text("damage", false)
 		target.append(paragraph)
@@ -155,7 +159,7 @@ static func _option(reader: DictReader) -> OptionData:
 	option.id = reader.id()
 	option.text = reader.text("text")
 	option.kind = reader.one_of("kind", OptionData.KINDS)
-	option.condition = reader.text("if", false)
+	option.condition = reader.condition()
 	option.reason = reader.text("reason", false)
 	var check_reader: DictReader = reader.child("check", CHECK_KEYS)
 	if check_reader != null:
@@ -192,7 +196,7 @@ static func _outcome(reader: DictReader) -> OutcomeData:
 	outcome.clears = reader.strings("clears", false)
 	for item: DictReader in reader.children("routes", ROUTE_KEYS):
 		var route: RouteData = RouteData.new()
-		route.condition = item.text("if", false)
+		route.condition = item.condition()
 		route.transition = item.text("transition")
 		outcome.routes.append(route)
 	outcome.deprecated = reader.flag("deprecated")
@@ -266,6 +270,62 @@ static func _check_references(chapter: ChapterData, source: String, issues: Arra
 		if transition.to_kind == TransitionData.TO_SCENE:
 			var transition_path: String = "%s/transitions/%s" % [source, DictReader.label(transition.id, i)]
 			_require(transition.to_id, scene_ids, transition_path + "/to", transition.id, issues)
+
+
+# Разбор `if` везде, где условие может стоять; с `known` ещё и флаги sets, clears, goal_fail_flag.
+static func _check_conditions(chapter: ChapterData, source: String, known: ConditionVocabulary, issues: Array[DataIssue]) -> void:
+	for i: int in chapter.starts.size():
+		var start: StartData = chapter.starts[i]
+		_check_condition(start.condition, "%s/starts/%s" % [source, DictReader.label(start.id, i)], start.id, known, issues)
+	for i: int in chapter.scenes.size():
+		var scene: SceneData = chapter.scenes[i]
+		var scene_path: String = "%s/scenes/%s" % [source, DictReader.label(scene.id, i)]
+		_check_paragraphs(scene.paragraphs, scene_path + "/paragraphs", scene.id, known, issues)
+		for j: int in scene.options.size():
+			var option: OptionData = scene.options[j]
+			_check_condition(option.condition, "%s/options/%s" % [scene_path, DictReader.label(option.id, j)], option.id, known, issues)
+	for i: int in chapter.outcomes.size():
+		var outcome: OutcomeData = chapter.outcomes[i]
+		var outcome_path: String = "%s/outcomes/%s" % [source, DictReader.label(outcome.id, i)]
+		_check_paragraphs(outcome.paragraphs, outcome_path + "/paragraphs", outcome.id, known, issues)
+		for j: int in outcome.routes.size():
+			_check_condition(outcome.routes[j].condition, "%s/routes/%d" % [outcome_path, j], outcome.id, known, issues)
+		_check_declared(outcome.sets, outcome_path + "/sets", true, outcome.id, known, issues)
+		_check_declared(outcome.clears, outcome_path + "/clears", true, outcome.id, known, issues)
+	for i: int in chapter.transitions.size():
+		var transition: TransitionData = chapter.transitions[i]
+		var transition_path: String = "%s/transitions/%s" % [source, DictReader.label(transition.id, i)]
+		if transition.bridge != null:
+			_check_paragraphs(transition.bridge.inserts, transition_path + "/bridge/inserts", transition.id, known, issues)
+		_check_paragraphs(transition.coda, transition_path + "/coda", transition.id, known, issues)
+	_check_declared(PackedStringArray([chapter.goal_fail_flag]), source + "/goal_fail_flag", false, chapter.id, known, issues)
+
+
+static func _check_paragraphs(paragraphs: Array[ParagraphData], path: String, owner_id: String, known: ConditionVocabulary, issues: Array[DataIssue]) -> void:
+	for i: int in paragraphs.size():
+		_check_condition(paragraphs[i].condition, "%s/%d" % [path, i], owner_id, known, issues)
+
+
+# Пустой `if` (ключа нет) пропущен; пустую строку DictReader уже назвал DT-08.
+static func _check_condition(text: String, path: String, owner_id: String, known: ConditionVocabulary, issues: Array[DataIssue]) -> void:
+	if text.is_empty():
+		return
+	for issue: DataIssue in ConditionParser.parse(text, known).issues:
+		issue.path = path + "/if"
+		issue.object_id = owner_id
+		issues.append(issue)
+
+
+# Список id флагов (sets, clears, goal_fail_flag) против объявлений героя; без `known` не проверяется.
+# Пустой id: ключа нет или о нём уже есть DT-находка.
+static func _check_declared(ids: PackedStringArray, path: String, indexed: bool, owner_id: String, known: ConditionVocabulary, issues: Array[DataIssue]) -> void:
+	if known == null:
+		return
+	for i: int in ids.size():
+		if ids[i].is_empty() or known.flags.has(ids[i]):
+			continue
+		var id_path: String = "%s/%d" % [path, i] if indexed else path
+		issues.append(DataIssue.new("BS-01", id_path, owner_id, "флаг «%s» не объявлен у героя" % ids[i]))
 
 
 static func _ids(items: Array) -> PackedStringArray:

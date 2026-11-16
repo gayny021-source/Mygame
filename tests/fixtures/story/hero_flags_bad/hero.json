@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "id": "hero_flags_bad",
+  "stats": [{"id": "strength", "bonus": 1}],
+  "chapters": ["m_cond"],
+  "endings": ["end_a"],
+  "portrait": "portrait_stub",
+  "accent": "carmine"
+}

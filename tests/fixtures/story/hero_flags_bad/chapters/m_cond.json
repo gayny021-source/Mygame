@@ -1,0 +1,16 @@
+{
+  "_note": "f_ghost не объявлен, но находки BS-01 нет: flags.json героя уже с ошибкой.",
+  "schema_version": 1,
+  "id": "m_cond",
+  "title": "Условия",
+  "goal": "Цель",
+  "starts": [{"id": "st_main", "scene": "s1", "if": "f_ghost"}],
+  "scenes": [{
+    "id": "s1",
+    "paragraphs": ["Абзац."],
+    "illustration": "ill_s1",
+    "options": [{"id": "s1_go", "text": "Дальше", "kind": "normal", "outcome": "o1"}]
+  }],
+  "outcomes": [{"id": "o1", "routes": [{"transition": "t_end"}]}],
+  "transitions": [{"id": "t_end", "to": "chapter_end", "coda": ["Кода."]}]
+}

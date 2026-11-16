@@ -10,3 +10,5 @@ var endings: PackedStringArray
 var portrait: String
 var accent: String
 var sum_exception: String
+## Declarations from flags.json; empty when the hero has no such file.
+var flags: Array[FlagDecl] = []

@@ -90,6 +90,14 @@ func text(key: String, required: bool = true) -> String:
 	return value
 
 
+## Optional `if` text. A present but empty string is DT-08 (no condition means no key).
+func condition(key: String = "if") -> String:
+	var value: String = text(key, false)
+	if has_text(key) and value.is_empty():
+		issue("DT-08", key, "пустая строка if; если условия нет, уберите ключ")
+	return value
+
+
 ## Required string from `allowed`; DT-05 for any other non-empty string.
 func one_of(key: String, allowed: PackedStringArray) -> String:
 	var value: String = text(key)
