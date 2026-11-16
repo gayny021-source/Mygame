@@ -591,6 +591,16 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/story/validation/json_lint.gd",
+   "label": "json_lint.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/validation/released_ids.gd",
+   "label": "released_ids.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/story/validation/story_graph.gd",
    "label": "story_graph.gd",
    "group": "GDScript"
@@ -753,6 +763,11 @@
   {
    "id": "tests/unit/ui/safe_area_margins_test.gd",
    "label": "safe_area_margins_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tools/validate_data.gd",
+   "label": "validate_data.gd",
    "group": "GDScript"
   }
  ],
@@ -1954,6 +1969,10 @@
    "target": "design/gdd/branching-story.md"
   },
   {
+   "source": "src/core/story/validation/released_ids.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
    "source": "src/core/story/validation/story_graph.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -1964,6 +1983,10 @@
   {
    "source": "src/core/story/validation/validator_options.gd",
    "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "src/core/story/validation/validator_options.gd",
+   "target": "tools/validate_data.gd"
   },
   {
    "source": "tests/fixtures/story/fake_flags.gd",
@@ -2076,6 +2099,10 @@
   {
    "source": "tests/unit/ui/safe_area_margins_test.gd",
    "target": ".claude/skills/tscn-handcrafter/SKILL.md"
+  },
+  {
+   "source": "tools/validate_data.gd",
+   "target": "design/gdd/branching-story.md"
   }
  ]
 }
