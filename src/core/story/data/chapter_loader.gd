@@ -209,7 +209,8 @@ static func _outcome(reader: DictReader) -> OutcomeData:
 static func _flag_ids(reader: DictReader, key: String) -> PackedStringArray:
 	var by_index: Dictionary = reader.strings_by_index(key, false)
 	for i: int in by_index:
-		if by_index[i].is_empty():
+		var id: String = by_index[i]
+		if id.is_empty():
 			reader.issue("DT-02", "%s/%d" % [key, i], "пустой id флага")
 	return PackedStringArray(by_index.values())
 

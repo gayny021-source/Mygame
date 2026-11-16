@@ -17,6 +17,7 @@ var _data: Dictionary
 var _issues: Array[DataIssue]
 
 
+## Wraps one JSON object; findings are appended to [param issues].
 func _init(data: Dictionary, object_path: String, issues: Array[DataIssue]) -> void:
 	_data = data
 	path = object_path

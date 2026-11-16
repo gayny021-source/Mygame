@@ -68,10 +68,12 @@ func has_flag(id: String) -> bool:
 	return _active.has(id)
 
 
+## True when at least one active flag belongs to the category.
 func any_in_category(category: String) -> bool:
 	return not active_in_category(category).is_empty()
 
 
+## Id of the active flag standing in the group, or "" when none.
 func flag_in_group(group: String) -> String:
 	if group.is_empty():
 		return ""
