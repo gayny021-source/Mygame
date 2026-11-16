@@ -54,7 +54,7 @@ func test_levels_valid_examples() -> void:
 		[{"dc_easy": 10}, 4, "80 %"],
 		[{"dc_medium": 12}, 0, ""],
 		[{"dc_medium": 14}, 0, ""],
-		[{"dc_easy": 13, "dc_medium": 13}, 1, ""],
+		[{"dc_easy": 13, "dc_medium": 13}, 1, "13, 13, 15"],
 	]
 	for case: Array in cases:
 		var issues: Array[DataIssue] = []

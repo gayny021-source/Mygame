@@ -15,6 +15,7 @@ extends SceneTree
 ## a list that already holds exactly the current ids is left as it is, with its date. A person commits it (ADR-0001 §3).
 
 const CONFIG := "res://assets/data/config/story_limits.json"
+const D20_CONFIG := "res://assets/data/config/d20.json"
 const RELEASED := "released_ids.json"
 const ROOT_ARG := "--root="
 const FREEZE_ARG := "--freeze"
@@ -42,13 +43,10 @@ func _initialize() -> void:
 		if arg.begins_with(ROOT_ARG):
 			root = arg.trim_prefix(ROOT_ARG)
 	var config_issues: Array[DataIssue] = []
-	var config: Variant = _read_json(CONFIG, config_issues)
-	var options: ValidatorOptions = ValidatorOptions.new()
-	if config != null:
-		options = ValidatorOptions.from_dict(config, CONFIG, config_issues)
+	var options: ValidatorOptions = read_configs(CONFIG, D20_CONFIG, config_issues)
 	_print(config_issues)
 	if _errors > 0:
-		print("НЕ ПРОВЕРЕНО: в конфиге пределов %s ошибки, данные не проверялись" % CONFIG)
+		print("НЕ ПРОВЕРЕНО: в конфигах %s, %s ошибки, данные не проверялись" % [CONFIG, D20_CONFIG])
 		quit(1)
 		return
 	var heroes: PackedStringArray = DirAccess.get_directories_at(root) if DirAccess.dir_exists_absolute(root) else PackedStringArray()
@@ -65,6 +63,19 @@ func _initialize() -> void:
 
 
 ## Arguments the CLI does not know, `--root=` without a folder included: a typo must not change what is checked.
+## Limits of the data checks from `limits_path`, and formula 3 of d20-checks.md over the d20 config at
+## `d20_path` (story S7): both files go through the text lint; their findings go to `issues`.
+static func read_configs(limits_path: String, d20_path: String, issues: Array[DataIssue]) -> ValidatorOptions:
+	var options: ValidatorOptions = ValidatorOptions.new()
+	var limits: Variant = _read_json(limits_path, issues)
+	if limits != null:
+		options = ValidatorOptions.from_dict(limits, limits_path, issues)
+	var d20: Variant = _read_json(d20_path, issues)
+	if d20 != null:
+		D20Config.from_dict(d20, d20_path, issues)
+	return options
+
+
 static func unknown_args(args: PackedStringArray) -> PackedStringArray:
 	var unknown: PackedStringArray = []
 	for arg: String in args:
@@ -116,7 +127,7 @@ func _json_files(dir: String) -> PackedStringArray:
 
 
 # One read of a JSON file: the text lint, then the parser. null when the file is absent or is not an object.
-func _read_json(path: String, issues: Array[DataIssue]) -> Variant:
+static func _read_json(path: String, issues: Array[DataIssue]) -> Variant:
 	if not FileAccess.file_exists(path):
 		issues.append(DataIssue.new("DT-01", path, "", "файла нет"))
 		return null

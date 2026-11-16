@@ -1,0 +1,13 @@
+{
+	"schema_version": 1,
+	"_about": "Runtime config of the d20 checks (src/core/checks/d20_config.gd). Source: design/gdd/d20-checks.md, formula 3 (levels, user decision 2026-11-08) and the registry constants chance_window_low/high, profile_gap_min, profile_floor_max, stat_bonus_min/max (frozen, heroes.md formula 2). tools/validate_data.gd checks formula 3.",
+	"dc_easy": 11,
+	"dc_medium": 13,
+	"dc_hard": 15,
+	"chance_window_low": 25,
+	"chance_window_high": 75,
+	"profile_gap_min": 4,
+	"profile_floor_max": 0,
+	"stat_bonus_min": -1,
+	"stat_bonus_max": 5
+}
