@@ -546,6 +546,21 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/story/validation/checks/bs_budget.gd",
+   "label": "bs_budget.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/validation/checks/bs_ids.gd",
+   "label": "bs_ids.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/validation/checks/bs_limits.gd",
+   "label": "bs_limits.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/story/validation/checks/bs_shape.gd",
    "label": "bs_shape.gd",
    "group": "GDScript"
@@ -558,6 +573,11 @@
   {
    "id": "src/core/story/validation/checks/bs_traces.gd",
    "label": "bs_traces.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/validation/data_validator.gd",
+   "label": "data_validator.gd",
    "group": "GDScript"
   },
   {
@@ -1902,6 +1922,18 @@
    "target": "design/gdd/branching-story.md"
   },
   {
+   "source": "src/core/story/validation/checks/bs_budget.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/validation/checks/bs_ids.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/validation/checks/bs_limits.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
    "source": "src/core/story/validation/checks/bs_shape.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -1911,6 +1943,10 @@
   },
   {
    "source": "src/core/story/validation/checks/bs_traces.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/validation/data_validator.gd",
    "target": "design/gdd/branching-story.md"
   },
   {
