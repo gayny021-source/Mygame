@@ -1,10 +1,9 @@
 class_name ScriptedD20Source
 extends D20Source
-## Test d20 (d20-checks.md, rule 10; Edge Cases «Отладка и тесты»; AC-09; TD S7 round 1, G2: test-only, no
-## export preset to keep it out of a release build): gives the
-## faces of `tokens` in order, then rolls `fallback`. A token that is not a whole number 1…20 is
+## Test-only d20, kept out of src/ so a release build cannot ship it (d20-checks.md, rule 10; AC-09):
+## gives the faces of `tokens` in order, then rolls `fallback`. A token that is not a whole number 1…20 is
 ## logged and replaced by one fallback roll; it is spent either way. The position lives only in
-## this instance: a new process starts the list again, a replayed chapter does not.
+## this instance: a new instance starts the list again, a replayed chapter does not.
 ##
 ## Usage: [code]ScriptedD20Source.new("14,3".split(","), EngineD20Source.new(), log)[/code]
 
@@ -27,7 +26,8 @@ func roll() -> int:
 	var token: String = _tokens[_next].strip_edges()
 	_next += 1
 	# to_int() reads "12.5" as 12: only is_valid_int() tells a whole number
-	if token.is_valid_int() and token.to_int() >= 1 and token.to_int() <= 20:
-		return token.to_int()
+	var face: int = token.to_int()
+	if token.is_valid_int() and face >= 1 and face <= 20:
+		return face
 	_log.call("ScriptedD20Source: «%s» — не грань 1…20, бросает запасной источник" % token)
 	return _fallback.roll()

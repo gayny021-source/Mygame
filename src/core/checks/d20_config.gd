@@ -12,12 +12,14 @@ const KEYS: PackedStringArray = [
 	"dc_easy", "dc_medium", "dc_hard", "chance_window_low", "chance_window_high", "profile_gap_min", "profile_floor_max",
 ]
 ## B_min, B_max of formula 3: frozen product constants (registry `stat_bonus_min/max`), changed only by a
-## balance patch of the heroes, never by the level config.
+## balance patch of the heroes, never by the level config (design/gdd/d20-checks.md:352, 364).
 const STAT_BONUS_MIN := -1
 const STAT_BONUS_MAX := 5
 
 ## True only when the file was read without findings and formula 3 holds.
 var valid: bool = false
+## Code of the first finding that left the config invalid; DT-01 until a file is read.
+var issue_code: String = "DT-01"
 var dc_easy: int
 var dc_medium: int
 var dc_hard: int
@@ -45,6 +47,7 @@ static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]
 	var before: int = issues.size()
 	var reader: DictReader = DictReader.new(data, source, issues)
 	if not reader.schema_ok(KEYS + PackedStringArray(["schema_version"])):
+		config.issue_code = issues[before].code
 		return config
 	config.dc_easy = reader.integer("dc_easy")
 	config.dc_medium = reader.integer("dc_medium")
@@ -53,9 +56,9 @@ static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]
 	config.chance_window_high = reader.integer("chance_window_high")
 	config.profile_gap_min = reader.integer("profile_gap_min")
 	config.profile_floor_max = reader.integer("profile_floor_max")
-	if issues.size() > before:
-		return config
-	config.valid = config._levels_valid(reader)
+	if issues.size() == before:
+		config.valid = config._levels_valid(reader)
+	config.issue_code = "" if config.valid else issues[before].code
 	return config
 
 
@@ -77,6 +80,9 @@ func dc(level: String, issues: Array[DataIssue]) -> int:
 func _levels_valid(reader: DictReader) -> bool:
 	var valid_levels: bool = true
 	var suffix: String = "; рискованные варианты скрыты"
+	if chance_window_low < 0 or chance_window_low > chance_window_high or chance_window_high > 100:
+		reader.issue("DT-02", "chance_window_low", "окно шанса %d…%d вне 0 ≤ P_lo ≤ P_hi ≤ 100%s" % [chance_window_low, chance_window_high, suffix])
+		return false
 	if dc_easy >= dc_medium or dc_medium >= dc_hard:
 		reader.issue("DT-02", "dc_medium", "формула 3, условие 1: нужно dc_easy < dc_medium < dc_hard, а здесь %d, %d, %d%s" % [dc_easy, dc_medium, dc_hard, suffix])
 		valid_levels = false

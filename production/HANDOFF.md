@@ -22,11 +22,12 @@
 - Парс-проверка: `.claude/scripts/godot-parse-check.gd`
 
 ## Где мы
-Код ядра по ADR-0001 (`docs/architecture/adr-0001-scene-data-format.md`), тесты 571 зелёные:
+Код ядра по ADR-0001 (`docs/architecture/adr-0001-scene-data-format.md`), тесты 626 зелёные:
 - S1 загрузчики данных, S2 язык условий, S3 RunState/FlagLoader/`if` в ChapterLoader, S4 граф главы и структурные проверки BS-02…10 — закрыты, аудит 2 раунда.
 - S5 закрыта 2026-11-16, аудит 2 раунда, override DD-018/DS-001, DD-019/DS-002: `DataValidator` (= GraphValidator + bs_traces/bs_budget/bs_limits/bs_ids), `ChapterPaths` (предел `path_enum_max`), `ReleasedIds` (Snapshot, read/compare), `JsonLint`, конфиг `assets/data/config/story_limits.json`, CLI `tools/validate_data.gd` (выход 0/1/2, `--freeze`, `--root=`). Тест AC-27 — `tests/integration/story/data_validator_test.gd`. Героев в `assets/data/heroes` пока нет (CLI выходит 2).
 - S6 закрыта 2026-11-16, аудит 2 раунда, DD-020/DS-003; типографика НП-62 (`design/narrative/chapter-writing-rules.md`): `StoryPosition`, `StoryScreen`, `StoryNavigator` в `src/core/story/`, `BridgeData.joined()/split()` (пробел у вставки ставит движок, решение CEO). Тесты 571 зелёные.
-- Дальше: S7 (d20). Обязательный критерий S7 (DD-020, ADR-0001 план S7): после загрузки с записью о броске «применён» — исход, не повторный бросок; при экране ERROR сохранение не пишется. Агентам давать точные строки, а не разделы: лимит 20 шагов уходил на чтение.
+- S7 закрыта 2026-11-16, аудит 2 раунда, DD-021, DD-022/DS-004: `src/core/checks/` (`D20Check`, `D20Source`/`EngineD20Source`, `D20Result`, `RollRecord`, `CheckTurn`, `D20Config`), конфиг `assets/data/config/d20.json`, CLI проверяет формулу 3; `ScriptedD20Source` — только в `tests/fixtures/checks/`.
+- План первых историй ADR-0001 (S1–S7) выполнен. Дальше — решение CEO: дизайн «Экрана чтения» и «Экрана броска» (MVP), история Сохранения, первая глава в данных, первый APK.
 
 GDD (все Designed, ждут независимого ревью): run-state, d20-checks, heroes, branching-story, choice-system, chapter-goal, save-system, scene-illustrations. MVP 8/10 в `design/gdd/systems-index.md`. Решения директоров — `design/DIRECTOR_DECISIONS.md` (последний DD-017).
 

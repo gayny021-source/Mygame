@@ -177,6 +177,19 @@ func test_chance_depends_only_on_bonus_and_dc() -> void:
 	assert_int(args["chance"]).is_equal(2)
 
 
+func test_roll_with_invalid_config_is_refused_without_source_call() -> void:
+	# Arrange (round 2: an invalid config is never silent)
+	var source: CountingD20Source = CountingD20Source.new(14)
+	var issues: Array[DataIssue] = []
+	# Act
+	var result: D20Result = D20Check.new(D20Config.new(), source).roll(CheckFixtures.check(), CheckFixtures.hero("strength", 4), issues)
+	# Assert
+	assert_object(result).is_null()
+	assert_int(source.calls).is_equal(0)
+	assert_int(issues.size()).is_equal(1)
+	assert_str(issues[0].code).is_equal("DT-01")
+
+
 func test_roll_takes_hero_bonus_config_dc_and_one_source_face() -> void:
 	# Arrange
 	var source: CountingD20Source = CountingD20Source.new(14)

@@ -98,6 +98,22 @@ func test_negative_value_is_allowed() -> void:
 	assert_bool(config.valid).is_true()
 
 
+func test_chance_window_outside_0_100_is_dt02() -> void:
+	# Arrange: negative levels pass every inequality of formula 3 under a window of ±1000
+	var cases: Array[Dictionary] = [
+		{"chance_window_low": -1000, "chance_window_high": 1000, "dc_easy": -10, "dc_medium": -8, "dc_hard": -6},
+		{"chance_window_low": 75, "chance_window_high": 25},
+	]
+	for values: Dictionary in cases:
+		var issues: Array[DataIssue] = []
+		# Act
+		var config: D20Config = _config(values, issues)
+		# Assert
+		assert_bool(config.valid).is_false()
+		assert_str(issues[0].code).is_equal("DT-02")
+		assert_str(issues[0].message).contains("окно")
+
+
 func test_unknown_key_is_dt04() -> void:
 	# Arrange
 	var issues: Array[DataIssue] = []
@@ -130,6 +146,16 @@ func test_missing_key_is_dt03_and_invalid() -> void:
 	# Assert
 	assert_str(issues[0].code).is_equal("DT-03")
 	assert_bool(config.valid).is_false()
+
+
+func test_other_schema_version_keeps_its_code() -> void:
+	# Arrange
+	var issues: Array[DataIssue] = []
+	# Act
+	var config: D20Config = _config({"schema_version": 2}, issues)
+	# Assert
+	assert_bool(config.valid).is_false()
+	assert_str(config.issue_code).is_equal("DT-07")
 
 
 func test_unreadable_file_is_dt01_and_invalid() -> void:

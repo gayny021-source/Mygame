@@ -29,13 +29,17 @@ var _log: Callable
 
 
 ## A check chosen on `screen`; null when the screen is not a scene, `option` is not a risky option of
-## it (an error screen writes nothing) or the d20 config is not valid (risky options are hidden then).
+## it (an error screen writes nothing), or the d20 config is not valid (risky options are hidden then,
+## and that one is logged).
 ## `commit` takes (transition: int, record: RollRecord) and serializes the record at once; `log_error`
 ## takes one String.
 static func choose(screen: StoryScreen, option: OptionData, hero: HeroData, d20: D20Check, commit: Callable, log_error: Callable) -> CheckTurn:
-	if screen == null or screen.kind != StoryScreen.Kind.SCENE or not d20.config.valid:
+	if screen == null or screen.kind != StoryScreen.Kind.SCENE:
 		return null
 	if option == null or option.check == null or not screen.scene.options.has(option):
+		return null
+	if not d20.config.valid:
+		log_error.call("%s конфиг d20 недействителен: рискованный вариант «%s» скрыт" % [d20.config.issue_code, option.id])
 		return null
 	var turn: CheckTurn = CheckTurn.new()
 	turn.phase = Phase.CHOSEN

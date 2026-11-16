@@ -272,13 +272,22 @@ func test_restore_null_record_is_dropped() -> void:
 	assert_str(_errors[0]).contains("DT-02")
 
 
-func test_choose_with_invalid_config_hides_the_check() -> void:
-	# Arrange: a config that did not read (C4: risky options hidden, no fallback)
+func test_choose_with_invalid_config_hides_the_check_and_logs() -> void:
+	# Arrange: a config that did not read, and one breaking formula 3 (C4; round 2: not silent)
+	var issues: Array[DataIssue] = []
+	var configs: Array[Array] = [
+		[D20Config.new(), "DT-01"],
+		[D20Config.load_file("res://tests/fixtures/checks/d20_hard_16.json", issues), "DT-02"],
+	]
 	var screen: StoryScreen = _screen()
 	var hero: HeroData = CheckFixtures.hero("strength", 4)
-	# Act
-	var turn: CheckTurn = CheckTurn.choose(screen, screen.scene.options[0], hero, _d20(D20Config.new()), _commit(), _log())
-	# Assert
-	assert_object(turn).is_null()
+	for pair: Array in configs:
+		_errors = []
+		# Act
+		var turn: CheckTurn = CheckTurn.choose(screen, screen.scene.options[0], hero, _d20(pair[0]), _commit(), _log())
+		# Assert
+		assert_object(turn).is_null()
+		assert_int(_errors.size()).is_equal(1)
+		assert_str(_errors[0]).contains(pair[1])
 	assert_int(_source.calls).is_equal(0)
 	assert_array(_commits).is_empty()

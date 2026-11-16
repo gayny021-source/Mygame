@@ -48,7 +48,7 @@ static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue]) -
 	var before: int = issues.size()
 	var reader: DictReader = DictReader.new(raw, path, issues)
 	for key: Variant in raw:
-		if not KEYS.has(key):
+		if not str(key).begins_with("_") and not KEYS.has(key):
 			reader.issue("DT-04", str(key), "неизвестный ключ")
 	var record: RollRecord = RollRecord.new()
 	record.scene_id = StoryPosition._id(reader, "scene_id")

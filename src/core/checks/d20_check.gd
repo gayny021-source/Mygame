@@ -67,9 +67,12 @@ static func bonus_of(hero: HeroData, stat_id: String) -> int:
 	return 0
 
 
-## A new roll: the one call of the source for this check. Null without a call when the level has
-## no DC (DT-02 in `issues`).
+## A new roll: the one call of the source for this check. Null without a call when the config is not
+## valid (its code, DT-01 or DT-02, in `issues`) or the level has no DC (DT-02).
 func roll(check: CheckData, hero: HeroData, issues: Array[DataIssue]) -> D20Result:
+	if not config.valid:
+		issues.append(DataIssue.new(config.issue_code, "d20", check.id, "конфиг d20 недействителен; бросок отклонён"))
+		return null
 	var dc: int = config.dc(check.level, issues)
 	if dc < 0:
 		return null

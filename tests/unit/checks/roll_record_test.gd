@@ -51,6 +51,18 @@ func test_unknown_key_dt04() -> void:
 	assert_str(issues[0].code).is_equal("DT-04")
 
 
+func test_underscore_key_is_skipped_like_dict_reader() -> void:
+	# Arrange
+	var raw: Dictionary = _raw()
+	raw["_note"] = "комментарий"
+	var issues: Array[DataIssue] = []
+	# Act
+	var record: RollRecord = _read(raw, issues)
+	# Assert
+	assert_array(issues).is_empty()
+	assert_object(record).is_not_null()
+
+
 func test_bad_id_dt06() -> void:
 	# Arrange
 	var raw: Dictionary = _raw()

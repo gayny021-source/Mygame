@@ -1272,6 +1272,10 @@
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
+   "target": ".claude/agents/balance-simulator.md"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
    "target": ".claude/agents/chaos-monkey.md"
   },
   {
@@ -1380,6 +1384,14 @@
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/checks/check_turn.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/checks/d20_config.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
    "target": "src/core/state/run_state.gd"
   },
   {
@@ -1477,6 +1489,14 @@
   {
    "source": "design/DISSENT_LOG.md",
    "target": "design/DIRECTOR_DECISIONS.md"
+  },
+  {
+   "source": "design/DISSENT_LOG.md",
+   "target": "src/core/checks/check_turn.gd"
+  },
+  {
+   "source": "design/DISSENT_LOG.md",
+   "target": "src/core/checks/d20_config.gd"
   },
   {
    "source": "design/DISSENT_LOG.md",

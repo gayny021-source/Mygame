@@ -154,6 +154,25 @@ func test_resume_error_screen_gives_no_turn_and_no_commit() -> void:
 	assert_int(_errors.size()).is_equal(1)
 
 
+func test_applied_record_continue_tapped_twice_commits_nothing_and_applies_once() -> void:
+	# Arrange: the caller of «Продолжить» applies whatever proceed returns (round 2, chaos)
+	var loaded: Array = _load(_play(true))
+	var run: NavigatorHarness = loaded[0]
+	var turn: CheckTurn = loaded[1]
+	var outcomes: Array[String] = []
+	# Act
+	for tap: int in 2:
+		var result: D20Result = turn.proceed()
+		if result != null:
+			outcomes.append(result.outcome_id)
+			run.choose(result.outcome_id)
+	# Assert
+	assert_array(outcomes).contains_exactly(["ow"])
+	assert_array(_commits).is_empty()
+	assert_int(run.state.applied).is_equal(1)
+	assert_int(run.state.journal().size()).is_equal(1)
+
+
 # The screen after «Дальше» on `ow` in a run that was never unloaded.
 func _straight_next() -> StoryScreen:
 	var run: NavigatorHarness = _run()
