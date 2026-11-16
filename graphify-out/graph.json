@@ -1160,6 +1160,10 @@
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
+   "target": ".claude/agents/godot-mobile-auditor.md"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
    "target": ".claude/agents/gut-test-engineer.md"
   },
   {
@@ -1255,6 +1259,34 @@
    "target": "design/narrative/voices/rovend.md"
   },
   {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/story/validation/json_lint.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/story/validation/released_ids.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/story/validation/validator_options.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "tests/unit/story/bs_ids_test.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "tests/unit/story/released_ids_test.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "tests/unit/story/validator_options_test.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "tools/validate_data.gd"
+  },
+  {
    "source": "design/DISSENT_LOG.md",
    "target": ".claude/agents/balance-simulator.md"
   },
@@ -1301,6 +1333,22 @@
   {
    "source": "design/DISSENT_LOG.md",
    "target": "design/DIRECTOR_DECISIONS.md"
+  },
+  {
+   "source": "design/DISSENT_LOG.md",
+   "target": "src/core/story/validation/json_lint.gd"
+  },
+  {
+   "source": "design/DISSENT_LOG.md",
+   "target": "src/core/story/validation/released_ids.gd"
+  },
+  {
+   "source": "design/DISSENT_LOG.md",
+   "target": "src/core/story/validation/validator_options.gd"
+  },
+  {
+   "source": "design/DISSENT_LOG.md",
+   "target": "tools/validate_data.gd"
   },
   {
    "source": "design/accessibility-requirements.md",
