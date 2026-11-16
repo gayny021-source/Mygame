@@ -541,6 +541,21 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/story/validation/checks/bs_shape.gd",
+   "label": "bs_shape.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/validation/checks/bs_structure.gd",
+   "label": "bs_structure.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/validation/graph_validator.gd",
+   "label": "graph_validator.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/story/validation/story_graph.gd",
    "label": "story_graph.gd",
    "group": "GDScript"
@@ -1820,6 +1835,14 @@
   },
   {
    "source": "src/core/story/data/transition_data.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/validation/checks/bs_shape.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/validation/checks/bs_structure.gd",
    "target": "design/gdd/branching-story.md"
   },
   {
