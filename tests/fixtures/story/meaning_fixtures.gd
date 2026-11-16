@@ -91,7 +91,8 @@ static func shape(letters: String) -> Dictionary:
 				for extra: String in [outcome_id + "_f", outcome_id + "_s"]:
 					data["outcomes"].append(GraphFixtures.outcome(extra, ["t_" + ids[i]]))
 			"v", "u":
-				scene["options"] = [GraphFixtures.normal(ids[i] + "_a", outcome_id), GraphFixtures.normal(ids[i] + "_b", outcome_id)]
+				scene["options"] = [GraphFixtures.normal(ids[i] + "_a", outcome_id), GraphFixtures.normal(ids[i] + "_b", outcome_id + "_b")]
+				data["outcomes"].append(GraphFixtures.outcome(outcome_id + "_b", ["t_" + ids[i]]))
 	return data
 
 

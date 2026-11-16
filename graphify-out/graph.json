@@ -1899,6 +1899,10 @@
    "target": "design/gdd/branching-story.md"
   },
   {
+   "source": "src/core/story/validation/validator_options.gd",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
    "source": "tests/fixtures/story/fake_flags.gd",
    "target": "src/core/story/data/condition_context.gd"
   },
