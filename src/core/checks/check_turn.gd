@@ -25,13 +25,15 @@ var record: RollRecord
 var _d20: D20Check
 var _hero: HeroData
 var _commit: Callable
+var _log: Callable
 
 
-## A check chosen on `screen`; null when the screen is not a scene or `option` is not a risky
-## option of it (an error screen writes nothing). `commit` takes (transition: int, record: RollRecord)
-## and serializes the record at once.
-static func choose(screen: StoryScreen, option: OptionData, hero: HeroData, d20: D20Check, commit: Callable) -> CheckTurn:
-	if screen == null or screen.kind != StoryScreen.Kind.SCENE:
+## A check chosen on `screen`; null when the screen is not a scene, `option` is not a risky option of
+## it (an error screen writes nothing) or the d20 config is not valid (risky options are hidden then).
+## `commit` takes (transition: int, record: RollRecord) and serializes the record at once; `log_error`
+## takes one String.
+static func choose(screen: StoryScreen, option: OptionData, hero: HeroData, d20: D20Check, commit: Callable, log_error: Callable) -> CheckTurn:
+	if screen == null or screen.kind != StoryScreen.Kind.SCENE or not d20.config.valid:
 		return null
 	if option == null or option.check == null or not screen.scene.options.has(option):
 		return null
@@ -42,13 +44,19 @@ static func choose(screen: StoryScreen, option: OptionData, hero: HeroData, d20:
 	turn._d20 = d20
 	turn._hero = hero
 	turn._commit = commit
+	turn._log = log_error
 	return turn
 
 
 ## The check of `record` after a load, shown again by the record's numbers (AC-21, AC-24): ROLLED,
 ## the source and `commit` not called. Null and one line to `log_error` when the screen is not the
-## record's scene or the scene has no such check any more: the record is dropped, the player chooses again.
+## record's scene, the scene has no such check any more, or the record does not fit it (another stat, a
+## bonus outside STAT_BONUS_MIN…MAX; the DC is not compared, AC-21): the record is dropped, the player
+## chooses again.
 static func restore(screen: StoryScreen, record: RollRecord, commit: Callable, log_error: Callable) -> CheckTurn:
+	if record == null:
+		log_error.call("DT-02 запись о броске отброшена: записи нет")
+		return null
 	if screen == null or screen.kind != StoryScreen.Kind.SCENE or screen.scene.id != record.scene_id:
 		log_error.call("запись о броске отброшена: сцены «%s» нет на экране" % record.scene_id)
 		return null
@@ -59,6 +67,9 @@ static func restore(screen: StoryScreen, record: RollRecord, commit: Callable, l
 	if found == null:
 		log_error.call("запись о броске отброшена: в сцене «%s» нет проверки «%s»" % [record.scene_id, record.check_id])
 		return null
+	if record.stat_id != found.stat or record.bonus < D20Config.STAT_BONUS_MIN or record.bonus > D20Config.STAT_BONUS_MAX:
+		log_error.call("DT-02 запись о броске отброшена: «%s» %+d не подходит к проверке «%s» (%s, бонус %d…%d)" % [record.stat_id, record.bonus, found.id, found.stat, D20Config.STAT_BONUS_MIN, D20Config.STAT_BONUS_MAX])
+		return null
 	var turn: CheckTurn = CheckTurn.new()
 	turn.phase = Phase.ROLLED
 	turn.check = found
@@ -66,16 +77,24 @@ static func restore(screen: StoryScreen, record: RollRecord, commit: Callable, l
 	turn.record = record
 	turn.result = D20Check.restore(record, found)
 	turn._commit = commit
+	turn._log = log_error
 	return turn
 
 
-## «Бросить»: only from CHOSEN. One call of the source, then commit 3 with an unapplied record.
+## «Бросить»: only from CHOSEN. One call of the source, then commit 3 with an unapplied record. The
+## phase changes only once the record exists; a level without a DC is logged and leaves CHOSEN.
 func roll() -> D20Result:
 	if phase != Phase.CHOSEN:
 		return null
-	phase = Phase.ROLLED
-	result = _d20.roll(check, _hero)
+	var issues: Array[DataIssue] = []
+	var rolled: D20Result = _d20.roll(check, _hero, issues)
+	for issue: DataIssue in issues:
+		_log.call("%s %s (%s): %s" % [issue.code, issue.path, check.id, issue.message])
+	if rolled == null:
+		return null
+	result = rolled
 	record = RollRecord.of(scene_id, result)
+	phase = Phase.ROLLED
 	_commit.call(COMMIT_ROLLED, record)
 	return result
 
@@ -92,6 +111,9 @@ func cancel() -> bool:
 ## unless a restored record was already applied.
 func proceed() -> D20Result:
 	if phase != Phase.ROLLED:
+		return null
+	if record == null:
+		_log.call("DT-02 «Продолжить» отклонено: у проверки «%s» нет записи о броске" % check.id)
 		return null
 	phase = Phase.APPLIED
 	if not record.applied:

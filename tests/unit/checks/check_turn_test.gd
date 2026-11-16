@@ -41,12 +41,12 @@ func _screen() -> StoryScreen:
 	return screen
 
 
-func _d20(config: D20Config = D20Config.new()) -> D20Check:
+func _d20(config: D20Config = CheckFixtures.config()) -> D20Check:
 	return D20Check.new(config, _source)
 
 
 func _chosen(screen: StoryScreen = _screen(), bonus: int = 4) -> CheckTurn:
-	return CheckTurn.choose(screen, screen.scene.options[0], CheckFixtures.hero("strength", bonus), _d20(), _commit())
+	return CheckTurn.choose(screen, screen.scene.options[0], CheckFixtures.hero("strength", bonus), _d20(), _commit(), _log())
 
 
 # AC-21: n = 14, +4, DC 13, not applied.
@@ -157,13 +157,15 @@ func test_restore_applied_proceed_returns_once_without_commit() -> void:
 func test_restore_keeps_record_numbers_after_balance_patch() -> void:
 	# Arrange: Medium 14 now, and Strength +3
 	var issues: Array[DataIssue] = []
-	var patched: D20Config = D20Config.from_dict({"schema_version": 1, "dc_medium": 14}, "d20", issues)
+	var data: Dictionary = ChapterLoader.read_object(D20Config.PATH, issues)
+	data["dc_medium"] = 14
+	var patched: D20Config = D20Config.from_dict(data, "d20", issues)
 	var record: RollRecord = _record()
 	record.roll = 9
 	record.rerolled = true
 	# Act: the saved reroll to 9 of the +4 / Medium 13 roll
 	var turn: CheckTurn = CheckTurn.restore(_screen(), record, _commit(), _log())
-	var fresh_need: int = D20Check.need(_d20(patched).dc_of(CheckFixtures.check()), 3)
+	var fresh_need: int = D20Check.need(patched.dc("medium", issues), 3)
 	# Assert: the restored roll keeps its numbers (13 against 13), a new check takes the new ones
 	assert_array(issues).is_empty()
 	assert_int(turn.result.total).is_equal(13)
@@ -182,10 +184,10 @@ func test_choose_or_restore_on_error_or_null_screen_returns_null_and_commits_not
 	var foreign: OptionData = _screen().scene.options[0]
 	# Act
 	var turns: Array = [
-		CheckTurn.choose(null, risky, hero, _d20(), _commit()),
-		CheckTurn.choose(error, risky, hero, _d20(), _commit()),
-		CheckTurn.choose(scene, scene.scene.options[1], hero, _d20(), _commit()),
-		CheckTurn.choose(scene, foreign, hero, _d20(), _commit()),
+		CheckTurn.choose(null, risky, hero, _d20(), _commit(), _log()),
+		CheckTurn.choose(error, risky, hero, _d20(), _commit(), _log()),
+		CheckTurn.choose(scene, scene.scene.options[1], hero, _d20(), _commit(), _log()),
+		CheckTurn.choose(scene, foreign, hero, _d20(), _commit(), _log()),
 		CheckTurn.restore(null, _record(), _commit(), _log()),
 		CheckTurn.restore(error, _record(), _commit(), _log()),
 	]
@@ -208,4 +210,75 @@ func test_restore_with_foreign_scene_or_missing_check_returns_null_and_logs_once
 		assert_object(turn).is_null()
 		assert_int(_errors.size()).is_equal(1)
 		assert_str(_errors[0]).contains("gone")
+	assert_array(_commits).is_empty()
+
+
+# --- Audit round 1 (TD S7): C1-C5 ---
+
+func test_roll_with_unknown_level_stays_chosen_and_calls_nothing() -> void:
+	# Arrange: C1 + C3, no result means no record, no phase change and no commit
+	var screen: StoryScreen = _screen()
+	screen.scene.options[0].check.level = "legendary"
+	var turn: CheckTurn = _chosen(screen)
+	# Act
+	var result: D20Result = turn.roll()
+	var proceeded: D20Result = turn.proceed()
+	# Assert
+	assert_object(result).is_null()
+	assert_object(proceeded).is_null()
+	assert_int(turn.phase).is_equal(PHASE.CHOSEN)
+	assert_object(turn.record).is_null()
+	assert_int(_source.calls).is_equal(0)
+	assert_array(_commits).is_empty()
+	assert_int(_errors.size()).is_equal(1)
+	assert_str(_errors[0]).contains("DT-02")
+
+
+func test_proceed_without_record_is_refused_and_logged() -> void:
+	# Arrange (C1)
+	var turn: CheckTurn = CheckTurn.restore(_screen(), _record(), _commit(), _log())
+	turn.record = null
+	# Act
+	var result: D20Result = turn.proceed()
+	# Assert
+	assert_object(result).is_null()
+	assert_array(_commits).is_empty()
+	assert_int(_errors.size()).is_equal(1)
+	assert_str(_errors[0]).contains("DT-02")
+
+
+func test_restore_with_bonus_out_of_window_or_other_stat_is_dropped() -> void:
+	# Arrange: [field, value] of a record that does not fit the check (C2; the DC is not compared, AC-21)
+	var cases: Array[Array] = [["bonus", 6], ["bonus", -2], ["stat_id", "faith"]]
+	for case: Array in cases:
+		_errors = []
+		var record: RollRecord = _record()
+		record.set(case[0], case[1])
+		# Act
+		var turn: CheckTurn = CheckTurn.restore(_screen(), record, _commit(), _log())
+		# Assert
+		assert_object(turn).is_null()
+		assert_int(_errors.size()).is_equal(1)
+		assert_str(_errors[0]).contains("DT-02")
+	assert_array(_commits).is_empty()
+
+
+func test_restore_null_record_is_dropped() -> void:
+	# Arrange / Act (C5)
+	var turn: CheckTurn = CheckTurn.restore(_screen(), null, _commit(), _log())
+	# Assert
+	assert_object(turn).is_null()
+	assert_int(_errors.size()).is_equal(1)
+	assert_str(_errors[0]).contains("DT-02")
+
+
+func test_choose_with_invalid_config_hides_the_check() -> void:
+	# Arrange: a config that did not read (C4: risky options hidden, no fallback)
+	var screen: StoryScreen = _screen()
+	var hero: HeroData = CheckFixtures.hero("strength", 4)
+	# Act
+	var turn: CheckTurn = CheckTurn.choose(screen, screen.scene.options[0], hero, _d20(D20Config.new()), _commit(), _log())
+	# Assert
+	assert_object(turn).is_null()
+	assert_int(_source.calls).is_equal(0)
 	assert_array(_commits).is_empty()

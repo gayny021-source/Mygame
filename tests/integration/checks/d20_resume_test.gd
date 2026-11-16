@@ -44,8 +44,8 @@ func _run() -> NavigatorHarness:
 func _play(applied: bool) -> Dictionary:
 	var run: NavigatorHarness = _run()
 	var screen: StoryScreen = run.nav.resume(StoryPosition.new("m_g", "s1"), run.state)
-	var d20: D20Check = D20Check.new(D20Config.new(), _source)
-	var turn: CheckTurn = CheckTurn.choose(screen, screen.scene.options[0], run.hero, d20, _commit())
+	var d20: D20Check = D20Check.new(CheckFixtures.config(), _source)
+	var turn: CheckTurn = CheckTurn.choose(screen, screen.scene.options[0], run.hero, d20, _commit(), _log())
 	turn.roll()
 	if applied:
 		turn.proceed()

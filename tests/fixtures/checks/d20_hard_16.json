@@ -1,5 +1,11 @@
 {
 	"schema_version": 1,
 	"_about": "Breaks formula 3, condition 5 of d20-checks.md: Hard 16 gives the bonus -1 a 20 % chance (story S7).",
-	"dc_hard": 16
+	"dc_easy": 11,
+	"dc_medium": 13,
+	"dc_hard": 16,
+	"chance_window_low": 25,
+	"chance_window_high": 75,
+	"profile_gap_min": 4,
+	"profile_floor_max": 0
 }

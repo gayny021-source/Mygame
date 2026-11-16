@@ -180,9 +180,10 @@ func test_chance_depends_only_on_bonus_and_dc() -> void:
 func test_roll_takes_hero_bonus_config_dc_and_one_source_face() -> void:
 	# Arrange
 	var source: CountingD20Source = CountingD20Source.new(14)
-	var d20: D20Check = D20Check.new(D20Config.new(), source)
+	var d20: D20Check = D20Check.new(CheckFixtures.config(), source)
+	var issues: Array[DataIssue] = []
 	# Act
-	var result: D20Result = d20.roll(CheckFixtures.check(), CheckFixtures.hero("strength", 4))
+	var result: D20Result = d20.roll(CheckFixtures.check(), CheckFixtures.hero("strength", 4), issues)
 	# Assert
 	assert_int(source.calls).is_equal(1)
 	assert_int(result.roll).is_equal(14)
@@ -193,4 +194,5 @@ func test_roll_takes_hero_bonus_config_dc_and_one_source_face() -> void:
 	assert_bool(result.rerolled).is_false()
 	assert_str(result.check_id).is_equal("bridge_strength")
 	assert_str(result.stat_id).is_equal("strength")
-	assert_int(D20Check.need(d20.dc_of(CheckFixtures.check()), 4)).is_equal(9)
+	assert_int(D20Check.need(d20.config.dc("medium", issues), 4)).is_equal(9)
+	assert_array(issues).is_empty()

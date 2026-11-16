@@ -1,34 +1,35 @@
 class_name D20Config
 extends RefCounted
-## Runtime config of the d20 checks, `assets/data/config/d20.json` (d20-checks.md, formulas 2-3;
-## ADR-0001 §6; story S7): the three levels and the frozen product constants formula 3 holds them
-## to. The defaults are the GDD values. A level set breaking formula 3 is DT-02, and the three
-## `dc_*` return to their defaults. Negative values are legal (`stat_bonus_min` is −1).
+## Runtime config of the d20 checks, `assets/data/config/d20.json` (d20-checks.md, formulas 2-3 and Edge
+## Cases «конфиг уровней»; ADR-0001 §6; story S7). The values live only in the file: a config that did not
+## read whole, or breaks formula 3, is not `valid`, and then every risky option is hidden — there is no
+## fallback to defaults. Negative values are legal.
 ##
 ## Usage: [code]var config: D20Config = D20Config.load_file(D20Config.PATH, issues)[/code]
 
 const PATH := "res://assets/data/config/d20.json"
 const KEYS: PackedStringArray = [
-	"dc_easy", "dc_medium", "dc_hard", "chance_window_low", "chance_window_high", "profile_gap_min",
-	"profile_floor_max", "stat_bonus_min", "stat_bonus_max",
+	"dc_easy", "dc_medium", "dc_hard", "chance_window_low", "chance_window_high", "profile_gap_min", "profile_floor_max",
 ]
-const LEVEL_KEYS: PackedStringArray = ["dc_easy", "dc_medium", "dc_hard"]
+## B_min, B_max of formula 3: frozen product constants (registry `stat_bonus_min/max`), changed only by a
+## balance patch of the heroes, never by the level config.
+const STAT_BONUS_MIN := -1
+const STAT_BONUS_MAX := 5
 
-var dc_easy: int = 11
-var dc_medium: int = 13
-var dc_hard: int = 15
+## True only when the file was read without findings and formula 3 holds.
+var valid: bool = false
+var dc_easy: int
+var dc_medium: int
+var dc_hard: int
 ## P_lo, P_hi: the chance window of one roll, in percent.
-var chance_window_low: int = 25
-var chance_window_high: int = 75
+var chance_window_low: int
+var chance_window_high: int
 ## G_min, F_max (heroes.md, formula 3).
-var profile_gap_min: int = 4
-var profile_floor_max: int = 0
-## B_min, B_max: frozen, changed only by a balance patch of the heroes.
-var stat_bonus_min: int = -1
-var stat_bonus_max: int = 5
+var profile_gap_min: int
+var profile_floor_max: int
 
 
-## Reads the config file at `path`; findings go to `issues`, a file that does not read leaves the defaults.
+## Reads the config file at `path`; findings go to `issues`. A file that does not read gives an invalid config.
 static func load_file(path: String, issues: Array[DataIssue]) -> D20Config:
 	var before: int = issues.size()
 	var data: Dictionary = ChapterLoader.read_object(path, issues)
@@ -37,59 +38,64 @@ static func load_file(path: String, issues: Array[DataIssue]) -> D20Config:
 	return from_dict(data, path, issues)
 
 
-## Config from a parsed object: unknown key DT-04, a fraction DT-02 (that value keeps its default),
-## a broken formula 3 DT-02 per violated condition.
+## Config from a parsed object: every key is required (DT-03), unknown key DT-04, a fraction DT-02,
+## a broken formula 3 DT-02 per violated condition. Any finding leaves it invalid.
 static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]) -> D20Config:
 	var config: D20Config = D20Config.new()
+	var before: int = issues.size()
 	var reader: DictReader = DictReader.new(data, source, issues)
 	if not reader.schema_ok(KEYS + PackedStringArray(["schema_version"])):
 		return config
-	for key: String in KEYS:
-		if not reader.has(key):
-			continue
-		var before: int = issues.size()
-		var value: int = reader.integer(key)
-		if issues.size() > before:
-			continue
-		config.set(key, value)
-	if not config._levels_valid(reader):
-		var defaults: D20Config = D20Config.new()
-		for key: String in LEVEL_KEYS:
-			config.set(key, defaults.get(key))
+	config.dc_easy = reader.integer("dc_easy")
+	config.dc_medium = reader.integer("dc_medium")
+	config.dc_hard = reader.integer("dc_hard")
+	config.chance_window_low = reader.integer("chance_window_low")
+	config.chance_window_high = reader.integer("chance_window_high")
+	config.profile_gap_min = reader.integer("profile_gap_min")
+	config.profile_floor_max = reader.integer("profile_floor_max")
+	if issues.size() > before:
+		return config
+	config.valid = config._levels_valid(reader)
 	return config
 
 
-## DC of `level`, one of CheckData.LEVELS (the loader guarantees it, DT-05).
-func dc(level: String) -> int:
-	var levels: Array[int] = [dc_easy, dc_medium, dc_hard]
-	return levels[CheckData.LEVELS.find(level)]
+## DC of `level`, one of CheckData.LEVELS. Any other level is DT-02 and −1: the caller refuses the roll.
+func dc(level: String, issues: Array[DataIssue]) -> int:
+	match level:
+		"easy":
+			return dc_easy
+		"medium":
+			return dc_medium
+		"hard":
+			return dc_hard
+	issues.append(DataIssue.new("DT-02", "d20/level", "", "уровень «%s» не из %s; проверка не бросается" % [level, ", ".join(CheckData.LEVELS)]))
+	return -1
 
 
 # Formula 3 condition by condition, each broken one a DT-02. P/5 is multiplied out: the same
 # inequalities for a window in steps of 5, and no integer division.
 func _levels_valid(reader: DictReader) -> bool:
-	var valid: bool = true
-	var defaults: D20Config = D20Config.new()
-	var suffix: String = "; dc_* возвращены к %d/%d/%d" % [defaults.dc_easy, defaults.dc_medium, defaults.dc_hard]
+	var valid_levels: bool = true
+	var suffix: String = "; рискованные варианты скрыты"
 	if dc_easy >= dc_medium or dc_medium >= dc_hard:
 		reader.issue("DT-02", "dc_medium", "формула 3, условие 1: нужно dc_easy < dc_medium < dc_hard, а здесь %d, %d, %d%s" % [dc_easy, dc_medium, dc_hard, suffix])
-		valid = false
+		valid_levels = false
 	if (dc_hard - dc_easy + profile_gap_min) * 5 > chance_window_high - chance_window_low:
 		reader.issue("DT-02", "dc_hard", "формула 3, условие 2: разброс dc_hard − dc_easy = %d больше (P_hi − P_lo)/5 − G_min%s" % [dc_hard - dc_easy, suffix])
-		valid = false
+		valid_levels = false
 	var floor_chance: int = _raw_chance(dc_hard, profile_floor_max)
 	if floor_chance < chance_window_low:
 		reader.issue("DT-02", "dc_hard", "формула 3, условие 3: дно профиля %d на Трудно %d даёт шанс %d %% < %d %%%s" % [profile_floor_max, dc_hard, floor_chance, chance_window_low, suffix])
-		valid = false
-	var top_chance: int = _raw_chance(dc_easy, stat_bonus_max)
+		valid_levels = false
+	var top_chance: int = _raw_chance(dc_easy, STAT_BONUS_MAX)
 	if top_chance > chance_window_high:
-		reader.issue("DT-02", "dc_easy", "формула 3, условие 4: бонус %d на Легко %d даёт шанс %d %% > %d %%%s" % [stat_bonus_max, dc_easy, top_chance, chance_window_high, suffix])
-		valid = false
-	var bottom_chance: int = _raw_chance(dc_hard, stat_bonus_min)
+		reader.issue("DT-02", "dc_easy", "формула 3, условие 4: бонус %d на Легко %d даёт шанс %d %% > %d %%%s" % [STAT_BONUS_MAX, dc_easy, top_chance, chance_window_high, suffix])
+		valid_levels = false
+	var bottom_chance: int = _raw_chance(dc_hard, STAT_BONUS_MIN)
 	if bottom_chance < chance_window_low:
-		reader.issue("DT-02", "dc_hard", "формула 3, условие 5: бонус %d на Трудно %d даёт шанс %d %% < %d %%%s" % [stat_bonus_min, dc_hard, bottom_chance, chance_window_low, suffix])
-		valid = false
-	return valid
+		reader.issue("DT-02", "dc_hard", "формула 3, условие 5: бонус %d на Трудно %d даёт шанс %d %% < %d %%%s" % [STAT_BONUS_MIN, dc_hard, bottom_chance, chance_window_low, suffix])
+		valid_levels = false
+	return valid_levels
 
 
 # (21 − (DC − bonus)) × 5 without the clamp of formula 2: the inequalities of formula 3 are unclamped.

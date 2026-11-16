@@ -6,12 +6,13 @@ extends RefCounted
 ##
 ## Usage: [code]var result: D20Result = D20Check.new(config, source).roll(check, hero)[/code]
 
-var _config: D20Config
+## Not `valid`: every risky option is hidden (d20-checks.md, Edge Cases «конфиг уровней»).
+var config: D20Config
 var _source: D20Source
 
 
-func _init(config: D20Config, source: D20Source) -> void:
-	_config = config
+func _init(d20_config: D20Config, source: D20Source) -> void:
+	config = d20_config
 	_source = source
 
 
@@ -55,9 +56,7 @@ static func resolve(check: CheckData, bonus: int, dc: int, n: int, rerolled: boo
 ## The result of a saved roll by the record's own numbers, not the config's (AC-21: a balance
 ## patch does not change a roll already made).
 static func restore(record: RollRecord, check: CheckData) -> D20Result:
-	var result: D20Result = resolve(check, record.bonus, record.dc, record.roll, record.rerolled)
-	result.stat_id = record.stat_id
-	return result
+	return resolve(check, record.bonus, record.dc, record.roll, record.rerolled)
 
 
 ## Bonus of the stat `stat_id` of `hero`; the loader guarantees the stat exists (BS-01).
@@ -68,13 +67,10 @@ static func bonus_of(hero: HeroData, stat_id: String) -> int:
 	return 0
 
 
-## DC of the level of `check` from the config (formula 3).
-func dc_of(check: CheckData) -> int:
-	return _config.dc(check.level)
-
-
-## A new roll: the one call of the source for this check.
-func roll(check: CheckData, hero: HeroData) -> D20Result:
-	var bonus: int = bonus_of(hero, check.stat)
-	var dc: int = dc_of(check)
-	return resolve(check, bonus, dc, _source.roll(), false)
+## A new roll: the one call of the source for this check. Null without a call when the level has
+## no DC (DT-02 in `issues`).
+func roll(check: CheckData, hero: HeroData, issues: Array[DataIssue]) -> D20Result:
+	var dc: int = config.dc(check.level, issues)
+	if dc < 0:
+		return null
+	return resolve(check, bonus_of(hero, check.stat), dc, _source.roll(), false)

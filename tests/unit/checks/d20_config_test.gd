@@ -1,49 +1,54 @@
 extends GdUnitTestSuite
-## Unit tests for D20Config: the levels from the config and formula 3 (d20-checks.md, formulas 2-3; AC-08;
-## story S7), and the CLI tools/validate_data.gd reading it.
+## Unit tests for D20Config: the levels from assets/data/config/d20.json and formula 3 (d20-checks.md,
+## formulas 2-3, Edge Cases «конфиг уровней»; AC-08; story S7, TD round 1: B1, C3, C4, G1), and the
+## CLI tools/validate_data.gd reading it. The values live only in the file: no defaults in code.
 
 const Cli := preload("res://tools/validate_data.gd")
 const BROKEN := "res://tests/fixtures/checks/d20_hard_16.json"
 
 
+# The project config with `values` written over it.
 func _config(values: Dictionary, issues: Array[DataIssue]) -> D20Config:
-	var data: Dictionary = {"schema_version": 1}
-	data.merge(values)
+	var data: Dictionary = ChapterLoader.read_object(D20Config.PATH, issues)
+	data.merge(values, true)
 	return D20Config.from_dict(data, "d20", issues)
 
 
 func _levels(config: D20Config) -> Array[int]:
-	return [config.dc("easy"), config.dc("medium"), config.dc("hard")]
+	var issues: Array[DataIssue] = []
+	return [config.dc("easy", issues), config.dc("medium", issues), config.dc("hard", issues)]
 
 
-func test_defaults_are_11_13_15() -> void:
-	# Arrange / Act / Assert
-	assert_array(_levels(D20Config.new())).contains_exactly([11, 13, 15])
-
-
-func test_real_d20_json_loads_without_issues() -> void:
+func test_real_d20_json_loads_valid_11_13_15() -> void:
 	# Arrange
 	var issues: Array[DataIssue] = []
 	# Act
 	var config: D20Config = D20Config.load_file(D20Config.PATH, issues)
 	# Assert
 	assert_array(issues).is_empty()
+	assert_bool(config.valid).is_true()
 	assert_array(_levels(config)).contains_exactly([11, 13, 15])
+
+
+func test_new_config_is_invalid_until_read() -> void:
+	# Arrange / Act / Assert: no balance values in code, so nothing to fall back on (C4, G1)
+	assert_bool(D20Config.new().valid).is_false()
 
 
 func test_medium_14_gives_need_10_and_55() -> void:
 	# Arrange
 	var issues: Array[DataIssue] = []
-	var check: CheckData = CheckFixtures.check("medium")
 	# Act
-	var patched: D20Check = D20Check.new(_config({"dc_medium": 14}, issues), CountingD20Source.new())
-	var back: D20Check = D20Check.new(_config({"dc_medium": 13}, issues), CountingD20Source.new())
+	var patched: D20Config = _config({"dc_medium": 14}, issues)
+	var back: D20Config = _config({"dc_medium": 13}, issues)
+	var medium_patched: int = patched.dc("medium", issues)
+	var medium_back: int = back.dc("medium", issues)
 	# Assert
 	assert_array(issues).is_empty()
-	assert_int(D20Check.need(patched.dc_of(check), 4)).is_equal(10)
-	assert_int(D20Check.chance(patched.dc_of(check), 4)).is_equal(55)
-	assert_int(D20Check.need(back.dc_of(check), 4)).is_equal(9)
-	assert_int(D20Check.chance(back.dc_of(check), 4)).is_equal(60)
+	assert_int(D20Check.need(medium_patched, 4)).is_equal(10)
+	assert_int(D20Check.chance(medium_patched, 4)).is_equal(55)
+	assert_int(D20Check.need(medium_back, 4)).is_equal(9)
+	assert_int(D20Check.chance(medium_back, 4)).is_equal(60)
 
 
 func test_levels_valid_examples() -> void:
@@ -60,7 +65,8 @@ func test_levels_valid_examples() -> void:
 		var issues: Array[DataIssue] = []
 		# Act
 		var config: D20Config = _config(case[0], issues)
-		# Assert: a broken level set reports its condition and falls back to the defaults
+		# Assert: a broken level set reports its condition and leaves the config invalid, no fallback
+		assert_bool(config.valid).is_equal(case[1] == 0)
 		if case[1] == 0:
 			assert_array(issues).is_empty()
 			continue
@@ -68,30 +74,42 @@ func test_levels_valid_examples() -> void:
 		assert_str(issues[0].code).is_equal("DT-02")
 		assert_str(issues[0].message).contains("условие %d" % case[1])
 		assert_str(issues[0].message).contains(case[2])
-		assert_array(_levels(config)).contains_exactly([11, 13, 15])
 
 
-func test_negative_stat_bonus_min_is_allowed() -> void:
+func test_frozen_stat_bonus_bounds_are_code_constants_not_config() -> void:
 	# Arrange
 	var issues: Array[DataIssue] = []
 	# Act
-	var config: D20Config = _config({"stat_bonus_min": -1, "profile_floor_max": 0}, issues)
+	var config: D20Config = _config({"stat_bonus_min": -1}, issues)
+	# Assert (B1: GDD formula 3, B_min/B_max are frozen product constants)
+	assert_int(D20Config.STAT_BONUS_MIN).is_equal(-1)
+	assert_int(D20Config.STAT_BONUS_MAX).is_equal(5)
+	assert_str(issues[0].code).is_equal("DT-04")
+	assert_bool(config.valid).is_false()
+
+
+func test_negative_value_is_allowed() -> void:
+	# Arrange
+	var issues: Array[DataIssue] = []
+	# Act
+	var config: D20Config = _config({"profile_floor_max": -1}, issues)
 	# Assert
 	assert_array(issues).is_empty()
-	assert_int(config.stat_bonus_min).is_equal(-1)
+	assert_bool(config.valid).is_true()
 
 
 func test_unknown_key_is_dt04() -> void:
 	# Arrange
 	var issues: Array[DataIssue] = []
 	# Act
-	_config({"dc_extreme": 17}, issues)
+	var config: D20Config = _config({"dc_extreme": 17}, issues)
 	# Assert
 	assert_int(issues.size()).is_equal(1)
 	assert_str(issues[0].code).is_equal("DT-04")
+	assert_bool(config.valid).is_false()
 
 
-func test_fraction_is_dt02() -> void:
+func test_fraction_is_dt02_and_invalid() -> void:
 	# Arrange
 	var issues: Array[DataIssue] = []
 	# Act
@@ -99,17 +117,41 @@ func test_fraction_is_dt02() -> void:
 	# Assert
 	assert_int(issues.size()).is_equal(1)
 	assert_str(issues[0].code).is_equal("DT-02")
-	assert_int(config.dc_medium).is_equal(13)
+	assert_bool(config.valid).is_false()
 
 
-func test_missing_file_is_dt01_with_defaults() -> void:
+func test_missing_key_is_dt03_and_invalid() -> void:
+	# Arrange
+	var issues: Array[DataIssue] = []
+	var data: Dictionary = ChapterLoader.read_object(D20Config.PATH, issues)
+	data.erase("dc_hard")
+	# Act
+	var config: D20Config = D20Config.from_dict(data, "d20", issues)
+	# Assert
+	assert_str(issues[0].code).is_equal("DT-03")
+	assert_bool(config.valid).is_false()
+
+
+func test_unreadable_file_is_dt01_and_invalid() -> void:
 	# Arrange
 	var issues: Array[DataIssue] = []
 	# Act
 	var config: D20Config = D20Config.load_file("res://tests/fixtures/checks/no_such.json", issues)
 	# Assert
 	assert_str(issues[0].code).is_equal("DT-01")
-	assert_array(_levels(config)).contains_exactly([11, 13, 15])
+	assert_bool(config.valid).is_false()
+
+
+func test_unknown_level_is_dt02_and_minus_one() -> void:
+	# Arrange
+	var issues: Array[DataIssue] = []
+	var config: D20Config = CheckFixtures.config()
+	# Act
+	var dc: int = config.dc("legendary", issues)
+	# Assert (C3: no silent Hard)
+	assert_int(dc).is_equal(-1)
+	assert_int(issues.size()).is_equal(1)
+	assert_str(issues[0].code).is_equal("DT-02")
 
 
 # --- The CLI checks formula 3 (TD S7 (а)) ---

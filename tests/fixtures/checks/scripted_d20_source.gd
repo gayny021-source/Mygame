@@ -1,6 +1,7 @@
 class_name ScriptedD20Source
 extends D20Source
-## Debug and test d20 (d20-checks.md, rule 10; Edge Cases «Отладка и тесты»; AC-09): gives the
+## Test d20 (d20-checks.md, rule 10; Edge Cases «Отладка и тесты»; AC-09; TD S7 round 1, G2: test-only, no
+## export preset to keep it out of a release build): gives the
 ## faces of `tokens` in order, then rolls `fallback`. A token that is not a whole number 1…20 is
 ## logged and replaced by one fallback roll; it is spent either way. The position lives only in
 ## this instance: a new process starts the list again, a replayed chapter does not.

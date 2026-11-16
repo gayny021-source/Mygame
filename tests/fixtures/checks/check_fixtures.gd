@@ -21,6 +21,12 @@ static func check(level: String = "medium", stat_id: String = "strength") -> Che
 	return data
 
 
+## The project config assets/data/config/d20.json (TD S7 round 1, G1: the values live only there).
+static func config() -> D20Config:
+	var issues: Array[DataIssue] = []
+	return D20Config.load_file(D20Config.PATH, issues)
+
+
 ## A hero with the one stat `stat_id` of `bonus`.
 static func hero(stat_id: String, bonus: int) -> HeroData:
 	var stat: StatData = StatData.new()
