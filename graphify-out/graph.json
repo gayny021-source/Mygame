@@ -691,6 +691,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/story/released_ids_test.gd",
+   "label": "released_ids_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/story/run_state_test.gd",
    "label": "run_state_test.gd",
    "group": "GDScript"
