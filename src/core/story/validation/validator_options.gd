@@ -1,10 +1,11 @@
 class_name ValidatorOptions
 extends RefCounted
 ## Limits of the graph and meaning checks (branching-story.md, Formulas F1–F8; ADR-0001, Key Interfaces).
-## The caller injects them: the CLI `tools/validate_data.gd` reads `assets/data/config/story_limits.json`
-## with `load_file`; tests build `new()`, whose defaults are the GDD values.
+## The caller injects them: the CLI `tools/validate_data.gd` reads `assets/data/config/story_limits.json` once
+## (text lint, parser) and builds the options with `from_dict`, the loader of this config; tests build `new()`,
+## whose defaults are the GDD values.
 ##
-## Usage: [code]var options: ValidatorOptions = ValidatorOptions.load_file(path, issues)[/code]
+## Usage: [code]var options: ValidatorOptions = ValidatorOptions.from_dict(data, path, issues)[/code]
 
 ## Integer limits the config may override; every name is a field below.
 const LIMIT_KEYS: PackedStringArray = [
@@ -53,7 +54,8 @@ var prose_flags_max: int = 3
 var outcome_paragraphs_max: int = 6
 var past_options_max: int = 1
 var coda_paragraphs_max: int = 3
-## Most paths ChapterPaths walks in one chapter: past it the walk stops and the path checks say so (2^N paths would hang CI).
+## Most paths ChapterPaths walks in one chapter: past it the walk stops and the path checks say so (2^N paths
+## would hang CI). 0 walks every path.
 var path_enum_max: int = 5000
 ## BS-25: a warning in MVP, an error from Vertical Slice (O-2).
 var bs25_is_error: bool = false
@@ -66,6 +68,7 @@ var ending_frames: Dictionary[String, String] = {}
 
 
 ## Reads the config file at `path`; findings go to `issues` and leave the defaults in place.
+# shortcut: only validator_options_test.gd calls it (TD S5 round 1, G3: the CLI reads the file); remove with those tests.
 static func load_file(path: String, issues: Array[DataIssue]) -> ValidatorOptions:
 	var before: int = issues.size()
 	var data: Dictionary = ChapterLoader.read_object(path, issues)

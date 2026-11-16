@@ -736,13 +736,28 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/story/json_lint_escape_test.gd",
+   "label": "json_lint_escape_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/story/json_lint_test.gd",
    "label": "json_lint_test.gd",
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/story/path_cap_test.gd",
+   "label": "path_cap_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/story/released_ids_test.gd",
    "label": "released_ids_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/released_snapshot_test.gd",
+   "label": "released_snapshot_test.gd",
    "group": "GDScript"
   },
   {
@@ -758,6 +773,16 @@
   {
    "id": "tests/unit/story/story_json_engine_test.gd",
    "label": "story_json_engine_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/validate_data_args_test.gd",
+   "label": "validate_data_args_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/validator_options_range_test.gd",
+   "label": "validator_options_range_test.gd",
    "group": "GDScript"
   },
   {
@@ -1991,6 +2016,10 @@
   },
   {
    "source": "src/core/story/validation/validator_options.gd",
+   "target": "tests/unit/story/validator_options_test.gd"
+  },
+  {
+   "source": "src/core/story/validation/validator_options.gd",
    "target": "tools/validate_data.gd"
   },
   {
@@ -2108,6 +2137,10 @@
   {
    "source": "tests/unit/story/story_json_engine_test.gd",
    "target": "tests/integration/story/story_file_engine_test.gd"
+  },
+  {
+   "source": "tests/unit/story/validate_data_args_test.gd",
+   "target": "tools/validate_data.gd"
   },
   {
    "source": "tests/unit/ui/safe_area_margins_test.gd",
