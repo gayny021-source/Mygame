@@ -656,6 +656,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/integration/story/data_validator_test.gd",
+   "label": "data_validator_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/integration/story/hero_flags_test.gd",
    "label": "hero_flags_test.gd",
    "group": "GDScript"
@@ -2013,6 +2018,10 @@
    "target": "tests/unit/story/chapter_loader_test.gd"
   },
   {
+   "source": "tests/integration/story/data_validator_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
    "source": "tests/integration/story/hero_flags_test.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -2087,6 +2096,10 @@
   {
    "source": "tests/unit/story/graph_validator_test.gd",
    "target": "tests/unit/story/bs_structure_test.gd"
+  },
+  {
+   "source": "tests/unit/story/released_ids_test.gd",
+   "target": "tests/integration/story/data_validator_test.gd"
   },
   {
    "source": "tests/unit/story/run_state_test.gd",

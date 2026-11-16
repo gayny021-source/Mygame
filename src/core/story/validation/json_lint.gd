@@ -9,6 +9,7 @@ extends RefCounted
 
 const BOM: PackedByteArray = [0xEF, 0xBB, 0xBF]
 const SPACE := " \t\r\n"
+const ESCAPES: Dictionary[String, String] = {"\"": "\"", "\\": "\\", "/": "/", "b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t"}
 
 
 ## Findings of the text `bytes` of the file `source`; empty bytes have none.
@@ -32,7 +33,7 @@ static func _issue(source: String, line: int, message: String) -> DataIssue:
 
 
 # Index of the first byte that breaks UTF-8 from `start`, or -1.
-# shortcut: overlong 3- and 4-byte forms and surrogates pass; the parser of the engine is the next guard.
+# Known limit (TD S5 round 1, rejected as YAGNI): overlong 3- and 4-byte forms and surrogates pass.
 static func _bad_utf8(bytes: PackedByteArray, start: int) -> int:
 	var i: int = start
 	while i < bytes.size():
@@ -78,7 +79,8 @@ static func _scan(text: String, source: String, issues: Array[DataIssue]) -> voi
 			"\n":
 				line += 1
 			"{", "[":
-				keys.append({})
+				var frame: Dictionary[String, bool] = {}
+				keys.append(frame)
 				is_object.append(symbol == "{")
 				expect_key = symbol == "{"
 				after_comma = false
@@ -99,10 +101,35 @@ static func _scan(text: String, source: String, issues: Array[DataIssue]) -> voi
 		i += 1
 
 
-static func _key(key: String, seen: Dictionary, source: String, line: int, issues: Array[DataIssue]) -> void:
+# Keys are compared after escapes: "a" and "\u0061" are one key for the parser.
+static func _key(raw: String, seen: Dictionary[String, bool], source: String, line: int, issues: Array[DataIssue]) -> void:
+	var key: String = _unescape(raw)
 	if seen.has(key):
 		issues.append(_issue(source, line, "ключ «%s» повторяется в одном объекте: парсер молча оставит последний" % key))
 	seen[key] = true
+
+
+# JSON escapes of a string body: \uXXXX and the one-letter ones; anything else is left as written.
+static func _unescape(raw: String) -> String:
+	if not raw.contains("\\"):
+		return raw
+	var result: String = ""
+	var i: int = 0
+	while i < raw.length():
+		var symbol: String = raw[i]
+		if symbol != "\\" or i + 1 >= raw.length():
+			result += symbol
+			i += 1
+			continue
+		var letter: String = raw[i + 1]
+		var hex: String = raw.substr(i + 2, 4)
+		if letter == "u" and hex.length() == 4 and hex.is_valid_hex_number():
+			result += char(hex.hex_to_int())
+			i += 6
+			continue
+		result += ESCAPES.get(letter, "\\" + letter)
+		i += 2
+	return result
 
 
 # Index of the closing quote of the string that opens at `start` (or the end of the text).

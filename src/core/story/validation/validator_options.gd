@@ -12,7 +12,10 @@ const LIMIT_KEYS: PackedStringArray = [
 	"branch_max", "path_words_min", "path_words_max", "k_budget", "k_min", "s_path_min", "spine_risky_max",
 	"pause_scenes_min", "linear_run_max", "n_early_max", "paragraph_words_max", "screen_paragraphs_max",
 	"conditional_paragraphs_max", "prose_flags_max", "outcome_paragraphs_max", "past_options_max", "coda_paragraphs_max",
+	"path_enum_max",
 ]
+## Pairs low, high of LIMIT_KEYS, flat: low above high is DT-02.
+const RANGES: PackedStringArray = ["s_chapter_min", "s_chapter_max", "n_node_min", "n_node_max", "path_words_min", "path_words_max", "k_min", "k_budget"]
 const SWITCH_BS25 := "bs25_is_error"
 
 ## F4: most options in a scene (BS-06).
@@ -50,6 +53,8 @@ var prose_flags_max: int = 3
 var outcome_paragraphs_max: int = 6
 var past_options_max: int = 1
 var coda_paragraphs_max: int = 3
+## Most paths ChapterPaths walks in one chapter: past it the walk stops and the path checks say so (2^N paths would hang CI).
+var path_enum_max: int = 5000
 ## BS-25: a warning in MVP, an error from Vertical Slice (O-2).
 var bs25_is_error: bool = false
 ## BS-20: the frame catalog; empty — the check does not run (O-18: no catalog yet).
@@ -69,8 +74,8 @@ static func load_file(path: String, issues: Array[DataIssue]) -> ValidatorOption
 	return from_dict(data, path, issues)
 
 
-## Options from a parsed config: named limits override the defaults. Unknown key DT-04, a fraction DT-02,
-## another `schema_version` DT-07; a value with a finding keeps its default.
+## Options from a parsed config: named limits override the defaults. Unknown key DT-04; a fraction, a negative
+## value or a pair with low above high DT-02. A value with a finding keeps its default, and the finding says so.
 static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]) -> ValidatorOptions:
 	var options: ValidatorOptions = ValidatorOptions.new()
 	var reader: DictReader = DictReader.new(data, source, issues)
@@ -78,14 +83,34 @@ static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]
 	if not reader.schema_ok(known):
 		return options
 	for key: String in LIMIT_KEYS:
+		# set() by name is silent on a missing property: a key without a field is a finding, not a no-op
+		if not key in options:
+			reader.issue("DT-04", key, "у ValidatorOptions нет поля для ключа")
+			continue
 		if not reader.has(key):
 			continue
 		var before: int = issues.size()
 		var value: int = reader.integer(key)
-		if issues.size() == before:
-			options.set(key, value)
+		if issues.size() > before:
+			continue
+		if value < 0:
+			reader.issue("DT-02", key, "предел %d < 0; оставлено значение по умолчанию %d" % [value, options.get(key)])
+			continue
+		options.set(key, value)
+	for i: int in range(0, RANGES.size(), 2):
+		_check_range(options, reader, RANGES[i], RANGES[i + 1])
 	options.bs25_is_error = reader.flag(SWITCH_BS25)
 	return options
+
+
+# Low above high: DT-02, and both return to their defaults.
+static func _check_range(options: ValidatorOptions, reader: DictReader, low: String, high: String) -> void:
+	if options.get(low) <= options.get(high):
+		return
+	var defaults: ValidatorOptions = ValidatorOptions.new()
+	reader.issue("DT-02", low, "%s %d больше %s %d; оставлены значения по умолчанию %d…%d" % [low, options.get(low), high, options.get(high), defaults.get(low), defaults.get(high)])
+	options.set(low, defaults.get(low))
+	options.set(high, defaults.get(high))
 
 
 ## Checks that have no input and do not run, by name: the CLI prints them, so a skip is never silent.

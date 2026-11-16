@@ -18,7 +18,8 @@ static func check(graph: StoryGraph, usage: FlagUsage, options: ValidatorOptions
 		_scene_screen(graph, scene, path, usage, options, issues)
 		var past: int = 0
 		for option: OptionData in scene.options:
-			past += 1 if not option.condition.is_empty() and option.exception.is_empty() else 0
+			if not option.condition.is_empty() and option.exception.is_empty():
+				past += 1
 		if past > options.past_options_max:
 			_warn(issues, "F4/past", path, scene.id, "вариантов от прошлого %d, не больше %d" % [past, options.past_options_max])
 	for outcome: OutcomeData in chapter.outcomes:
@@ -58,7 +59,8 @@ static func _scene_screen(graph: StoryGraph, scene: SceneData, path: String, usa
 			prose.append(insert.condition)
 	var conditional: int = 0
 	for paragraph: ParagraphData in scene.paragraphs:
-		conditional += 0 if paragraph.condition.is_empty() else 1
+		if not paragraph.condition.is_empty():
+			conditional += 1
 		prose.append(paragraph.condition)
 	var screen: int = with_bridge + scene.paragraphs.size()
 	if screen > options.screen_paragraphs_max:

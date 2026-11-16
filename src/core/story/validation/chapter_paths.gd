@@ -23,12 +23,17 @@ class PathInfo extends RefCounted:
 
 ## True when the graph has a loop: then `paths` is empty and the path checks say so.
 var has_loop: bool = false
+## True when the walk stopped at `limit` paths: `paths` is incomplete and the path checks say so.
+var truncated: bool = false
 var paths: Array[PathInfo] = []
 var _graph: StoryGraph
+var _limit: int
 
 
-func _init(graph: StoryGraph) -> void:
+## `limit` is ValidatorOptions.path_enum_max; 0 walks every path.
+func _init(graph: StoryGraph, limit: int = 0) -> void:
 	_graph = graph
+	_limit = limit
 	has_loop = not graph.back_edges().is_empty()
 	if has_loop:
 		return
@@ -61,6 +66,8 @@ static func is_risky(scene: SceneData) -> bool:
 
 # Depth-first over successors; the graph has no loop, so the depth is at most the scene count.
 func _walk(prefix: PackedStringArray) -> void:
+	if truncated:
+		return
 	var last: String = prefix[-1]
 	for next: String in _graph.successors(last):
 		var longer: PackedStringArray = prefix.duplicate()
@@ -75,6 +82,9 @@ func _walk(prefix: PackedStringArray) -> void:
 
 
 func _add(scenes: PackedStringArray, early: bool) -> void:
+	if _limit > 0 and paths.size() >= _limit:
+		truncated = true
+		return
 	var path: PathInfo = PathInfo.new()
 	path.scenes = scenes
 	path.early = early
@@ -82,7 +92,8 @@ func _add(scenes: PackedStringArray, early: bool) -> void:
 	var high: int = 0
 	for i: int in scenes.size():
 		var scene: SceneData = _graph.scene_by_id[scenes[i]]
-		path.risky += 1 if is_risky(scene) else 0
+		if is_risky(scene):
+			path.risky += 1
 		low += paragraph_words(scene.paragraphs, false)
 		high += paragraph_words(scene.paragraphs, true)
 		var next: String = scenes[i + 1] if i + 1 < scenes.size() else ""
@@ -106,7 +117,10 @@ func _step_words(from: String, to: String, early: bool) -> Vector2i:
 			continue
 		var step_low: int = paragraph_words(outcome.paragraphs, false) + _transition_words(transition, false)
 		var step_high: int = paragraph_words(outcome.paragraphs, true) + _transition_words(transition, true)
-		low = step_low if low < 0 else mini(low, step_low)
+		if low < 0:
+			low = step_low
+		else:
+			low = mini(low, step_low)
 		high = maxi(high, step_high)
 	return Vector2i(maxi(low, 0), high)
 

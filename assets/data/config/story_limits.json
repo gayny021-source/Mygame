@@ -1,6 +1,6 @@
 {
 	"schema_version": 1,
-	"_about": "Limits of the story data checks (tools/validate_data.gd). Source: design/gdd/branching-story.md, Formulas F1-F8; k_budget, k_min, s_path_min: d20-checks.md, formula 7.",
+	"_about": "Limits of the story data checks (tools/validate_data.gd). Source: design/gdd/branching-story.md, Formulas F1-F8; k_budget, k_min, s_path_min: d20-checks.md, formula 7. path_enum_max: most paths walked per chapter (CI guard, not a GDD value).",
 	"options_max": 4,
 	"finales_base": 3,
 	"finales_past": 1,
@@ -25,5 +25,6 @@
 	"outcome_paragraphs_max": 6,
 	"past_options_max": 1,
 	"coda_paragraphs_max": 3,
+	"path_enum_max": 5000,
 	"bs25_is_error": false
 }

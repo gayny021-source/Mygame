@@ -5,12 +5,17 @@ extends RefCounted
 ## ending, BS-16 the structure of early endings, BS-18 words on a path. Every limit comes from ValidatorOptions.
 ## Not here: the frequency of F5 (needs the d20 config; AC-32) and the MVP ban on early endings (AC-63).
 
+## Checks that need the paths: with a loop or a stopped walk each of them reports that it did not run.
+const PATH_CODES: PackedStringArray = ["BS-13", "BS-14", "BS-15", "BS-18"]
+
 
 ## Appends the findings of one chapter to `issues`.
 static func check(hero: HeroData, graph: StoryGraph, paths: ChapterPaths, usage: FlagUsage, options: ValidatorOptions, issues: Array[DataIssue]) -> void:
 	_early_endings(hero, graph, usage, options, issues)
-	if paths.has_loop:
-		GraphValidator.report(issues, "BS-14", graph.chapter.id, graph.chapter.id, "ритм, бюджет проверок, длина и слова путей (BS-13, BS-14, BS-15, BS-18) не проверены: в графе цикл (BS-05)", DataIssue.WARNING)
+	if paths.has_loop or paths.truncated:
+		var reason: String = "в графе цикл (BS-05)" if paths.has_loop else "путей больше path_enum_max = %d, обход остановлен" % options.path_enum_max
+		for code: String in PATH_CODES:
+			GraphValidator.report(issues, code, graph.chapter.id, graph.chapter.id, "не проверено: %s" % reason, DataIssue.WARNING)
 		return
 	var side: Dictionary[String, bool] = _side_scenes(graph, paths)
 	var reported: Dictionary[String, bool] = {}
@@ -51,11 +56,15 @@ static func _rhythm(graph: StoryGraph, path: ChapterPaths.PathInfo, options: Val
 	for id: String in path.scenes:
 		var scene: SceneData = graph.scene_by_id[id]
 		var linear: bool = scene.options.size() == 1 and scene.options[0].check == null
-		linear_run = linear_run + 1 if linear else 0
+		if linear:
+			linear_run += 1
+		else:
+			linear_run = 0
 		if linear_run == options.linear_run_max + 1:
 			_rhythm_once(graph, id, "линейных сцен подряд больше %d" % options.linear_run_max, reported, issues)
 		if not ChapterPaths.is_risky(scene):
-			pause += 0 if pause < 0 else 1
+			if pause >= 0:
+				pause += 1
 			continue
 		if pause >= 0 and pause < options.pause_scenes_min:
 			_rhythm_once(graph, id, "между сценами с рискованным вариантом меньше %d сцен без него" % options.pause_scenes_min, reported, issues)
@@ -75,8 +84,8 @@ static func _rhythm_once(graph: StoryGraph, scene_id: String, message: String, r
 static func _budget(graph: StoryGraph, path: ChapterPaths.PathInfo, side: Dictionary[String, bool], options: ValidatorOptions, issues: Array[DataIssue]) -> void:
 	var on_spine: int = 0
 	for id: String in path.scenes:
-		var risky: bool = ChapterPaths.is_risky(graph.scene_by_id[id])
-		on_spine += 1 if risky and not side.has(id) else 0
+		if ChapterPaths.is_risky(graph.scene_by_id[id]) and not side.has(id):
+			on_spine += 1
 	if path.risky > options.k_budget or on_spine > options.spine_risky_max:
 		_warn(issues, "BS-14", graph, path, "рискованных выборов на пути %d (вне ответвления %d): потолок %d, вне ответвления не больше %d" % [path.risky, on_spine, options.k_budget, options.spine_risky_max])
 	elif not path.early and path.scenes.size() >= options.s_path_min and path.risky < options.k_min:

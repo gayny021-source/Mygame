@@ -15,7 +15,7 @@ static func validate(hero: HeroData, options: ValidatorOptions) -> Array[DataIss
 	var usage: FlagUsage = FlagUsage.new(hero)
 	for chapter: ChapterData in hero.chapters:
 		var graph: StoryGraph = StoryGraph.new(chapter)
-		var paths: ChapterPaths = ChapterPaths.new(graph)
+		var paths: ChapterPaths = ChapterPaths.new(graph, options.path_enum_max)
 		BsTraces.check(hero, graph, usage, issues)
 		BsBudget.check(hero, graph, paths, usage, options, issues)
 		BsLimits.check(graph, usage, options, issues)
