@@ -631,6 +631,16 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/fixtures/checks/check_fixtures.gd",
+   "label": "check_fixtures.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/fixtures/checks/counting_d20_source.gd",
+   "label": "counting_d20_source.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/fixtures/story/condition_fixtures.gd",
    "label": "condition_fixtures.gd",
    "group": "GDScript"
@@ -693,6 +703,21 @@
   {
    "id": "tests/integration/story/story_file_engine_test.gd",
    "label": "story_file_engine_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/checks/d20_config_test.gd",
+   "label": "d20_config_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/checks/d20_formula_test.gd",
+   "label": "d20_formula_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/checks/d20_source_test.gd",
+   "label": "d20_source_test.gd",
    "group": "GDScript"
   },
   {
@@ -1297,6 +1322,14 @@
   {
    "source": "design/DIRECTOR_DECISIONS.md",
    "target": "design/narrative/voices/rovend.md"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/state/run_state.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/story/data/hero_loader.gd"
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
@@ -2143,6 +2176,14 @@
    "target": "tools/validate_data.gd"
   },
   {
+   "source": "tests/fixtures/checks/check_fixtures.gd",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "tests/fixtures/checks/counting_d20_source.gd",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
    "source": "tests/fixtures/story/fake_flags.gd",
    "target": "src/core/story/data/condition_context.gd"
   },
@@ -2185,6 +2226,22 @@
   {
    "source": "tests/integration/story/story_file_engine_test.gd",
    "target": "tests/unit/story/story_json_engine_test.gd"
+  },
+  {
+   "source": "tests/unit/checks/d20_config_test.gd",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "tests/unit/checks/d20_config_test.gd",
+   "target": "tools/validate_data.gd"
+  },
+  {
+   "source": "tests/unit/checks/d20_formula_test.gd",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "tests/unit/checks/d20_source_test.gd",
+   "target": "design/gdd/d20-checks.md"
   },
   {
    "source": "tests/unit/story/bridge_join_test.gd",

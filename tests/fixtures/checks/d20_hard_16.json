@@ -1,0 +1,5 @@
+{
+	"schema_version": 1,
+	"_about": "Breaks formula 3, condition 5 of d20-checks.md: Hard 16 gives the bonus -1 a 20 % chance (story S7).",
+	"dc_hard": 16
+}
