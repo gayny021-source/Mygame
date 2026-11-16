@@ -2,7 +2,9 @@ class_name ReleasedIds
 extends RefCounted
 ## The list of released ids of a hero (BS-26; ADR-0001 §3; branching-story.md, Edge Cases "Обновление",
 ## AC-26; story S5): `freeze` builds it from the current data, `diff` reports every listed id that the data
-## lost. A `deprecated` object is still in the data, so it passes. Pure: the CLI reads and writes the file.
+## lost. A `deprecated` object is still in the data, so it passes. `read` is the loader of the file content
+## (a Dictionary from the CLI) into a typed Snapshot; `compare` works on the snapshot. Pure: the CLI reads and
+## writes the file.
 ##
 ## Usage: [code]var issues: Array[DataIssue] = ReleasedIds.diff(hero, ChapterLoader.read_object(path, issues))[/code]
 
@@ -21,26 +23,63 @@ static func freeze(hero: HeroData, released_at: String) -> Dictionary:
 	return {"schema_version": DictReader.SCHEMA_VERSION, "released_at": released_at, "ids": ids}
 
 
-## BS-26 (error) for every id of `released` missing from `hero`; DT-NN when the file has a wrong form.
+## The released list read from a file, typed: the Dictionary stops at `read`.
+class Snapshot extends RefCounted:
+	var released_at: String
+	## Kind of KINDS -> ids as listed.
+	var ids: Dictionary[String, PackedStringArray] = {}
+
+
+## BS-26 (error) for every id of the file content `released` missing from `hero`; DT-NN when the file has a wrong form.
 static func diff(hero: HeroData, released: Dictionary) -> Array[DataIssue]:
 	var issues: Array[DataIssue] = []
-	var reader: DictReader = DictReader.new(released, "%s/released_ids.json" % hero.id, issues)
+	var snapshot: Snapshot = read(released, "%s/released_ids.json" % hero.id, issues)
+	if snapshot != null:
+		issues.append_array(compare(hero, snapshot, "%s/released_ids.json/ids" % hero.id))
+	return issues
+
+
+## The loader of released_ids.json: the snapshot, or null with DT-03/DT-07 (DT-02 of a single id only skips it).
+static func read(released: Dictionary, source: String, issues: Array[DataIssue]) -> Snapshot:
+	var reader: DictReader = DictReader.new(released, source, issues)
 	if not reader.schema_ok(FILE_KEYS):
-		return issues
-	reader.text("released_at")
+		return null
+	var snapshot: Snapshot = Snapshot.new()
+	snapshot.released_at = reader.text("released_at")
 	if not reader.has("ids"):
 		reader.issue("DT-03", "ids", "нет обязательного ключа")
-		return issues
+		return null
 	var listed: DictReader = reader.child("ids", KINDS)
 	if listed == null:
-		return issues
+		return null
+	for kind: String in KINDS:
+		snapshot.ids[kind] = listed.strings(kind)
+	return snapshot
+
+
+## BS-26 (error) for every id of `snapshot` that `hero` lost; `path` starts every finding's path.
+static func compare(hero: HeroData, snapshot: Snapshot, path: String) -> Array[DataIssue]:
+	var issues: Array[DataIssue] = []
 	var current: Dictionary[String, PackedStringArray] = _current(hero)
 	for kind: String in KINDS:
 		var present: Dictionary[String, bool] = StoryGraph.as_set(current[kind])
-		for id: String in listed.strings(kind):
+		for id: String in snapshot.ids.get(kind, PackedStringArray()):
 			if not present.has(id):
-				listed.issue("BS-26", kind, "выпущенный id «%s» пропал из данных: удалять и переименовывать нельзя, только deprecated" % id)
+				issues.append(DataIssue.new("BS-26", "%s/%s" % [path, kind], id, "выпущенный id «%s» пропал из данных: удалять и переименовывать нельзя, только deprecated" % id))
 	return issues
+
+
+## True when `hero` has exactly the ids of `snapshot`: then --freeze keeps the file and its date.
+static func unchanged(hero: HeroData, snapshot: Snapshot) -> bool:
+	var current: Dictionary[String, PackedStringArray] = _current(hero)
+	for kind: String in KINDS:
+		var now: PackedStringArray = current[kind].duplicate()
+		var before: PackedStringArray = snapshot.ids.get(kind, PackedStringArray()).duplicate()
+		now.sort()
+		before.sort()
+		if now != before:
+			return false
+	return true
 
 
 static func _current(hero: HeroData) -> Dictionary[String, PackedStringArray]:
