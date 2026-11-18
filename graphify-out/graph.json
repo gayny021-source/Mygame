@@ -406,6 +406,11 @@
    "group": "GDD / Docs"
   },
   {
+   "id": "design/ux/roll-screen.md",
+   "label": "roll-screen.md",
+   "group": "GDD / Docs"
+  },
+  {
    "id": "project.godot",
    "label": "project.godot",
    "group": "Scenes"
@@ -2296,6 +2301,50 @@
   {
    "source": "design/ux/reading-screen.md",
    "target": "design/gdd/systems-index.md"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "USER_PREFERENCES.md"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "design/accessibility-requirements.md"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "design/art/art-bible.md"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "design/gdd/choice-system.md"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "design/gdd/systems-index.md"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "design/ux/reading-screen.md"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "src/core/checks/check_turn.gd"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "src/core/checks/d20_result.gd"
+  },
+  {
+   "source": "design/ux/roll-screen.md",
+   "target": "src/core/save/run_session.gd"
   },
   {
    "source": "project.godot",

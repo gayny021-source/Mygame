@@ -32,6 +32,7 @@
 GDD (все Designed, ждут независимого ревью): run-state, d20-checks, heroes, branching-story, choice-system, chapter-goal, save-system, scene-illustrations. MVP 8/10 в `design/gdd/systems-index.md`. Решения директоров — `design/DIRECTOR_DECISIONS.md` (последний DD-017).
 
 ## Открытые задачи
+- UX-спеки «Экран чтения» и «Экран броска» записаны (design/ux/, по 2 раунда аудита; решения CEO в USER_PREFERENCES.md «Экран чтения», «Экран броска», «Шрифт»). Дальше — истории «Экран чтения: ядро для UI» и «Экран броска: ядро для UI» (поля/команды из Dependencies спек), затем первая рантайм-точка. Проба на устройстве до APK: системная «Убрать анимацию» (RS-D6), Safe Area, tnum в Literata.
 - История Сохранения закрыта 2026-11-18 (SV1–SV4, 798 тестов; ADR-0002; DD-023, DD-024; CEO: READ_ERROR). Код `src/core/save/`: SaveCodec, RunBody, SaveWriter, SaveIo/ThreadSaveIo, RunSession, SaveConfig, SaveNode. Отложено до первого APK: autoload SaveNode, ожидание записи при выходе, AC-22, замер AC-47. Отложено до своих GDD: переходы 4 и 5 («Схема главы»), Галерея, Меню.
 - Первая рантайм-точка (история Экрана чтения/броска, DD-022 + DD-024): autoload `SaveNode`, ожидание задачи записи при выходе/паузе, загрузка `d20.json` при старте; AC-22 Сохранения открыт до этого. Всё — до первого APK.
 - Процесс: WIP-коммит, сделанный, пока агент гоняет мутации, может захватить мутанта (так было в 17d378a, save_writer.gd:163, исправлено следующим коммитом). WIP-коммиты во время работы агента помечать «not verified»; закрывающий коммит — только после прогона тестов Замом.
