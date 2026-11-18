@@ -188,12 +188,17 @@ func _one_per_group() -> void:
 		if entry.action == Entry.Action.SET and _active.has(entry.flag):
 			keep[_decls[entry.flag].group] = entry.flag
 	var dropped: PackedStringArray = []
+	var fresh: bool = false
 	for id: String in _active.keys():
 		var group: String = _decls[id].group
-		if not group.is_empty() and keep[group] != id:
-			_active.erase(id)
-			dropped.append(id)
-	if not dropped.is_empty():
+		if group.is_empty() or keep[group] == id:
+			continue
+		_active.erase(id)
+		dropped.append(id)
+		# Ключ с «:» не совпадёт с id флага: один лог на группу за загрузку (общий _reported).
+		fresh = fresh or not _reported.has("group:" + group)
+		_reported["group:" + group] = true
+	if fresh:
 		_report("в группе стоят несколько флагов, сняты: %s" % ", ".join(dropped))
 
 

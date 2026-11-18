@@ -1427,6 +1427,14 @@
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/save/run_body.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/save/save_codec.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
    "target": "src/core/state/run_state.gd"
   },
   {
@@ -1527,11 +1535,19 @@
   },
   {
    "source": "design/DISSENT_LOG.md",
+   "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "design/DISSENT_LOG.md",
    "target": "src/core/checks/check_turn.gd"
   },
   {
    "source": "design/DISSENT_LOG.md",
    "target": "src/core/checks/d20_config.gd"
+  },
+  {
+   "source": "design/DISSENT_LOG.md",
+   "target": "src/core/state/run_state.gd"
   },
   {
    "source": "design/DISSENT_LOG.md",

@@ -24,13 +24,13 @@ func _codes(issues: Array[DataIssue]) -> Array[String]:
 
 func test_ac05_body_with_every_field_through_a_slot_is_equal() -> void:
 	# Arrange
-	var written: Dictionary = SaveFixtures.body().to_dict()
+	var written: Dictionary = SaveFixtures.raw_body()
 	var issues: Array[DataIssue] = []
 	# Act
 	var loaded: RunBody = _load(_decoded(written), issues)
 	# Assert
 	assert_array(issues).is_empty()
-	assert_dict(loaded.to_dict()).is_equal(written)
+	assert_dict(SaveFixtures.raw_of(loaded)).is_equal(written)
 	assert_int(loaded.schema.size()).is_equal(3)
 	assert_str(loaded.resume.position.transition).is_equal("t_cross")
 	assert_bool(loaded.resume.state.has_flag("leg_wound")).is_true()
@@ -38,7 +38,7 @@ func test_ac05_body_with_every_field_through_a_slot_is_equal() -> void:
 
 func test_ac04_roll_has_no_state_and_reads_back_equal() -> void:
 	# Arrange
-	var raw: Dictionary = _decoded(SaveFixtures.body().to_dict())
+	var raw: Dictionary = _decoded(SaveFixtures.raw_body())
 	var issues: Array[DataIssue] = []
 	# Act
 	var loaded: RunBody = _load(raw, issues)
@@ -50,7 +50,7 @@ func test_ac04_roll_has_no_state_and_reads_back_equal() -> void:
 
 func test_ac61_body_has_no_gen_and_v1_keys_only() -> void:
 	# Act
-	var raw: Dictionary = SaveFixtures.body().to_dict()
+	var raw: Dictionary = SaveFixtures.raw_body()
 	# Assert: no gen (AC-61), no status/start/milestone_max (B4)
 	assert_array(raw.keys()).contains_exactly_in_any_order(Array(RunBody.KEYS))
 
@@ -61,9 +61,9 @@ func test_body_without_roll_has_no_roll_key() -> void:
 	body.roll = null
 	var issues: Array[DataIssue] = []
 	# Act
-	var loaded: RunBody = _load(_decoded(body.to_dict()), issues)
+	var loaded: RunBody = _load(_decoded(SaveFixtures.raw_of(body)), issues)
 	# Assert
-	assert_bool(body.to_dict().has("roll")).is_false()
+	assert_bool(SaveFixtures.raw_of(body).has("roll")).is_false()
 	assert_array(issues).is_empty()
 	assert_object(loaded.roll).is_null()
 
@@ -71,7 +71,7 @@ func test_body_without_roll_has_no_roll_key() -> void:
 func test_snapshot_in_the_body_is_a_copy() -> void:
 	# Arrange
 	var body: RunBody = SaveFixtures.body()
-	var raw: Dictionary = body.to_dict()
+	var raw: Dictionary = SaveFixtures.raw_of(body)
 	var before: Dictionary = raw.duplicate(true)
 	# Act
 	body.resume.state.end_chapter()
@@ -87,7 +87,7 @@ func test_undeclared_flag_is_dropped_from_every_snapshot() -> void:
 	var sink: Callable = func(message: String) -> void: logs.append(message)
 	var issues: Array[DataIssue] = []
 	# Act
-	var loaded: RunBody = RunBody.from_dict(_decoded(SaveFixtures.body().to_dict()), PATH, issues, decls, SaveFixtures.HERO, sink)
+	var loaded: RunBody = RunBody.from_dict(_decoded(SaveFixtures.raw_body()), PATH, issues, decls, SaveFixtures.HERO, sink)
 	# Assert: «once» is once per load, not per snapshot (TD C2)
 	assert_array(issues).is_empty()
 	assert_bool(loaded.resume.state.has_flag("leg_wound")).is_true()
@@ -117,7 +117,7 @@ func test_broken_body_is_a_finding_and_null() -> void:
 	}
 	for name: String in cases:
 		# Arrange
-		var raw: Dictionary = _decoded(SaveFixtures.body().to_dict())
+		var raw: Dictionary = _decoded(SaveFixtures.raw_body())
 		cases[name].call(raw)
 		var issues: Array[DataIssue] = []
 		# Act
@@ -129,7 +129,7 @@ func test_broken_body_is_a_finding_and_null() -> void:
 
 func test_hero_other_than_the_file_name_is_a_refusal() -> void:
 	# Arrange: the slot was decoded for another hero (TD C4; Э-14)
-	var raw: Dictionary = _decoded(SaveFixtures.body().to_dict())
+	var raw: Dictionary = _decoded(SaveFixtures.raw_body())
 	var issues: Array[DataIssue] = []
 	# Act
 	var loaded: RunBody = RunBody.from_dict(raw, PATH, issues, SaveFixtures.decls(), "other")
@@ -140,9 +140,9 @@ func test_hero_other_than_the_file_name_is_a_refusal() -> void:
 
 func test_unknown_key_in_a_valid_slot_is_a_refusal_without_fallback() -> void:
 	# Arrange: same format_version, the sum is right, an unknown key (TD C5; rule 8, item 6)
-	var raw: Dictionary = SaveFixtures.body().to_dict()
+	var raw: Dictionary = SaveFixtures.raw_body()
 	raw["mood"] = "calm"
-	var older: SaveCodec.SlotRead = SaveCodec.decode(SaveCodec.encode(1, 14, SaveFixtures.body().to_dict()), 0, SaveFixtures.APP_VERSION, SaveFixtures.HERO)
+	var older: SaveCodec.SlotRead = SaveCodec.decode(SaveCodec.encode(1, 14, SaveFixtures.raw_body()), 0, SaveFixtures.APP_VERSION, SaveFixtures.HERO)
 	var newer: SaveCodec.SlotRead = SaveCodec.decode(SaveCodec.encode(1, 15, raw), 1, SaveFixtures.APP_VERSION, SaveFixtures.HERO)
 	var issues: Array[DataIssue] = []
 	# Act
@@ -165,7 +165,7 @@ func test_null_parts_from_json_are_findings_not_crashes() -> void:
 	}
 	for name: String in cases:
 		# Arrange
-		var raw: Dictionary = _decoded(SaveFixtures.body().to_dict())
+		var raw: Dictionary = _decoded(SaveFixtures.raw_body())
 		cases[name].call(raw)
 		var issues: Array[DataIssue] = []
 		# Act
@@ -175,7 +175,7 @@ func test_null_parts_from_json_are_findings_not_crashes() -> void:
 		assert_array(_codes(issues)).override_failure_message(name).contains_exactly(["DT-02"])
 
 
-func test_body_without_resume_or_with_a_null_snapshot_gives_a_finding_and_no_dict() -> void:
+func test_body_without_resume_or_with_a_null_snapshot_gives_a_finding_and_null() -> void:
 	# Arrange (TD G3): a body built in code with a hole
 	var no_resume: RunBody = SaveFixtures.body()
 	no_resume.resume = null
@@ -185,7 +185,24 @@ func test_body_without_resume_or_with_a_null_snapshot_gives_a_finding_and_no_dic
 	for code: String in cases:
 		var issues: Array[DataIssue] = []
 		# Act
-		var raw: Dictionary = cases[code].to_dict(issues)
+		var raw: Variant = cases[code].to_dict(issues)
 		# Assert
-		assert_dict(raw).override_failure_message(code).is_empty()
+		assert_object(raw).override_failure_message(code).is_null()
 		assert_array(_codes(issues)).override_failure_message(code).contains_exactly([code])
+
+
+func test_group_conflict_in_two_snapshots_is_logged_once_per_load() -> void:
+	# Arrange (TD round 2): bold and calm stand together in the resume and in the last schema snapshot
+	var raw: Dictionary = _decoded(SaveFixtures.raw_body())
+	raw["resume"]["state"]["flags"].append("stance_bold")
+	raw["schema"][2]["state"]["flags"].append("stance_calm")
+	var logs: Array[String] = []
+	var sink: Callable = func(message: String) -> void: logs.append(message)
+	var issues: Array[DataIssue] = []
+	# Act
+	var loaded: RunBody = RunBody.from_dict(raw, PATH, issues, SaveFixtures.decls(), SaveFixtures.HERO, sink)
+	# Assert: each state keeps one flag of the group, one log line for the load
+	assert_array(issues).is_empty()
+	assert_str(loaded.resume.state.flag_in_group("stance")).is_equal("stance_calm")
+	assert_str(loaded.schema[2].state.flag_in_group("stance")).is_equal("stance_bold")
+	assert_int(logs.size()).is_equal(1)

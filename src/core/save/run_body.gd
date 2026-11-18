@@ -4,7 +4,7 @@ extends RefCounted
 ## the raw run body. No `gen` (it lives in the header, AC-61), no generator `state` in the roll record
 ## (B1), no status, start, milestone_max yet (B4). `chapter_map` waits for the GDD «Схема главы».
 ##
-## Usage: [code]var bytes := SaveCodec.encode(1, gen, body.to_dict())[/code]
+## Usage: [code]var raw: Variant = body.to_dict(issues)[/code] — null with findings means no write.
 
 const KEYS: PackedStringArray = ["run_id", "hero", "resume", "schema", "roll"]
 const SNAPSHOT_KEYS: PackedStringArray = ["state", "position"]
@@ -35,17 +35,17 @@ var schema: Array[Snapshot] = []
 var roll: RollRecord
 
 
-## The raw body; `roll` only when there is a record. Empty, with a finding in `issues`, when the body
-## has no resume (DT-03) or a null schema snapshot (DT-02): such a body is not written.
-func to_dict(issues: Array[DataIssue] = []) -> Dictionary:
+## The raw body (a Dictionary); `roll` only when there is a record. Null, with a finding in `issues`,
+## when the body has no resume (DT-03) or a null schema snapshot (DT-02): such a body is not written.
+func to_dict(issues: Array[DataIssue]) -> Variant:
 	if resume == null:
 		issues.append(DataIssue.new("DT-03", "body/resume", "", "нет снимка возобновления"))
-		return {}
+		return null
 	var snapshots: Array[Dictionary] = []
 	for i: int in schema.size():
 		if schema[i] == null:
 			issues.append(DataIssue.new("DT-02", "body/schema/%d" % i, "", "снимок схемы пуст"))
-			return {}
+			return null
 		snapshots.append(schema[i].to_dict())
 	var raw: Dictionary = {"run_id": run_id, "hero": hero, "resume": resume.to_dict(), "schema": snapshots}
 	if roll != null:

@@ -69,6 +69,17 @@ static func body() -> RunBody:
 	return run_body
 
 
+## Raw dict of a fixture body (RunBody.to_dict needs an issues list).
+static func raw_of(run_body: RunBody) -> Dictionary:
+	var issues: Array[DataIssue] = []
+	return run_body.to_dict(issues)
+
+
+## Raw dict of body().
+static func raw_body() -> Dictionary:
+	return raw_of(body())
+
+
 ## Slot bytes built by the test, not by SaveCodec: the header of ADR-0002 §2 over any payload.
 static func raw_slot(version: int, gen: int, payload: PackedByteArray) -> PackedByteArray:
 	var bytes: PackedByteArray = "KPSV".to_ascii_buffer()

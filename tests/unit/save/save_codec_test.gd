@@ -12,7 +12,7 @@ const GEN_MAX: int = 9007199254740991
 
 
 func _body() -> Dictionary:
-	return SaveFixtures.body().to_dict()
+	return SaveFixtures.raw_body()
 
 
 func _decode(bytes: PackedByteArray, slot: int) -> SaveCodec.SlotRead:

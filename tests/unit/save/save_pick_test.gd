@@ -11,7 +11,7 @@ const TOO_NEW := SaveCodec.Pick.Code.TOO_NEW
 
 
 func _bytes(gen: int, version: int = 1) -> PackedByteArray:
-	return SaveCodec.encode(version, gen, SaveFixtures.body().to_dict())
+	return SaveCodec.encode(version, gen, SaveFixtures.raw_body())
 
 
 func _read(bytes: PackedByteArray, slot: int) -> SaveCodec.SlotRead:
