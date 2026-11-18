@@ -1,7 +1,7 @@
 class_name SaveConfig
 extends RefCounted
 ## Save config from assets/data/config/save.json (ADR-0002 §4; save-system.md F3; story SV4): `wait_ms` is
-## T_ожид. A config with findings is not valid and keeps DEFAULT_WAIT_MS, the GDD candidate.
+## T_ожид. A config with findings keeps DEFAULT_WAIT_MS; the caller logs `issues`.
 ##
 ## Usage: [code]var config: SaveConfig = SaveConfig.load_file(SaveConfig.PATH, issues)[/code]
 
@@ -10,9 +10,9 @@ const KEYS: PackedStringArray = ["wait_ms"]
 ## ADR-0002 §4: allowed 500…5000 ms.
 const WAIT_MIN_MS: int = 500
 const WAIT_MAX_MS: int = 5000
+## Fallback when the file does not load: the GDD candidate (save-system.md F3, ADR-0002 §4); the caller logs the findings.
 const DEFAULT_WAIT_MS: int = 2000
 
-var valid: bool = false
 var wait_ms: int = DEFAULT_WAIT_MS
 
 
@@ -26,7 +26,7 @@ static func load_file(path: String, issues: Array[DataIssue]) -> SaveConfig:
 
 
 ## Config from a parsed object: `wait_ms` required (DT-03), a fraction or a value outside the range DT-02,
-## an unknown key DT-04. Any finding leaves the default and `valid` false.
+## an unknown key DT-04. Any finding leaves the default and the default.
 static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]) -> SaveConfig:
 	var config: SaveConfig = SaveConfig.new()
 	var before: int = issues.size()
@@ -39,5 +39,4 @@ static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]
 	if issues.size() > before:
 		return config
 	config.wait_ms = wait
-	config.valid = true
 	return config

@@ -1530,6 +1530,14 @@
   },
   {
    "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/save/save_node.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
+   "target": "src/core/save/thread_save_io.gd"
+  },
+  {
+   "source": "design/DIRECTOR_DECISIONS.md",
    "target": "src/core/state/run_state.gd"
   },
   {

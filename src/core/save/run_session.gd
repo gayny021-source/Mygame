@@ -70,6 +70,8 @@ func screen() -> StoryScreen:
 
 ## Transition 6: a new run from the start of chapter 1, written as a pair; one ticket.
 func start_new() -> StoryScreen:
+	if _waiting != 0:
+		return null
 	_begin(RunState.new(_hero.flags, _log))
 	_run_id = _make_run_id.call()
 	_schema = []
@@ -92,6 +94,11 @@ func load_saved() -> int:
 func apply_plain(option: OptionData) -> StoryScreen:
 	if _state == null or option == null or option.check != null:
 		return null
+	var page: StoryScreen = _nav.screen()
+	if page == null or page.kind != StoryScreen.Kind.SCENE or not page.scene.options.has(option):
+		return null
+	if not _can_apply(option.outcome):
+		return null
 	_turn = null
 	return _apply(option.outcome)
 
@@ -107,6 +114,8 @@ func advance() -> StoryScreen:
 func choose_check(option: OptionData) -> bool:
 	if _state == null:
 		return false
+	if _turn != null and (_turn.phase == CheckTurn.Phase.CHOSEN or _turn.phase == CheckTurn.Phase.ROLLED):
+		return false
 	_turn = CheckTurn.choose(_nav.screen(), option, _hero, _d20, _commit_roll, _log)
 	return _turn != null
 
@@ -118,7 +127,9 @@ func roll() -> D20Result:
 
 ## «Продолжить»: commit 7 inside (state before the outcome), then the outcome is applied once.
 func continue_check() -> StoryScreen:
-	if _turn == null:
+	if _turn == null or _turn.phase != CheckTurn.Phase.ROLLED:
+		return null
+	if not _can_apply(_turn.result.outcome_id):
 		return null
 	var result: D20Result = _turn.proceed()
 	if result == null:
@@ -137,12 +148,23 @@ func _on_chapter_finished(_chapter_id: String) -> void:
 	pass
 
 
+# Everything outcome_applied() checks, asked first: the state must change before the navigator routes
+# (conditions read it), so the navigator cannot be the judge. Logs why when refused.
+func _can_apply(outcome_id: String) -> bool:
+	var page: StoryScreen = _nav.screen()
+	if page == null or page.kind != StoryScreen.Kind.SCENE or _find_outcome(outcome_id) == null:
+		_log.call("исход «%s» не применён: нет сцены на экране или исхода у героя" % outcome_id)
+		return false
+	for option: OptionData in page.scene.options:
+		if option.outcome == outcome_id or (option.check != null and (option.check.success == outcome_id or option.check.failure == outcome_id)):
+			return true
+	_log.call("исход «%s» не применён: он не из вариантов сцены «%s»" % [outcome_id, page.scene.id])
+	return false
+
+
 func _apply(outcome_id: String) -> StoryScreen:
 	var scene_id: String = _nav.position().scene
 	var outcome: OutcomeData = _find_outcome(outcome_id)
-	if outcome == null:
-		_log.call("исход «%s» не найден у героя" % outcome_id)
-		return null
 	_state.apply_outcome(scene_id, outcome_id, outcome.sets, outcome.clears)
 	return _after(_nav.outcome_applied(outcome_id))
 

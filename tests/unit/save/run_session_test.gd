@@ -311,25 +311,26 @@ func test_error_screen_from_advance_writes_nothing() -> void:
 func test_double_tap_on_a_plain_option_applies_and_commits_once() -> void:
 	# Arrange
 	_t.started()
-	var tapped: OptionData = _t.option("a")
-	_t.session.apply_plain(tapped)
+	var tapped: OptionData = _t.option("c")
+	_t.session.apply_plain(_t.option("a"))
 	_t.settle()
 	var journal: int = _t.session.journal_size()
 	var before: int = _t.writes()
-	# Act
+	# Act: a second option tapped while the outcome of the first is on show
 	var again: StoryScreen = _t.session.apply_plain(tapped)
 	_t.settle()
 	# Assert (C1)
 	assert_object(again).is_null()
 	assert_int(_t.session.journal_size()).is_equal(journal)
+	assert_bool(_t.session.has_flag("f_c")).is_false()
 	assert_int(_t.writes() - before).is_equal(0)
 
 
 func test_option_of_another_screen_changes_neither_state_nor_disk() -> void:
 	# Arrange: s1's option while s2 is on show
 	_t.started()
-	var stale: OptionData = _t.option("a")
-	_t.session.apply_plain(stale)
+	var stale: OptionData = _t.option("c")
+	_t.session.apply_plain(_t.option("a"))
 	_t.session.advance()
 	_t.settle()
 	var journal: int = _t.session.journal_size()
@@ -340,6 +341,7 @@ func test_option_of_another_screen_changes_neither_state_nor_disk() -> void:
 	# Assert (C1)
 	assert_object(screen).is_null()
 	assert_int(_t.session.journal_size()).is_equal(journal)
+	assert_bool(_t.session.has_flag("f_c")).is_false()
 	assert_int(_t.writes() - before).is_equal(0)
 
 
@@ -377,3 +379,15 @@ func test_continue_with_a_missing_outcome_neither_commits_7_nor_applies() -> voi
 	assert_int(_t.writes() - before).is_equal(0)
 	assert_bool(_t.disk_body()["roll"]["applied"]).is_false()
 	assert_int(_t.session.journal_size()).is_equal(0)
+
+
+func test_new_run_tapped_twice_while_waiting_starts_once() -> void:
+	# Arrange
+	_t.session.start_new()
+	# Act
+	var second: StoryScreen = _t.session.start_new()
+	_t.settle()
+	# Assert (TD C4)
+	assert_object(second).is_null()
+	assert_int(_t.writes()).is_equal(2)
+	assert_str(_t.disk_body()["run_id"]).is_equal("run1")

@@ -29,13 +29,14 @@ func _init(hero_id: String = HERO_ID) -> void:
 	_build()
 
 
-## s1: options a (safe), r (risky: ow sets f_a, of); s2 is a node scene; ends into m_h.
+## s1: options a, c (safe), r (risky: ow sets f_a, of); s2 is a node scene; ends into m_h.
 static func chapter_m_g() -> Dictionary:
 	var data: Dictionary = MeaningFixtures.chain(["s1", "s2"])
-	GraphFixtures.find(data["scenes"], "s1")["options"] = [GraphFixtures.normal("a", "oa"), GraphFixtures.risky("r", "ow", "of")]
+	GraphFixtures.find(data["scenes"], "s1")["options"] = [GraphFixtures.normal("a", "oa"), GraphFixtures.normal("c", "oc"), GraphFixtures.risky("r", "ow", "of")]
 	GraphFixtures.find(data["scenes"], "s2")["node"] = true
 	data["outcomes"] = [
 		GraphFixtures.outcome("oa", ["t_s1"], ["f_b"]),
+		GraphFixtures.outcome("oc", ["t_s1"], ["f_c"]),
 		GraphFixtures.outcome("ow", ["t_s1"], ["f_a"]),
 		GraphFixtures.outcome("of", ["t_s1"], ["f_fail"]),
 		GraphFixtures.outcome("o_s2", ["t_s2"]),

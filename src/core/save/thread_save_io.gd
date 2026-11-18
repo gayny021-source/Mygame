@@ -9,12 +9,17 @@ var _task: int = -1
 var _running: IoDone
 
 
+## A start while a task runs is ignored with a warning: one task at a time, the running one is not lost.
 func start_write(path: String, bytes: PackedByteArray) -> void:
+	if _busy():
+		return
 	_running = IoDone.new()
 	_task = WorkerThreadPool.add_task(_write_task.bind(path, bytes, _running))
 
 
 func start_read(paths: PackedStringArray) -> void:
+	if _busy():
+		return
 	_running = IoDone.new()
 	_task = WorkerThreadPool.add_task(_read_task.bind(paths, _running))
 
@@ -28,6 +33,12 @@ func poll() -> IoDone:
 	_task = -1
 	_running = null
 	return done
+
+
+func _busy() -> bool:
+	if _task >= 0:
+		push_warning("ThreadSaveIo: задача уже идёт, новый запуск отклонён")
+	return _task >= 0
 
 
 static func _write_task(path: String, bytes: PackedByteArray, done: IoDone) -> void:
