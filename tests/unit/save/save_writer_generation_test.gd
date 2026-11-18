@@ -143,3 +143,25 @@ func test_gallery_both_corrupt_writes_gen_1_in_b() -> void:
 	_rig.pump()
 	assert_int(_rig.read("gallery", WriterRig.B, "").gen).is_equal(1)
 	assert_array(_rig.bytes("gallery", WriterRig.A)).is_equal(kept_a)
+
+
+func test_gen_pair_over_max_refused() -> void:
+	_rig.put(WriterRig.RUN, SaveCodec.MAX_GEN - 1, WriterRig.run("r_old"))
+	var pair: int = _rig.commit("r_pair", 6)
+	_rig.pump()
+	assert_int(_rig.io.written.size()).is_equal(0)
+	assert_array(_rig.finished).is_equal([Vector2i(pair, ERROR_OUT)])
+	_rig.commit("r_last")
+	_rig.pump()
+	var last: SaveCodec.SlotRead = _rig.read(WriterRig.RUN, WriterRig.B)
+	assert_int(last.gen).is_equal(SaveCodec.MAX_GEN)
+	assert_str(last.body["run_id"]).is_equal("r_last")
+
+
+func test_gen_past_max_is_refused_without_write() -> void:
+	_rig.put(WriterRig.RUN, SaveCodec.MAX_GEN, WriterRig.run("r_max"))
+	var ticket: int = _rig.commit("r_next")
+	_rig.pump()
+	assert_int(_rig.io.written.size()).is_equal(0)
+	assert_array(_rig.finished).is_equal([Vector2i(ticket, ERROR_OUT)])
+	assert_int(_rig.lines.size()).is_equal(1)

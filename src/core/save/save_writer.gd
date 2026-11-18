@@ -67,7 +67,7 @@ static func path_of(key: String, slot: int) -> String:
 
 ## Queues the run body of `hero_id` for transition 1…7; 6 is the pair. Returns the ticket, or 0 with
 ## a log line and nothing queued when the transition is unknown, the id unfit for a path, the body
-## null or `issues` not empty (DD-023: no write, no gen spent).
+## null, `issues` not empty or body.hero not `hero_id` (DD-023: no write, no gen spent).
 func commit(transition: int, hero_id: String, body: Variant, issues: Array[DataIssue]) -> int:
 	if transition < 1 or transition > LAST_TRANSITION:
 		return _refuse("переход %d вне 1…%d" % [transition, LAST_TRANSITION])
@@ -75,6 +75,8 @@ func commit(transition: int, hero_id: String, body: Variant, issues: Array[DataI
 		return _refuse("id героя «%s» не годится для пути" % hero_id)
 	if not issues.is_empty() or not (body is Dictionary):
 		return _refuse("тело %s не собрано, находок %d" % [hero_id, issues.size()])
+	if body.get("hero") != hero_id:
+		return _refuse("тело героя «%s» в файл %s" % [body.get("hero"), hero_id])
 	return _enqueue(RUN_PREFIX + hero_id, hero_id, body, transition == PAIR_TRANSITION)
 
 
@@ -127,6 +129,9 @@ func _start() -> void:
 	_io.start_read(paths)
 
 
+## A failed write ends the job ERROR and leaves gen_ok as is: the retry of the next commit goes to the
+## same slot (rule 5). A failed second pair write keeps the first one, so the new run survives in
+## the first slot and the ticket still gets ERROR (rule 11, AC-66 a).
 func _advance(done: SaveIo.IoDone) -> void:
 	if _job.gen == 0:
 		_primed(done.reads)
@@ -143,7 +148,7 @@ func _advance(done: SaveIo.IoDone) -> void:
 
 
 ## The slots read by the first step of a job with an unknown gen (F2; AC-09, AC-43, AC-64).
-func _primed(reads: Array) -> void:
+func _primed(reads: Array[Variant]) -> void:
 	var slots: Array[SaveCodec.SlotRead] = []
 	for slot: int in reads.size():
 		var bytes: Variant = reads[slot]
@@ -159,7 +164,11 @@ func _primed(reads: Array) -> void:
 	_write_next()
 
 
+## Starts the next write; refuses the whole job when its writes would pass MAX_GEN (F1).
 func _write_next() -> void:
+	if _gen_ok[_job.key] + _job.writes_left > SaveCodec.MAX_GEN:
+		_finish(Outcome.ERROR, "save: %s gen за пределом %d, не пишется" % [_job.key, SaveCodec.MAX_GEN])
+		return
 	_job.gen = _gen_ok[_job.key] + 1
 	var bytes: PackedByteArray = SaveCodec.frame(_app_version, _job.gen, _job.payload)
 	_io.start_write(path_of(_job.key, SaveCodec.slot_of(_job.gen)), bytes)

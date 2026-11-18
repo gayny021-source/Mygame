@@ -14,7 +14,7 @@ class IoDone extends RefCounted:
 	## Write: the file opened, every byte stored and closed. Read: always true.
 	var ok: bool
 	## Read: per path the bytes, or null when the file does not exist.
-	var reads: Array = []
+	var reads: Array[Variant] = []
 
 
 var _done: IoDone

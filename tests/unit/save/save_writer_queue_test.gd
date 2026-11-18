@@ -146,3 +146,16 @@ func test_gallery_and_settings_write_both_slots_and_fall_back() -> void:
 	assert_int(pick.code).is_equal(SaveCodec.Pick.Code.OK)
 	assert_int(pick.slot).is_equal(WriterRig.B)
 	assert_dict(_rig.read("gallery", WriterRig.B, "").body).is_equal({"seen": ["e_0"]})
+
+
+func test_commit_body_of_other_hero_is_refused_and_keeps_gen() -> void:
+	_rig.put(WriterRig.RUN, 14, WriterRig.run("r1"))
+	var none: Array[DataIssue] = []
+	var ticket: int = _rig.writer.commit(1, WriterRig.HERO, WriterRig.run("r_b", WriterRig.OTHER), none)
+	_rig.pump()
+	assert_int(ticket).is_equal(0)
+	assert_int(_rig.lines.size()).is_equal(1)
+	assert_int(_rig.io.written.size()).is_equal(0)
+	_rig.commit("r_good")
+	_rig.pump()
+	assert_str(_rig.slot_run(WriterRig.RUN, WriterRig.B)).is_equal("r_good@15")
