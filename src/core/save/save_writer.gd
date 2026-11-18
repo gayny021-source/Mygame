@@ -160,7 +160,7 @@ func _enqueue(key: String, hero: String, body: Dictionary, pair: bool) -> int:
 		if waiting.key != key:
 			continue
 		if waiting.is_load:
-			continue
+			break
 		waiting.payload = payload
 		# A displaced pair stays a pair: one write would leave the old run in the other slot.
 		waiting.pair = waiting.pair or pair
