@@ -456,8 +456,18 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/save/run_session.gd",
+   "label": "run_session.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/save/save_codec.gd",
    "label": "save_codec.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/save/save_config.gd",
+   "label": "save_config.gd",
    "group": "GDScript"
   },
   {
@@ -466,8 +476,18 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/save/save_node.gd",
+   "label": "save_node.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/save/save_writer.gd",
    "label": "save_writer.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/save/thread_save_io.gd",
+   "label": "thread_save_io.gd",
    "group": "GDScript"
   },
   {
@@ -2273,7 +2293,15 @@
    "target": "design/gdd/save-system.md"
   },
   {
+   "source": "src/core/save/run_session.gd",
+   "target": "design/gdd/save-system.md"
+  },
+  {
    "source": "src/core/save/save_codec.gd",
+   "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "src/core/save/save_config.gd",
    "target": "design/gdd/save-system.md"
   },
   {
@@ -2283,6 +2311,10 @@
   {
    "source": "src/core/save/save_writer.gd",
    "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "src/core/save/thread_save_io.gd",
+   "target": "src/core/save/save_io.gd"
   },
   {
    "source": "src/core/state/flag_decl.gd",

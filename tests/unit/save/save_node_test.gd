@@ -22,8 +22,8 @@ func test_pause_and_return_notifications_write_nothing() -> void:
 	var node: SaveNode = auto_free(SaveNode.new())
 	node.writer = rig.writer
 	# Act
-	node._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
-	node._notification(Node.NOTIFICATION_APPLICATION_RESUMED)
+	node.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	node.notification(Node.NOTIFICATION_APPLICATION_RESUMED)
 	node._process(0.016)
 	# Assert
 	assert_int(rig.io.written.size()).is_equal(0)

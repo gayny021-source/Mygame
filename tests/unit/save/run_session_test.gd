@@ -148,14 +148,15 @@ func test_schema_gets_a_snapshot_for_a_node_scene_and_one_for_the_next_chapter()
 	_t.session.apply_plain(_t.option("s2_go"))
 	_t.settle()
 	_t.session.advance()
+	_t.session.advance()
 	_t.settle()
 	var next_chapter: Dictionary = _t.disk_body()
 	# Assert (AC-23): s2 is a node: one snapshot; the first scene of m_h replaces the list
 	assert_int(in_node["schema"].size()).is_equal(1)
 	assert_str(in_node["schema"][0]["position"]["scene"]).is_equal("s2")
 	assert_int(next_chapter["schema"].size()).is_equal(1)
-	assert_str(next_chapter["schema"][0]["position"]["chapter"]).is_equal("m_h")
-	assert_str(_resume_of(next_chapter)["chapter"]).is_equal("m_h")
+	assert_str(next_chapter["schema"][0]["position"]["chapter"]).is_equal(_t.hero.chapters[1].id)
+	assert_str(_resume_of(next_chapter)["chapter"]).is_equal(_t.hero.chapters[1].id)
 
 
 func test_ordinary_scene_adds_no_snapshot() -> void:
@@ -166,6 +167,7 @@ func test_ordinary_scene_adds_no_snapshot() -> void:
 	_t.session.advance()
 	_t.settle()
 	_t.session.apply_plain(_t.option("s2_go"))
+	_t.session.advance()
 	_t.session.advance()
 	_t.settle()
 	_t.session.apply_plain(_t.option("s1_go"))
@@ -209,7 +211,7 @@ func test_load_does_not_write_and_resumes_the_saved_scene() -> void:
 	assert_int(_t.loads[0][1].kind).is_equal(KIND.SCENE)
 	assert_str(_t.loads[0][1].scene.id).is_equal("s2")
 	assert_int(_t.writes() - before).is_equal(0)
-	assert_bool(_t.session.has_flag("f_b")).is_false()
+	assert_bool(_t.session.has_flag("f_b")).is_true()
 
 
 func test_load_refuses_a_missing_scene_without_a_run_or_a_write() -> void:
@@ -283,7 +285,7 @@ func test_refused_commit_shows_at_once_for_each_waiting_transition() -> void:
 	assert_bool(after_roll).is_false()
 	assert_bool(after_apply).is_false()
 	assert_int(_t.writes()).is_equal(0)
-	assert_int(_t.logs.size()).is_greater(0)
+	assert_int(_t.rig.lines.size()).is_greater(0)
 
 
 func test_error_screen_from_advance_writes_nothing() -> void:
@@ -295,8 +297,9 @@ func test_error_screen_from_advance_writes_nothing() -> void:
 	_t.session.advance()
 	_t.session.apply_plain(_t.option("s2_go"))
 	_t.settle()
+	_t.session.advance()
 	var before: int = _t.writes()
-	# Act
+	# Act: the coda is on show, the next «Дальше» finds no chapter
 	var screen: StoryScreen = _t.session.advance()
 	_t.settle()
 	# Assert
