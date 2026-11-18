@@ -821,6 +821,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/save/save_load_test.gd",
+   "label": "save_load_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/save/save_pick_test.gd",
    "label": "save_pick_test.gd",
    "group": "GDScript"
@@ -843,6 +848,11 @@
   {
    "id": "tests/unit/save/save_writer_queue_test.gd",
    "label": "save_writer_queue_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/save/save_writer_timeout_test.gd",
+   "label": "save_writer_timeout_test.gd",
    "group": "GDScript"
   },
   {
@@ -2525,6 +2535,10 @@
    "target": "design/gdd/save-system.md"
   },
   {
+   "source": "tests/unit/save/save_load_test.gd",
+   "target": "design/gdd/save-system.md"
+  },
+  {
    "source": "tests/unit/save/save_pick_test.gd",
    "target": "design/gdd/save-system.md"
   },
@@ -2546,6 +2560,10 @@
   },
   {
    "source": "tests/unit/save/save_writer_queue_test.gd",
+   "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "tests/unit/save/save_writer_timeout_test.gd",
    "target": "design/gdd/save-system.md"
   },
   {

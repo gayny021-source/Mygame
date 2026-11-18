@@ -1,6 +1,6 @@
 class_name FakeSaveIo
 extends SaveIo
-## In-memory SaveIo for the writer tests (save-system.md, rules 5, 6, 11; ADR-0002 §1; story SV2).
+## In-memory SaveIo for the writer tests (save-system.md, rules 5, 6, 11; ADR-0002 §1; stories SV2, SV3).
 ## Files live in a dictionary that a second instance may share: a new writer over the same `files` is
 ## a restarted process. No threads, no disk.
 
@@ -15,6 +15,8 @@ var written: PackedStringArray = []
 var fail_writes: int
 ## While true, a started write keeps its result until release().
 var hold_write: bool
+## While true, a started read keeps its result until release() (a hung load, rule 8).
+var hold_read: bool
 ## 1-based number of the write at which the process is killed; 0 — never.
 var kill_write: int
 ## Bytes the killed write leaves in the file; -1 — killed before open, the file is untouched.
@@ -58,7 +60,10 @@ func start_read(paths: PackedStringArray) -> void:
 	done.ok = true
 	for path: String in paths:
 		done.reads.append(files.get(path))
-	_result = done
+	if hold_read:
+		_held = done
+	else:
+		_result = done
 
 
 func poll() -> SaveIo.IoDone:
@@ -67,9 +72,10 @@ func poll() -> SaveIo.IoDone:
 	return done
 
 
-## Lets a held write finish at the next poll.
+## Lets a held write or read finish at the next poll.
 func release() -> void:
 	hold_write = false
+	hold_read = false
 	_result = _held
 	_held = null
 
