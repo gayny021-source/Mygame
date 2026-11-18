@@ -9,7 +9,8 @@ extends RefCounted
 ## Usage: [code]var r: D20Result = turn.proceed()[/code], then the Choice system applies
 ## `r.outcome_id` to the state and calls `navigator.outcome_applied(r.outcome_id)`.
 
-enum Phase { CHOSEN, ROLLED, APPLIED, CANCELLED }
+## CLOSED: the Roll screen was closed without an outcome after a flow error (CT close).
+enum Phase { CHOSEN, ROLLED, APPLIED, CANCELLED, CLOSED }
 
 ## Save transitions this class commits (save-system.md).
 const COMMIT_ROLLED := 3
@@ -17,6 +18,10 @@ const COMMIT_APPLIED := 7
 
 var phase: Phase
 var check: CheckData
+## The option the check belongs to; null when a restored turn found none.
+var option: OptionData
+## True for a turn made by `restore`: the roll was made before the load.
+var restored: bool
 var scene_id: String
 ## Null before the roll.
 var result: D20Result
@@ -44,6 +49,7 @@ static func choose(screen: StoryScreen, option: OptionData, hero: HeroData, d20:
 	var turn: CheckTurn = CheckTurn.new()
 	turn.phase = Phase.CHOSEN
 	turn.check = option.check
+	turn.option = option
 	turn.scene_id = screen.scene.id
 	turn._d20 = d20
 	turn._hero = hero
@@ -65,9 +71,11 @@ static func restore(screen: StoryScreen, record: RollRecord, commit: Callable, l
 		log_error.call("запись о броске отброшена: сцены «%s» нет на экране" % record.scene_id)
 		return null
 	var found: CheckData = null
+	var owner: OptionData = null
 	for option: OptionData in screen.scene.options:
 		if option.check != null and option.check.id == record.check_id:
 			found = option.check
+			owner = option
 	if found == null:
 		log_error.call("запись о броске отброшена: в сцене «%s» нет проверки «%s»" % [record.scene_id, record.check_id])
 		return null
@@ -77,6 +85,8 @@ static func restore(screen: StoryScreen, record: RollRecord, commit: Callable, l
 	var turn: CheckTurn = CheckTurn.new()
 	turn.phase = Phase.ROLLED
 	turn.check = found
+	turn.option = owner
+	turn.restored = true
 	turn.scene_id = record.scene_id
 	turn.record = record
 	turn.result = D20Check.restore(record, found)
@@ -124,3 +134,35 @@ func proceed() -> D20Result:
 		record.applied = true
 		_commit.call(COMMIT_APPLIED, record)
 	return result
+
+
+## The numbers before the roll (Д-3): by the record when there is one (AC-21), else by the config and the
+## hero. Null without a log line when the level has no DC (the roll is refused the same way).
+func brief() -> CheckBrief:
+	var data: CheckBrief = CheckBrief.new()
+	data.check_id = check.id
+	data.stat_id = check.stat
+	data.level = check.level
+	if record != null:
+		data.bonus = record.bonus
+		data.dc = record.dc
+	else:
+		var issues: Array[DataIssue] = []
+		data.dc = _d20.config.dc(check.level, issues)
+		if data.dc < 0:
+			return null
+		data.bonus = D20Check.bonus_of(_hero, check.stat)
+	data.need = D20Check.need(data.dc, data.bonus)
+	data.chance = D20Check.chance(data.dc, data.bonus)
+	if option != null:
+		data.option_text = option.text
+		data.option_reason = option.reason
+	return data
+
+
+## Close without an outcome (Д-6): only from ROLLED, for a flow error. Nothing is written or applied.
+func close() -> bool:
+	if phase != Phase.ROLLED:
+		return false
+	phase = Phase.CLOSED
+	return true

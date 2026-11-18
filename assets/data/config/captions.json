@@ -1,0 +1,9 @@
+{
+	"_about": "Option caption templates and names for the Reading and Roll screens (src/core/story/caption_texts.gd; design/ux/reading-screen.md, Dependencies; CEO decisions 2026-11-18). U+00A0 holds the pairs together. Placeholders: {stat} {bonus} {level} {dc} {chance} {price} {reason}.",
+	"risky": "{stat} {bonus} · {level} {dc} · шанс {chance} %",
+	"plain": "Без броска",
+	"plain_price": "Без броска · {price}",
+	"closed": "{stat} закрыта: {reason}",
+	"levels": {"easy": "Легко", "medium": "Средне", "hard": "Трудно"},
+	"stats": {"strength": "Сила", "agility": "Ловкость", "mind": "Ум", "faith": "Вера", "luck": "Удача"}
+}

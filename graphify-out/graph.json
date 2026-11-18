@@ -426,6 +426,11 @@
    "group": "Scenes"
   },
   {
+   "id": "src/core/checks/check_brief.gd",
+   "label": "check_brief.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/checks/check_turn.gd",
    "label": "check_turn.gd",
    "group": "GDScript"
@@ -508,6 +513,11 @@
   {
    "id": "src/core/state/run_state.gd",
    "label": "run_state.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/caption_texts.gd",
+   "label": "caption_texts.gd",
    "group": "GDScript"
   },
   {
@@ -623,6 +633,11 @@
   {
    "id": "src/core/story/data/transition_data.gd",
    "label": "transition_data.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/option_view.gd",
+   "label": "option_view.gd",
    "group": "GDScript"
   },
   {
@@ -816,6 +831,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/checks/check_turn_ui_test.gd",
+   "label": "check_turn_ui_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/checks/d20_config_test.gd",
    "label": "d20_config_test.gd",
    "group": "GDScript"
@@ -853,6 +873,11 @@
   {
    "id": "tests/unit/save/fixtures/writer_rig.gd",
    "label": "writer_rig.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/save/run_session_roll_ui_test.gd",
+   "label": "run_session_roll_ui_test.gd",
    "group": "GDScript"
   },
   {
@@ -951,6 +976,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/story/caption_texts_ui_test.gd",
+   "label": "caption_texts_ui_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/story/chapter_conditions_test.gd",
    "label": "chapter_conditions_test.gd",
    "group": "GDScript"
@@ -1003,6 +1033,11 @@
   {
    "id": "tests/unit/story/released_snapshot_test.gd",
    "label": "released_snapshot_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/story/run_session_ui_test.gd",
+   "label": "run_session_ui_test.gd",
    "group": "GDScript"
   },
   {
@@ -2363,6 +2398,10 @@
    "target": "src/ui/safe_area_margins.gd"
   },
   {
+   "source": "src/core/checks/check_brief.gd",
+   "target": "design/ux/roll-screen.md"
+  },
+  {
    "source": "src/core/checks/check_turn.gd",
    "target": "design/gdd/d20-checks.md"
   },
@@ -2408,7 +2447,15 @@
   },
   {
    "source": "src/core/save/run_session.gd",
+   "target": "design/gdd/heroes.md"
+  },
+  {
+   "source": "src/core/save/run_session.gd",
    "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "src/core/save/run_session.gd",
+   "target": "design/ux/reading-screen.md"
   },
   {
    "source": "src/core/save/run_session.gd",
@@ -2449,6 +2496,18 @@
   {
    "source": "src/core/state/run_state.gd",
    "target": "src/core/story/data/condition_context.gd"
+  },
+  {
+   "source": "src/core/story/caption_texts.gd",
+   "target": "design/gdd/choice-system.md"
+  },
+  {
+   "source": "src/core/story/caption_texts.gd",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "src/core/story/caption_texts.gd",
+   "target": "design/ux/reading-screen.md"
   },
   {
    "source": "src/core/story/data/bridge_data.gd",
@@ -2517,6 +2576,14 @@
   {
    "source": "src/core/story/data/transition_data.gd",
    "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/option_view.gd",
+   "target": "design/gdd/choice-system.md"
+  },
+  {
+   "source": "src/core/story/option_view.gd",
+   "target": "design/ux/reading-screen.md"
   },
   {
    "source": "src/core/story/story_navigator.gd",
@@ -2671,6 +2738,10 @@
    "target": "design/gdd/d20-checks.md"
   },
   {
+   "source": "tests/unit/checks/check_turn_ui_test.gd",
+   "target": "design/ux/roll-screen.md"
+  },
+  {
    "source": "tests/unit/checks/d20_config_test.gd",
    "target": "design/gdd/d20-checks.md"
   },
@@ -2705,6 +2776,10 @@
   {
    "source": "tests/unit/save/fixtures/save_fixtures.gd",
    "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "tests/unit/save/run_session_roll_ui_test.gd",
+   "target": "design/ux/roll-screen.md"
   },
   {
    "source": "tests/unit/save/run_session_test.gd",
@@ -2779,6 +2854,14 @@
    "target": "design/gdd/branching-story.md"
   },
   {
+   "source": "tests/unit/story/caption_texts_ui_test.gd",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "tests/unit/story/caption_texts_ui_test.gd",
+   "target": "design/ux/reading-screen.md"
+  },
+  {
    "source": "tests/unit/story/chapter_loader_test.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -2821,6 +2904,14 @@
   {
    "source": "tests/unit/story/released_ids_test.gd",
    "target": "tests/integration/story/data_validator_test.gd"
+  },
+  {
+   "source": "tests/unit/story/run_session_ui_test.gd",
+   "target": "design/gdd/choice-system.md"
+  },
+  {
+   "source": "tests/unit/story/run_session_ui_test.gd",
+   "target": "design/ux/reading-screen.md"
   },
   {
    "source": "tests/unit/story/run_state_test.gd",

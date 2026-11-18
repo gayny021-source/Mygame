@@ -12,6 +12,9 @@ extends RefCounted
 
 ## The ticket of a waiting transition finished (OK, ERROR or TIMEOUT), rule 7.
 signal show_released()
+## The write behind `show_released` ended with this outcome, sent just before it. Only for the log and
+## guards: a failed roll write is not shown to the player (CEO 2026-11-18, «Экран броска»).
+signal write_ended(outcome: SaveWriter.Outcome)
 ## A load ended: the load code and the resumed screen. CORRUPT with an ERROR screen is a refusal by id
 ## (rule 8, item 6): no run exists then and nothing was written.
 signal loaded(code: SaveWriter.LoadCode, screen: StoryScreen)
@@ -33,9 +36,21 @@ var _schema_chapter: String
 var _turn: CheckTurn
 var _waiting: int
 var _load_token: int
+var _captions: CaptionTexts
+## Options of the scene on show with their fixed captions; the states are set by `option_views`.
+var _views: Array[OptionView] = []
+## The stake of the scene was seen (reading-screen.md, «защёлка»): reset by a new scene or a load.
+var _stake_read: bool
 
 
-func _init(hero: HeroData, writer: SaveWriter, d20: D20Check, make_run_id: Callable, log_error: Callable) -> void:
+## `captions` null reads assets/data/config/captions.json.
+func _init(hero: HeroData, writer: SaveWriter, d20: D20Check, make_run_id: Callable, log_error: Callable, captions: CaptionTexts = null) -> void:
+	_captions = captions
+	if _captions == null:
+		var issues: Array[DataIssue] = []
+		_captions = CaptionTexts.load_file(CaptionTexts.PATH, issues)
+		for issue: DataIssue in issues:
+			log_error.call("%s %s: %s" % [issue.code, issue.path, issue.message])
 	_hero = hero
 	_writer = writer
 	_d20 = d20
@@ -81,6 +96,7 @@ func start_new() -> StoryScreen:
 		_state = null
 		return page
 	_schema_chapter = _nav.position().chapter
+	_enter_views(page)
 	_waiting = _commit(TRANSITION_NEW, _nav.position(), null)
 	return page
 
@@ -93,7 +109,7 @@ func load_saved() -> int:
 
 ## A plain option (transition 2): applies its outcome, then the outcome screen waits for the write.
 func apply_plain(option: OptionData) -> StoryScreen:
-	if _state == null or option == null or option.check != null:
+	if _state == null or _waiting != 0 or option == null or option.check != null:
 		return null
 	var page: StoryScreen = _nav.screen()
 	if page == null or page.kind != StoryScreen.Kind.SCENE or not page.scene.options.has(option):
@@ -106,16 +122,16 @@ func apply_plain(option: OptionData) -> StoryScreen:
 
 ## «Дальше»: commit 1 when it enters a scene.
 func advance() -> StoryScreen:
-	if _state == null:
+	if _state == null or _waiting != 0:
 		return null
 	return _after(_nav.advance())
 
 
 ## A risky option of the scene on show; false when there is no such check.
 func choose_check(option: OptionData) -> bool:
-	if _state == null:
+	if _state == null or _waiting != 0:
 		return false
-	if _turn != null and (_turn.phase == CheckTurn.Phase.CHOSEN or _turn.phase == CheckTurn.Phase.ROLLED):
+	if _turn != null and _turn.phase != CheckTurn.Phase.CANCELLED:
 		return false
 	_turn = CheckTurn.choose(_nav.screen(), option, _hero, _d20, _commit_roll, _log)
 	return _turn != null
@@ -133,7 +149,7 @@ func roll() -> D20Result:
 
 ## «Продолжить»: commit 7 inside (state before the outcome), then the outcome is applied once.
 func continue_check() -> StoryScreen:
-	if _turn == null or _turn.phase != CheckTurn.Phase.ROLLED:
+	if _waiting != 0 or _turn == null or _turn.phase != CheckTurn.Phase.ROLLED:
 		return null
 	if not _can_apply(_turn.result.outcome_id):
 		return null
@@ -141,6 +157,160 @@ func continue_check() -> StoryScreen:
 	if result == null:
 		return null
 	return _apply(result.outcome_id)
+
+
+## The numbers of the turn before the roll, with the texts; null without a turn or without a DC.
+func check_brief() -> CheckBrief:
+	if _turn == null:
+		return null
+	var data: CheckBrief = _turn.brief()
+	if data == null:
+		return null
+	data.stat_name = _captions.stat_name(data.stat_id)
+	data.level_word = _captions.level_word(data.level)
+	data.caption = _captions.risky(data.stat_id, data.bonus, data.level, data.dc, data.chance)
+	return data
+
+
+## True while a turn made by a load waits for «Продолжить»: the Roll screen shows the roll at once.
+## A record already applied belongs to the outcome page, not to the Roll screen.
+func has_restored_turn() -> bool:
+	return _turn != null and _turn.restored and _turn.phase == CheckTurn.Phase.ROLLED and not _turn.record.applied
+
+
+## The roll of the restored turn; null when there is none.
+func restored_result() -> D20Result:
+	return _turn.result if has_restored_turn() else null
+
+
+## Closes the Roll screen without an outcome after a flow error (СВ Э-23): only from ROLLED while no write
+## waits. Nothing is written or applied and the choice stays blocked (DD-011).
+func close_check() -> bool:
+	if _waiting != 0 or _turn == null or not _turn.close():
+		return false
+	_log.call("ошибка потока: Экран броска «%s» закрыт без исхода" % _turn.check.id)
+	return true
+
+
+## True when the scene on show has no option that a hindrance has not closed (the fallback screen).
+func no_open_options() -> bool:
+	var page: StoryScreen = screen()
+	if page == null or page.kind != StoryScreen.Kind.SCENE:
+		return false
+	for view: OptionView in _views:
+		if view.reason.is_empty():
+			return false
+	return true
+
+
+## The stake of the scene was seen at least once (a latch, not a timer).
+func stake_read() -> bool:
+	return _stake_read
+
+
+## UI to core: the last line of the stake is in the visible area. Ignored off a scene.
+func report_stake_visible() -> void:
+	var page: StoryScreen = screen()
+	if page != null and page.kind == StoryScreen.Kind.SCENE:
+		_stake_read = true
+
+
+## The cards of the scene on show (or of the option just taken on its outcome) with their states.
+func option_views() -> Array[OptionView]:
+	var page: StoryScreen = screen()
+	var taken: OptionData = _taken(page)
+	for view: OptionView in _views:
+		if taken != null:
+			view.state = OptionView.State.CHOSEN if view.option == taken else OptionView.State.BLOCKED
+		elif not view.reason.is_empty():
+			view.state = OptionView.State.CLOSED
+		elif not _stake_read:
+			view.state = OptionView.State.INACTIVE
+		else:
+			view.state = OptionView.State.OPEN
+	return _views
+
+
+# The option taken: the one of the outcome on show or of a live turn; null before a choice.
+func _taken(page: StoryScreen) -> OptionData:
+	if page != null and page.kind == StoryScreen.Kind.OUTCOME:
+		return page.option
+	if _turn != null and _turn.phase != CheckTurn.Phase.CANCELLED:
+		return _turn.option
+	return null
+
+
+func _enter_views(page: StoryScreen) -> void:
+	_stake_read = false
+	_views = []
+	if page.kind == StoryScreen.Kind.OUTCOME:
+		_views.append(_view_of(page.option))
+		return
+	if page.kind != StoryScreen.Kind.SCENE:
+		return
+	for option: OptionData in page.scene.options:
+		if not _nav.holds(option.condition):
+			continue
+		if option.check != null and not _has_stat(option.check.stat):
+			_log.call("у героя нет характеристики «%s»: вариант «%s» скрыт" % [option.check.stat, option.id])
+			continue
+		_views.append(_view_of(option))
+
+
+func _view_of(option: OptionData) -> OptionView:
+	var view: OptionView = OptionView.new()
+	view.option = option
+	if option.check == null:
+		view.caption = _captions.plain(_price_of(option) if option.kind == OptionData.KIND_SAFE else "")
+		return view
+	var hindrance: FlagDecl = _hindrance(option.check.stat)
+	if hindrance != null:
+		view.reason = hindrance.title
+		view.caption = _captions.closed(option.check.stat, hindrance.title)
+		return view
+	var bonus: int = D20Check.bonus_of(_hero, option.check.stat)
+	var issues: Array[DataIssue] = []
+	var dc: int = _d20.config.dc(option.check.level, issues)
+	if dc >= 0:
+		view.caption = _captions.risky(option.check.stat, bonus, option.check.level, dc, D20Check.chance(dc, bonus))
+	return view
+
+
+func _has_stat(stat_id: String) -> bool:
+	for stat: StatData in _hero.stats:
+		if stat.id == stat_id:
+			return true
+	return false
+
+
+# The flag that closes `stat_id`, the one set first (heroes.md, «Помехи во время игры»).
+func _hindrance(stat_id: String) -> FlagDecl:
+	for entry: RunState.Entry in _state.journal():
+		if entry.action != RunState.Entry.Action.SET or not _state.has_flag(entry.flag):
+			continue
+		var decl: FlagDecl = _decl(entry.flag)
+		if decl != null and decl.blocks.has(stat_id):
+			return decl
+	return null
+
+
+func _decl(flag_id: String) -> FlagDecl:
+	for decl: FlagDecl in _hero.flags:
+		if decl.id == flag_id:
+			return decl
+	return null
+
+
+# Title of the one price flag the safe option's outcome sets; empty when none.
+func _price_of(option: OptionData) -> String:
+	var outcome: OutcomeData = _find_outcome(option.outcome)
+	if outcome == null:
+		return ""
+	for flag_id: String in outcome.sets:
+		var decl: FlagDecl = _decl(flag_id)
+		if decl != null and decl.category == "price":
+			return decl.title
+	return ""
 
 
 func _begin(state: RunState) -> void:
@@ -196,6 +366,7 @@ func _after(page: StoryScreen) -> StoryScreen:
 	var position: StoryPosition = _nav.position()
 	if page.kind == StoryScreen.Kind.SCENE:
 		_turn = null
+		_enter_views(page)
 		_snapshot_schema(page, position)
 		_commit(TRANSITION_SCENE, position, null)
 	elif page.kind == StoryScreen.Kind.OUTCOME and not position.pending_outcome.is_empty():
@@ -234,10 +405,13 @@ func _commit(transition: int, position: StoryPosition, record: RollRecord) -> in
 	return _writer.commit(transition, _hero.id, raw, issues)
 
 
-func _on_write_finished(ticket: int, _outcome: SaveWriter.Outcome) -> void:
+func _on_write_finished(ticket: int, outcome: SaveWriter.Outcome) -> void:
 	if ticket != _waiting:
 		return
 	_waiting = 0
+	if outcome != SaveWriter.Outcome.OK:
+		_log.call("запись %d закончилась кодом %d" % [ticket, outcome])
+	write_ended.emit(outcome)
 	show_released.emit()
 
 
@@ -264,6 +438,7 @@ func _on_load_finished(token: int, code: SaveWriter.LoadCode, raw: Dictionary) -
 		_state = null
 		loaded.emit(SaveWriter.LoadCode.CORRUPT, page)
 		return
+	_enter_views(page)
 	if body.roll != null:
 		_turn = CheckTurn.restore(page, body.roll, _commit_roll, _log)
 	loaded.emit(SaveWriter.LoadCode.OK, page)
