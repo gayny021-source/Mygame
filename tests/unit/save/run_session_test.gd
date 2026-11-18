@@ -305,3 +305,75 @@ func test_error_screen_from_advance_writes_nothing() -> void:
 	# Assert
 	assert_int(screen.kind).is_equal(KIND.ERROR)
 	assert_int(_t.writes() - before).is_equal(0)
+
+
+# Round 1 (TD C1, C2, C3): regressions, written before the fixes.
+func test_double_tap_on_a_plain_option_applies_and_commits_once() -> void:
+	# Arrange
+	_t.started()
+	var tapped: OptionData = _t.option("a")
+	_t.session.apply_plain(tapped)
+	_t.settle()
+	var journal: int = _t.session.journal_size()
+	var before: int = _t.writes()
+	# Act
+	var again: StoryScreen = _t.session.apply_plain(tapped)
+	_t.settle()
+	# Assert (C1)
+	assert_object(again).is_null()
+	assert_int(_t.session.journal_size()).is_equal(journal)
+	assert_int(_t.writes() - before).is_equal(0)
+
+
+func test_option_of_another_screen_changes_neither_state_nor_disk() -> void:
+	# Arrange: s1's option while s2 is on show
+	_t.started()
+	var stale: OptionData = _t.option("a")
+	_t.session.apply_plain(stale)
+	_t.session.advance()
+	_t.settle()
+	var journal: int = _t.session.journal_size()
+	var before: int = _t.writes()
+	# Act
+	var screen: StoryScreen = _t.session.apply_plain(stale)
+	_t.settle()
+	# Assert (C1)
+	assert_object(screen).is_null()
+	assert_int(_t.session.journal_size()).is_equal(journal)
+	assert_int(_t.writes() - before).is_equal(0)
+
+
+func test_choose_check_is_refused_while_a_turn_lives_so_no_reroll() -> void:
+	# Arrange
+	_t.started()
+	_t.session.choose_check(_t.option("r"))
+	_t.session.roll()
+	_t.settle()
+	var calls: int = _t.source.calls
+	# Act
+	var second: bool = _t.session.choose_check(_t.option("r"))
+	var rerolled: D20Result = _t.session.roll()
+	# Assert (C2)
+	assert_bool(second).is_false()
+	assert_object(rerolled).is_null()
+	assert_int(_t.source.calls).is_equal(calls)
+
+
+func test_continue_with_a_missing_outcome_neither_commits_7_nor_applies() -> void:
+	# Arrange: the hero has no outcome `ow`
+	for outcome: OutcomeData in _t.hero.chapters[0].outcomes.duplicate():
+		if outcome.id == "ow":
+			_t.hero.chapters[0].outcomes.erase(outcome)
+	_t.started()
+	_t.session.choose_check(_t.option("r"))
+	_t.session.roll()
+	_t.settle()
+	var before: int = _t.writes()
+	# Act
+	var shown: StoryScreen = _t.session.continue_check()
+	_t.settle()
+	# Assert (C3): the record on disk is still not applied
+	assert_object(shown).is_null()
+	assert_int(_t.writes() - before).is_equal(0)
+	assert_bool(_t.disk_body()["roll"]["applied"]).is_false()
+	assert_int(_t.session.journal_size()).is_equal(0)
