@@ -96,12 +96,14 @@ func test_ac03_other_hero_in_body_is_invalid_and_gives_no_body() -> void:
 	assert_dict(read.body).is_empty()
 
 
-func test_no_expected_hero_skips_the_hero_check() -> void:
-	# Act: Gallery and Settings bodies have no hero
-	var read: SaveCodec.SlotRead = SaveCodec.decode(SaveCodec.encode(1, 2, {"entries": []}), SLOT_A, 1)
+func test_no_expected_hero_accepts_only_a_body_without_hero() -> void:
+	# Act: Gallery and Settings bodies have no hero; a run body read without its hero fails closed (TD C4)
+	var gallery: SaveCodec.SlotRead = SaveCodec.decode(SaveCodec.encode(1, 2, {"entries": []}), SLOT_A, 1)
+	var run: SaveCodec.SlotRead = SaveCodec.decode(SaveCodec.encode(1, 2, _body()), SLOT_A, 1)
 	# Assert
-	assert_int(read.status).is_equal(VALID)
-	assert_dict(read.body).contains_keys(["entries"])
+	assert_int(gallery.status).is_equal(VALID)
+	assert_dict(gallery.body).contains_keys(["entries"])
+	assert_int(run.status).is_equal(INVALID)
 
 
 func test_newer_version_is_too_new_by_header_and_body_not_parsed() -> void:

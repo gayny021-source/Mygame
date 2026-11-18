@@ -12,7 +12,7 @@ func _decoded(body: Dictionary) -> Dictionary:
 
 
 func _load(raw: Dictionary, issues: Array[DataIssue], decls: Array[FlagDecl] = SaveFixtures.decls()) -> RunBody:
-	return RunBody.from_dict(raw, PATH, issues, decls)
+	return RunBody.from_dict(raw, PATH, issues, decls, SaveFixtures.HERO)
 
 
 func _codes(issues: Array[DataIssue]) -> Array[String]:
@@ -87,13 +87,13 @@ func test_undeclared_flag_is_dropped_from_every_snapshot() -> void:
 	var sink: Callable = func(message: String) -> void: logs.append(message)
 	var issues: Array[DataIssue] = []
 	# Act
-	var loaded: RunBody = RunBody.from_dict(_decoded(SaveFixtures.body().to_dict()), PATH, issues, decls, sink)
-	# Assert: one line per restored state that held it
+	var loaded: RunBody = RunBody.from_dict(_decoded(SaveFixtures.body().to_dict()), PATH, issues, decls, SaveFixtures.HERO, sink)
+	# Assert: «once» is once per load, not per snapshot (TD C2)
 	assert_array(issues).is_empty()
 	assert_bool(loaded.resume.state.has_flag("leg_wound")).is_true()
 	for snapshot: RunBody.Snapshot in loaded.schema:
 		assert_array(snapshot.state.to_dict()["flags"]).not_contains(["torch"])
-	assert_int(logs.size()).is_equal(3)
+	assert_int(logs.size()).is_equal(1)
 
 
 func test_broken_body_is_a_finding_and_null() -> void:
@@ -125,3 +125,67 @@ func test_broken_body_is_a_finding_and_null() -> void:
 		# Assert
 		assert_object(loaded).override_failure_message(name).is_null()
 		assert_array(_codes(issues)).override_failure_message(name).contains_exactly([expected[name]])
+
+
+func test_hero_other_than_the_file_name_is_a_refusal() -> void:
+	# Arrange: the slot was decoded for another hero (TD C4; Э-14)
+	var raw: Dictionary = _decoded(SaveFixtures.body().to_dict())
+	var issues: Array[DataIssue] = []
+	# Act
+	var loaded: RunBody = RunBody.from_dict(raw, PATH, issues, SaveFixtures.decls(), "other")
+	# Assert
+	assert_object(loaded).is_null()
+	assert_array(_codes(issues)).contains_exactly(["DT-05"])
+
+
+func test_unknown_key_in_a_valid_slot_is_a_refusal_without_fallback() -> void:
+	# Arrange: same format_version, the sum is right, an unknown key (TD C5; rule 8, item 6)
+	var raw: Dictionary = SaveFixtures.body().to_dict()
+	raw["mood"] = "calm"
+	var older: SaveCodec.SlotRead = SaveCodec.decode(SaveCodec.encode(1, 14, SaveFixtures.body().to_dict()), 0, SaveFixtures.APP_VERSION, SaveFixtures.HERO)
+	var newer: SaveCodec.SlotRead = SaveCodec.decode(SaveCodec.encode(1, 15, raw), 1, SaveFixtures.APP_VERSION, SaveFixtures.HERO)
+	var issues: Array[DataIssue] = []
+	# Act
+	var pick: SaveCodec.Pick = SaveCodec.pick(older, newer)
+	var loaded: RunBody = _load(newer.body, issues)
+	# Assert: the slot is chosen, its body is refused; the older generation is not offered
+	assert_int(pick.code).is_equal(SaveCodec.Pick.Code.OK)
+	assert_int(pick.slot).is_equal(1)
+	assert_object(loaded).is_null()
+	assert_array(_codes(issues)).contains_exactly(["DT-04"])
+
+
+func test_null_parts_from_json_are_findings_not_crashes() -> void:
+	var cases: Dictionary[String, Callable] = {
+		"resume null": func(raw: Dictionary) -> void: raw["resume"] = null,
+		"schema null": func(raw: Dictionary) -> void: raw["schema"] = null,
+		"schema element null": func(raw: Dictionary) -> void: raw["schema"][0] = null,
+		"state null": func(raw: Dictionary) -> void: raw["resume"]["state"] = null,
+		"roll null": func(raw: Dictionary) -> void: raw["roll"] = null,
+	}
+	for name: String in cases:
+		# Arrange
+		var raw: Dictionary = _decoded(SaveFixtures.body().to_dict())
+		cases[name].call(raw)
+		var issues: Array[DataIssue] = []
+		# Act
+		var loaded: RunBody = _load(raw, issues)
+		# Assert
+		assert_object(loaded).override_failure_message(name).is_null()
+		assert_array(_codes(issues)).override_failure_message(name).contains_exactly(["DT-02"])
+
+
+func test_body_without_resume_or_with_a_null_snapshot_gives_a_finding_and_no_dict() -> void:
+	# Arrange (TD G3): a body built in code with a hole
+	var no_resume: RunBody = SaveFixtures.body()
+	no_resume.resume = null
+	var null_snapshot: RunBody = SaveFixtures.body()
+	null_snapshot.schema[1] = null
+	var cases: Dictionary[String, RunBody] = {"DT-03": no_resume, "DT-02": null_snapshot}
+	for code: String in cases:
+		var issues: Array[DataIssue] = []
+		# Act
+		var raw: Dictionary = cases[code].to_dict(issues)
+		# Assert
+		assert_dict(raw).override_failure_message(code).is_empty()
+		assert_array(_codes(issues)).override_failure_message(code).contains_exactly([code])

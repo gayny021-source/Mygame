@@ -109,7 +109,7 @@ func one_of(key: String, allowed: PackedStringArray) -> String:
 
 ## Bool, false by default; with `required` an absent key is DT-03.
 func flag(key: String, required: bool = false) -> bool:
-	return _typed(key, TYPE_BOOL, required) == true
+	return typed(key, TYPE_BOOL, required) == true
 
 
 ## Required whole number. JSON gives every number as float, so a fraction or a
@@ -117,7 +117,7 @@ func flag(key: String, required: bool = false) -> bool:
 func integer(key: String) -> int:
 	if _data.get(key) is int:
 		return _data[key]
-	var value: Variant = _typed(key, TYPE_FLOAT, true)
+	var value: Variant = typed(key, TYPE_FLOAT, true)
 	if value == null:
 		return 0
 	var number: float = value
@@ -148,7 +148,7 @@ func strings_by_index(key: String, required: bool = true) -> Dictionary:
 
 ## Reader of the object under `key`; null when the key is absent or is not an object.
 func child(key: String, known_keys: PackedStringArray) -> DictReader:
-	var value: Variant = _typed(key, TYPE_DICTIONARY, false)
+	var value: Variant = typed(key, TYPE_DICTIONARY, false)
 	if value == null:
 		return null
 	var reader: DictReader = DictReader.new(value, "%s/%s" % [path, key], _issues)
@@ -185,20 +185,22 @@ func _check_keys(known_keys: PackedStringArray) -> void:
 
 
 func _string(key: String, required: bool) -> String:
-	var value: Variant = _typed(key, TYPE_STRING, required)
+	var value: Variant = typed(key, TYPE_STRING, required)
 	if value == null:
 		return ""
 	return value
 
 
 func _list(key: String, required: bool) -> Array:
-	var value: Variant = _typed(key, TYPE_ARRAY, required)
+	var value: Variant = typed(key, TYPE_ARRAY, required)
 	if value == null:
 		return []
 	return value
 
 
-func _typed(key: String, type: Variant.Type, required: bool) -> Variant:
+## Raw value of `type` under `key`; null when absent (DT-03 with `required`) or of another type
+## (DT-02). For a nested object handed whole to another reader's from_dict (RunBody, ADR-0002 §6).
+func typed(key: String, type: Variant.Type, required: bool) -> Variant:
 	if not _data.has(key):
 		if required:
 			issue("DT-03", key, "нет обязательного ключа")

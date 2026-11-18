@@ -146,3 +146,49 @@ func test_broken_snapshot_is_a_finding_and_null() -> void:
 		# Assert
 		assert_object(restored).override_failure_message(code).is_null()
 		assert_array(_codes(issues)).override_failure_message(code).contains_exactly([code.strip_edges()])
+
+
+func test_two_flags_of_one_group_keep_the_last_set_in_the_journal() -> void:
+	# Arrange (TD C1; rule 10): bold is set after calm in the journal, both stand in the list
+	var raw: Dictionary = _through_json(SaveFixtures.state(3).to_dict())
+	raw["flags"] = ["stance_bold", "leg_wound", "stance_calm"]
+	raw["journal"].append({"flag": "stance_bold", "action": "set", "scene": "s_ford", "outcome": "o_shout"})
+	var issues: Array[DataIssue] = []
+	# Act
+	var restored: RunState = _restore(raw, issues)
+	# Assert: one flag of the group, no finding, journal untouched, one log line
+	assert_array(issues).is_empty()
+	assert_str(restored.flag_in_group("stance")).is_equal("stance_bold")
+	assert_bool(restored.has_flag("stance_calm")).is_false()
+	assert_bool(restored.has_flag("leg_wound")).is_true()
+	assert_int(restored.journal().size()).is_equal(raw["journal"].size())
+	assert_int(_logs.size()).is_equal(1)
+	assert_str(_logs[0]).contains("stance_calm")
+
+
+func test_two_flags_of_one_group_without_journal_keep_the_last_in_the_list() -> void:
+	# Arrange
+	var raw: Dictionary = {"flags": ["stance_calm", "stance_bold"], "journal": []}
+	var issues: Array[DataIssue] = []
+	# Act
+	var restored: RunState = _restore(raw, issues)
+	# Assert
+	assert_array(issues).is_empty()
+	assert_str(restored.flag_in_group("stance")).is_equal("stance_bold")
+	assert_array(_ids(restored.active_flags())).contains_exactly(["stance_bold"])
+	assert_int(_logs.size()).is_equal(1)
+
+
+func test_shared_reported_set_logs_an_undeclared_flag_once_across_states() -> void:
+	# Arrange (TD C2)
+	var decls: Array[FlagDecl] = SaveFixtures.decls()
+	decls.remove_at(1)
+	var reported: Dictionary[String, bool] = {}
+	var sink: Callable = _sink()
+	var issues: Array[DataIssue] = []
+	# Act
+	RunState.from_dict(SaveFixtures.state().to_dict(), PATH, issues, decls, sink, reported)
+	RunState.from_dict(SaveFixtures.state(1).to_dict(), PATH, issues, decls, sink, reported)
+	# Assert
+	assert_array(issues).is_empty()
+	assert_int(_logs.size()).is_equal(1)

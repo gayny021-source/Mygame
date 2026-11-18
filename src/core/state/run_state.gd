@@ -134,10 +134,12 @@ func to_dict() -> Dictionary:
 ## State restored from a snapshot (run-state.md, rule 11): flags and journal are assigned as they
 ## are, outcomes are not replayed. A flag no longer declared for the hero is dropped with its journal
 ## records and logged once (run-state.md, AC-24; `deprecated` flags stay). Null when findings were
-## appended to `issues`: DT-02, DT-03, DT-04, DT-05 a wrong action.
-static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], declarations: Array[FlagDecl], log_error: Callable = Callable()) -> RunState:
+## appended to `issues`: DT-02, DT-03, DT-04, DT-05 a wrong action. Two flags of one group: the one
+## set last in the journal stays (rule 10). `reported` shares «logged once» across one load.
+static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], declarations: Array[FlagDecl], log_error: Callable = Callable(), reported: Dictionary[String, bool] = {}) -> RunState:
 	var before: int = issues.size()
 	var state: RunState = RunState.new(declarations, log_error)
+	state._reported = reported
 	var reader: DictReader = DictReader.new(raw, path, issues)
 	for key: Variant in raw:
 		if not KEYS.has(key):
@@ -154,6 +156,7 @@ static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], d
 			state._journal.append(Entry.new(flag, action as Entry.Action, scene_id, outcome_id))
 	if issues.size() > before:
 		return null
+	state._one_per_group()
 	return state
 
 
@@ -173,6 +176,25 @@ func _drop(id: String, scene_id: String, outcome_id: String) -> void:
 		return
 	_active.erase(id)
 	_journal.append(Entry.new(id, Entry.Action.CLEARED, scene_id, outcome_id))
+
+
+# Правленые данные героя или подложный снимок дают два флага группы (правило 10): остаётся
+# поставленный журналом последним, без записи в журнале — последний в списке; журнал не трогается.
+func _one_per_group() -> void:
+	var keep: Dictionary[String, String] = {}
+	for id: String in _active:
+		keep[_decls[id].group] = id
+	for entry: Entry in _journal:
+		if entry.action == Entry.Action.SET and _active.has(entry.flag):
+			keep[_decls[entry.flag].group] = entry.flag
+	var dropped: PackedStringArray = []
+	for id: String in _active.keys():
+		var group: String = _decls[id].group
+		if not group.is_empty() and keep[group] != id:
+			_active.erase(id)
+			dropped.append(id)
+	if not dropped.is_empty():
+		_report("в группе стоят несколько флагов, сняты: %s" % ", ".join(dropped))
 
 
 # Условие читают часто: одна запись в лог на id, а не на каждый вызов.

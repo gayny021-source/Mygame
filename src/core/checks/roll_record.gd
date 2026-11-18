@@ -51,9 +51,9 @@ static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue]) -
 		if not str(key).begins_with("_") and not KEYS.has(key):
 			reader.issue("DT-04", str(key), "неизвестный ключ")
 	var record: RollRecord = RollRecord.new()
-	record.scene_id = StoryPosition._id(reader, "scene_id")
-	record.check_id = StoryPosition._id(reader, "check_id")
-	record.stat_id = StoryPosition._id(reader, "stat_id")
+	record.scene_id = StoryPosition.read_id(reader, "scene_id")
+	record.check_id = StoryPosition.read_id(reader, "check_id")
+	record.stat_id = StoryPosition.read_id(reader, "stat_id")
 	var face_before: int = issues.size()
 	record.roll = reader.integer("roll")
 	if issues.size() == face_before and (record.roll < 1 or record.roll > 20):

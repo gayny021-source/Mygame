@@ -35,34 +35,44 @@ var schema: Array[Snapshot] = []
 var roll: RollRecord
 
 
-## The raw body; `roll` only when there is a record.
-func to_dict() -> Dictionary:
+## The raw body; `roll` only when there is a record. Empty, with a finding in `issues`, when the body
+## has no resume (DT-03) or a null schema snapshot (DT-02): such a body is not written.
+func to_dict(issues: Array[DataIssue] = []) -> Dictionary:
+	if resume == null:
+		issues.append(DataIssue.new("DT-03", "body/resume", "", "нет снимка возобновления"))
+		return {}
 	var snapshots: Array[Dictionary] = []
-	for snapshot: Snapshot in schema:
-		snapshots.append(snapshot.to_dict())
+	for i: int in schema.size():
+		if schema[i] == null:
+			issues.append(DataIssue.new("DT-02", "body/schema/%d" % i, "", "снимок схемы пуст"))
+			return {}
+		snapshots.append(schema[i].to_dict())
 	var raw: Dictionary = {"run_id": run_id, "hero": hero, "resume": resume.to_dict(), "schema": snapshots}
 	if roll != null:
 		raw["roll"] = roll.to_dict()
 	return raw
 
 
-## Body read from a slot; null when findings were appended to `issues` (DT-02, DT-03, DT-04, DT-05,
-## DT-06). `log_error` goes to the restored states: each logs a dropped undeclared flag once.
-static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], declarations: Array[FlagDecl], log_error: Callable = Callable()) -> RunBody:
+## Body read from a slot; null when findings were appended to `issues` (DT-02, DT-03, DT-04, DT-06,
+## DT-05 a hero other than `hero_id` of the file name, Э-14). `log_error` goes to the restored
+## states; a dropped undeclared flag is logged once per load.
+static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], declarations: Array[FlagDecl], hero_id: String, log_error: Callable = Callable()) -> RunBody:
 	var before: int = issues.size()
 	var reader: DictReader = DictReader.new(raw, path, issues)
 	_check_keys(reader, raw, KEYS)
 	var body: RunBody = RunBody.new()
 	body.run_id = reader.text("run_id")
-	body.hero = StoryPosition._id(reader, "hero")
-	# DictReader не отдаёт вложенный объект сырым, а from_dict соседей ждут сырой словарь.
-	var resume: Variant = reader._typed("resume", TYPE_DICTIONARY, true)
+	body.hero = StoryPosition.read_id(reader, "hero")
+	if DictReader.is_id(body.hero) and body.hero != hero_id:
+		reader.issue("DT-05", "hero", "герой «%s», а файл героя «%s»" % [body.hero, hero_id])
+	var reported: Dictionary[String, bool] = {}
+	var resume: Variant = reader.typed("resume", TYPE_DICTIONARY, true)
 	if resume != null:
-		body.resume = _snapshot(resume, path + "/resume", issues, declarations, log_error)
-	var snapshots: Variant = reader._typed("schema", TYPE_ARRAY, true)
+		body.resume = _snapshot(resume, path + "/resume", issues, declarations, log_error, reported)
+	var snapshots: Variant = reader.typed("schema", TYPE_ARRAY, true)
 	if snapshots != null:
-		body.schema = _snapshots(reader, snapshots, issues, declarations, log_error)
-	var record: Variant = reader._typed("roll", TYPE_DICTIONARY, false)
+		body.schema = _snapshots(reader, snapshots, issues, declarations, log_error, reported)
+	var record: Variant = reader.typed("roll", TYPE_DICTIONARY, false)
 	if record != null:
 		body.roll = RollRecord.from_dict(record, path + "/roll", issues)
 	if issues.size() > before:
@@ -70,24 +80,24 @@ static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], d
 	return body
 
 
-static func _snapshots(reader: DictReader, items: Array, issues: Array[DataIssue], declarations: Array[FlagDecl], log_error: Callable) -> Array[Snapshot]:
+static func _snapshots(reader: DictReader, items: Array, issues: Array[DataIssue], declarations: Array[FlagDecl], log_error: Callable, reported: Dictionary[String, bool]) -> Array[Snapshot]:
 	var result: Array[Snapshot] = []
 	for i: int in items.size():
 		if not items[i] is Dictionary:
 			reader.issue("DT-02", "schema/%d" % i, "ожидался объект")
 			continue
-		result.append(_snapshot(items[i], "%s/schema/%d" % [reader.path, i], issues, declarations, log_error))
+		result.append(_snapshot(items[i], "%s/schema/%d" % [reader.path, i], issues, declarations, log_error, reported))
 	return result
 
 
-static func _snapshot(raw: Dictionary, path: String, issues: Array[DataIssue], declarations: Array[FlagDecl], log_error: Callable) -> Snapshot:
+static func _snapshot(raw: Dictionary, path: String, issues: Array[DataIssue], declarations: Array[FlagDecl], log_error: Callable, reported: Dictionary[String, bool]) -> Snapshot:
 	var reader: DictReader = DictReader.new(raw, path, issues)
 	_check_keys(reader, raw, SNAPSHOT_KEYS)
-	var state: Variant = reader._typed("state", TYPE_DICTIONARY, true)
-	var position: Variant = reader._typed("position", TYPE_DICTIONARY, true)
+	var state: Variant = reader.typed("state", TYPE_DICTIONARY, true)
+	var position: Variant = reader.typed("position", TYPE_DICTIONARY, true)
 	if state == null or position == null:
 		return null
-	var restored: RunState = RunState.from_dict(state, path + "/state", issues, declarations, log_error)
+	var restored: RunState = RunState.from_dict(state, path + "/state", issues, declarations, log_error, reported)
 	return Snapshot.new(restored, StoryPosition.from_dict(position, path + "/position", issues))
 
 

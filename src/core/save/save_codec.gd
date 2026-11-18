@@ -56,8 +56,8 @@ static func encode(version: int, gen: int, body: Dictionary) -> PackedByteArray:
 
 
 ## Reads the bytes of slot `slot` (0 `_a`, 1 `_b`). VALID: magic, version 1…`app_version`, gen
-## 1…2^53 − 1 of the slot's parity, the sum, a JSON object, and its `hero` equal to `expect_hero`
-## (not checked when empty: Gallery, Settings). A newer version with a valid header is TOO_NEW and its
+## 1…2^53 − 1 of the slot's parity, the sum, a JSON object, and its `hero` equal to `expect_hero`;
+## an empty `expect_hero` (Gallery, Settings) accepts only a body without `hero`. A newer version with a valid header is TOO_NEW and its
 ## body is not parsed. Anything else, a cut or empty file included, is INVALID.
 static func decode(bytes: PackedByteArray, slot: int, app_version: int, expect_hero: String = "") -> SlotRead:
 	var read: SlotRead = SlotRead.new()
@@ -78,6 +78,9 @@ static func decode(bytes: PackedByteArray, slot: int, app_version: int, expect_h
 	if json.parse(payload.get_string_from_utf8()) != OK or not json.data is Dictionary:
 		return read
 	var body: Dictionary = json.data
+	# Пустой expect_hero — тело без героя (Галерея, Настройки); тело прохождения так не читается (Э-14).
+	if expect_hero.is_empty() and body.has("hero"):
+		return read
 	var hero: Variant = body.get("hero")
 	if not expect_hero.is_empty() and not (hero is String and hero == expect_hero):
 		return read
