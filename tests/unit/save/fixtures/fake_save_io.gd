@@ -17,6 +17,10 @@ var fail_writes: int
 var hold_write: bool
 ## While true, a started read keeps its result until release() (a hung load, rule 8).
 var hold_read: bool
+## So many next reads fail as a whole: ok false, no bytes (a read error, not a missing file).
+var fail_reads: int
+## When ≥ 0, a read returns only so many slots (a short answer of the executor).
+var read_slots: int = -1
 ## 1-based number of the write at which the process is killed; 0 — never.
 var kill_write: int
 ## Bytes the killed write leaves in the file; -1 — killed before open, the file is untouched.
@@ -57,9 +61,13 @@ func start_read(paths: PackedStringArray) -> void:
 		return
 	reads += 1
 	var done: SaveIo.IoDone = SaveIo.IoDone.new()
-	done.ok = true
+	done.ok = fail_reads == 0
 	for path: String in paths:
-		done.reads.append(files.get(path))
+		done.reads.append(files.get(path) if done.ok else null)
+	if not done.ok:
+		fail_reads -= 1
+	if read_slots >= 0:
+		done.reads.resize(read_slots)
 	if hold_read:
 		_held = done
 	else:

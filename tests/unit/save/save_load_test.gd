@@ -325,3 +325,85 @@ func test_write_after_a_queued_load_does_not_reach_that_load() -> void:
 	assert_array(_rig.load_results).is_equal([Vector2i(token, LOAD_OK)])
 	assert_str(_body()["run_id"]).is_equal("t16")
 	assert_str(_rig.slot_run(RUN, B)).is_equal("t17@17")
+
+
+func test_load_commit_load_gives_a_second_token_that_sees_the_commit() -> void:
+	# Arrange
+	_rig.put(RUN, 14, WriterRig.run("r14"))
+	var first: int = _rig.load_run()
+	_rig.commit("t15")
+	# Act
+	var second: int = _rig.load_run()
+	_rig.pump()
+	# Assert
+	assert_int(second).is_not_equal(first)
+	assert_array(_rig.load_results).is_equal([Vector2i(first, LOAD_OK), Vector2i(second, LOAD_OK)])
+	assert_str(_rig.load_bodies[0]["run_id"]).is_equal("r14")
+	assert_str(_rig.load_bodies[1]["run_id"]).is_equal("t15")
+
+
+func test_two_loads_without_a_write_between_share_one_token() -> void:
+	# Act
+	var first: int = _rig.load_run()
+	var second: int = _rig.load_run()
+	_rig.pump()
+	# Assert
+	assert_int(second).is_equal(first)
+	assert_array(_rig.load_results).is_equal([Vector2i(first, LOAD_EMPTY)])
+	assert_int(_rig.io.reads).is_equal(1)
+
+
+func test_read_error_is_corrupt_not_empty_and_writes_nothing() -> void:
+	# Arrange
+	_rig.put(RUN, 14, WriterRig.run("r14"))
+	_rig.io.fail_reads = 1
+	var before: Array[PackedByteArray] = _slots()
+	# Act
+	var code: int = _load()
+	# Assert
+	assert_int(code).is_equal(LOAD_CORRUPT)
+	assert_dict(_body()).is_empty()
+	assert_int(_rig.io.written.size()).is_equal(0)
+	assert_bool(_slots() == before).is_true()
+
+
+func test_short_read_counts_the_missing_slot_as_no_file() -> void:
+	# Arrange
+	_rig.put(RUN, 14, WriterRig.run("r14"))
+	_rig.io.read_slots = 1
+	# Act
+	var code: int = _load()
+	# Assert
+	assert_int(code).is_equal(LOAD_OK)
+	assert_str(_body()["run_id"]).is_equal("r14")
+
+
+static func _migrate_to_other_hero(body: Dictionary) -> Variant:
+	body["hero"] = WriterRig.OTHER
+	return body
+
+
+func test_migration_that_changes_the_hero_is_corrupt() -> void:
+	# Arrange
+	var migrations: Dictionary[int, Callable] = {1: _migrate_to_other_hero}
+	_rig.restart(true, WriterRig.WAIT_MS, 2, migrations)
+	_rig.put(RUN, 14, WriterRig.run("r14"))
+	# Act
+	var code: int = _load()
+	# Assert
+	assert_int(code).is_equal(LOAD_CORRUPT)
+	assert_dict(_body()).is_empty()
+
+
+func test_invalid_migration_is_refused_at_registration() -> void:
+	# Arrange
+	var migrations: Dictionary[int, Callable] = {1: Callable()}
+	_rig.lines.clear()
+	# Act
+	_rig.restart(true, WriterRig.WAIT_MS, 2, migrations)
+	var refused: int = _rig.lines.size()
+	_rig.put(RUN, 14, WriterRig.run("r14"))
+	var code: int = _load()
+	# Assert
+	assert_int(refused).is_equal(1)
+	assert_int(code).is_equal(LOAD_CORRUPT)

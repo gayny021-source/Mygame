@@ -296,3 +296,78 @@ func test_ac67_idle_writer_counts_from_the_load_not_instantly() -> void:
 	# Assert
 	assert_int(before).is_equal(0)
 	assert_array(_rig.load_results).is_equal([Vector2i(token, LOAD_TIMEOUT)])
+
+
+func test_read_error_before_a_write_ends_error_without_writing() -> void:
+	# Arrange
+	_rig.put(WriterRig.RUN, 14, WriterRig.run("r14"))
+	_rig.io.fail_reads = 1
+	var ticket: int = _rig.commit("t15")
+	# Act
+	_rig.pump()
+	var written: int = _rig.io.written.size()
+	_rig.commit("t15b")
+	_rig.pump()
+	# Assert
+	assert_array(_outcomes(ticket)).is_equal([SaveWriter.Outcome.ERROR])
+	assert_int(written).is_equal(0)
+	assert_str(_rig.slot_run(WriterRig.RUN, WriterRig.B)).is_equal("t15b@15")
+	assert_int(_rig.io.reads).is_equal(2)
+
+
+func test_clock_going_back_does_not_move_the_writer_time_back() -> void:
+	# Arrange
+	_rig.io.hold_write = true
+	_rig.at(1000)
+	_rig.at(500)
+	var ticket: int = _rig.commit("t1")
+	_rig.pump(3)
+	# Act
+	_rig.at(1000 + WAIT - 1)
+	var before: Array[int] = _outcomes(ticket)
+	_rig.at(1000 + WAIT)
+	# Assert
+	assert_array(before).is_empty()
+	assert_array(_outcomes(ticket)).is_equal([TIMEOUT_OUT])
+
+
+func test_same_time_frames_never_time_out() -> void:
+	# Arrange
+	var ticket: int = _held_commit(1000, "t1")
+	# Act
+	for frame: int in 50:
+		_rig.at(1000)
+	var before: Array[int] = _outcomes(ticket)
+	_rig.at(1000 + WAIT)
+	# Assert
+	assert_array(before).is_empty()
+	assert_array(_outcomes(ticket)).is_equal([TIMEOUT_OUT])
+
+
+func test_jump_after_background_times_out_once_by_real_time() -> void:
+	# Arrange
+	var ticket: int = _held_commit(0, "t1")
+	var token: int = _rig.load_run()
+	# Act
+	_rig.at(3600000)
+	_rig.at(3600016)
+	# Assert
+	assert_array(_outcomes(ticket)).is_equal([TIMEOUT_OUT])
+	assert_array(_rig.load_results).is_equal([Vector2i(token, LOAD_TIMEOUT)])
+
+
+func test_pump_from_a_signal_handler_returns_at_once() -> void:
+	# Arrange: two loads and three tickets expire in one frame; every handler pumps again
+	_rig.io.hold_write = true
+	var tickets: Array[int] = [_rig.commit("t1"), _rig.commit("m1", 1, WriterRig.OTHER), _rig.writer.write_gallery({"endings": []})]
+	_rig.pump(3)
+	var loads: Array[int] = [_rig.load_run(), _rig.load_run(WriterRig.OTHER)]
+	var again: Callable = func(_id: int, _code: int, _body: Dictionary = {}) -> void: _rig.writer.pump(_rig.now_ms + WAIT)
+	_rig.writer.write_finished.connect(again)
+	_rig.writer.load_finished.connect(again)
+	# Act
+	_rig.at(WAIT)
+	# Assert
+	for ticket: int in tickets:
+		assert_array(_outcomes(ticket)).is_equal([TIMEOUT_OUT])
+	assert_array(_rig.load_results).is_equal([Vector2i(loads[0], LOAD_TIMEOUT), Vector2i(loads[1], LOAD_TIMEOUT)])
