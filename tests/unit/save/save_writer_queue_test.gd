@@ -136,7 +136,7 @@ func test_gallery_and_settings_write_both_slots_and_fall_back() -> void:
 	for i: int in 2:
 		_rig.writer.write_gallery({"seen": ["e_%d" % i]})
 		_rig.writer.write_settings({"volume": i})
-	_rig.pump()
+		_rig.pump()
 	for key: String in ["gallery", "settings"]:
 		for slot: int in 2:
 			var head: String = _rig.bytes(key, slot).slice(0, 4).get_string_from_ascii()

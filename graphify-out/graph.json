@@ -466,6 +466,11 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/save/save_writer.gd",
+   "label": "save_writer.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/state/flag_decl.gd",
    "label": "flag_decl.gd",
    "group": "GDScript"
@@ -823,6 +828,16 @@
   {
    "id": "tests/unit/save/save_run_body_test.gd",
    "label": "save_run_body_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/save/save_writer_generation_test.gd",
+   "label": "save_writer_generation_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/save/save_writer_pair_test.gd",
+   "label": "save_writer_pair_test.gd",
    "group": "GDScript"
   },
   {
@@ -2226,6 +2241,10 @@
    "target": "design/gdd/save-system.md"
   },
   {
+   "source": "src/core/save/save_writer.gd",
+   "target": "design/gdd/save-system.md"
+  },
+  {
    "source": "src/core/state/flag_decl.gd",
    "target": "design/gdd/run-state.md"
   },
@@ -2515,6 +2534,14 @@
   },
   {
    "source": "tests/unit/save/save_run_body_test.gd",
+   "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "tests/unit/save/save_writer_generation_test.gd",
+   "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "tests/unit/save/save_writer_pair_test.gd",
    "target": "design/gdd/save-system.md"
   },
   {

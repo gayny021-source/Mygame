@@ -44,7 +44,16 @@ static func slot_of(gen: int) -> int:
 
 ## Slot bytes of `body` with the header of `version` and `gen`. The body is serialized now (AC-15).
 static func encode(version: int, gen: int, body: Dictionary) -> PackedByteArray:
-	var payload: PackedByteArray = JSON.stringify(body).to_utf8_buffer()
+	return frame(version, gen, serialize(body))
+
+
+## UTF-8 JSON of a body: the writer takes it at commit, before the gen is known (rule 5, AC-15).
+static func serialize(body: Dictionary) -> PackedByteArray:
+	return JSON.stringify(body).to_utf8_buffer()
+
+
+## Slot bytes of an already serialized body under the header of `version` and `gen`.
+static func frame(version: int, gen: int, payload: PackedByteArray) -> PackedByteArray:
 	var bytes: PackedByteArray = MAGIC.to_ascii_buffer()
 	bytes.resize(HEAD_END)
 	bytes.encode_u32(4, version)
