@@ -16,6 +16,8 @@ class IoDone extends RefCounted:
 	var ok: bool
 	## Read: per path the bytes, or null when the file does not exist or failed to open.
 	var reads: Array[Variant] = []
+	## Read: indexes of the paths whose existing file failed to open; empty when `ok`.
+	var failed: Array[int] = []
 
 
 var _done: IoDone
@@ -30,13 +32,13 @@ func start_write(path: String, bytes: PackedByteArray) -> void:
 ## Reads every path whole. One operation at a time.
 func start_read(paths: PackedStringArray) -> void:
 	_done = IoDone.new()
-	_done.ok = true
-	for path: String in paths:
-		var bytes: Variant = _read(path)
+	for slot: int in paths.size():
+		var bytes: Variant = _read(paths[slot])
 		if bytes is bool:
-			_done.ok = false
+			_done.failed.append(slot)
 			bytes = null
 		_done.reads.append(bytes)
+	_done.ok = _done.failed.is_empty()
 
 
 ## The finished operation once, then null until the next start.

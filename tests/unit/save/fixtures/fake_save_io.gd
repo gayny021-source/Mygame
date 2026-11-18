@@ -21,6 +21,8 @@ var hold_read: bool
 var fail_reads: int
 ## When ≥ 0, a read returns only so many slots (a short answer of the executor).
 var read_slots: int = -1
+## Slot whose file fails to open at the next read, then -1 (a read error of one slot).
+var fail_read_slot: int = -1
 ## 1-based number of the write at which the process is killed; 0 — never.
 var kill_write: int
 ## Bytes the killed write leaves in the file; -1 — killed before open, the file is untouched.
@@ -61,11 +63,17 @@ func start_read(paths: PackedStringArray) -> void:
 		return
 	reads += 1
 	var done: SaveIo.IoDone = SaveIo.IoDone.new()
-	done.ok = fail_reads == 0
-	for path: String in paths:
-		done.reads.append(files.get(path) if done.ok else null)
-	if not done.ok:
+	var whole: bool = fail_reads > 0
+	if whole:
 		fail_reads -= 1
+	for slot: int in paths.size():
+		if whole or slot == fail_read_slot:
+			done.failed.append(slot)
+			done.reads.append(null)
+		else:
+			done.reads.append(files.get(paths[slot]))
+	fail_read_slot = -1
+	done.ok = done.failed.is_empty()
 	if read_slots >= 0:
 		done.reads.resize(read_slots)
 	if hold_read:

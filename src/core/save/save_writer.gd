@@ -13,8 +13,9 @@ extends RefCounted
 
 ## Outcome of a ticket; TIMEOUT only releases the screen, the write goes on (rule 7).
 enum Outcome { OK, ERROR, TIMEOUT }
-## Code of a load; the first four follow SaveCodec.Pick.Code (rule 8).
-enum LoadCode { OK, EMPTY, CORRUPT, TOO_NEW, LOAD_TIMEOUT }
+## Code of a load: the first four from SaveCodec.Pick.Code (rule 8); READ_ERROR — no slot loads
+## and a file failed to read, the player may retry (rule 12, CEO decision «Сбой чтения сохранения»).
+enum LoadCode { OK, EMPTY, CORRUPT, TOO_NEW, LOAD_TIMEOUT, READ_ERROR }
 
 ## Once per ticket; displaced tickets get the outcome of the write that displaced them (rule 6).
 signal write_finished(ticket: int, outcome: Outcome)
@@ -266,8 +267,10 @@ func _decoded(reads: Array[Variant]) -> Array[SaveCodec.SlotRead]:
 
 
 ## Ends a load job (rule 8, items 1-5). An expired one ends silently: its token already got
-## LOAD_TIMEOUT. A read error is CORRUPT, never EMPTY: the files may be there. Nothing is written,
-## the slots stay as read (invariant 5).
+## LOAD_TIMEOUT. A slot that failed to read counts as no file for the pick: a readable valid slot
+## still loads (rule 8 item 2, with a log line); otherwise the code is READ_ERROR, never EMPTY or
+## CORRUPT — the files may be fine, the player retries (rule 12). Nothing is written, the slots stay
+## as read (invariant 5).
 func _loaded(done: SaveIo.IoDone) -> void:
 	var job: Job = _job
 	var slots: Array[SaveCodec.SlotRead] = _decoded(done.reads)
@@ -276,18 +279,19 @@ func _loaded(done: SaveIo.IoDone) -> void:
 	if job.expired:
 		return
 	_loads.erase(job)
-	var code: LoadCode = LoadCode.CORRUPT
+	var pick: SaveCodec.Pick = SaveCodec.pick(slots[0], slots[1])
+	var code: LoadCode = _code_of(pick.code)
 	var body: Dictionary = {}
-	var note: String = ", слоты не прочитаны"
-	if done.ok:
-		var pick: SaveCodec.Pick = SaveCodec.pick(slots[0], slots[1])
-		code = _code_of(pick.code)
-		note = ""
-		if code == LoadCode.OK:
-			body = _migrated(slots[pick.slot], job.hero)
-		if code == LoadCode.OK and body.is_empty():
-			code = LoadCode.CORRUPT
-			note = ", миграция не удалась"
+	var note: String = ""
+	if code == LoadCode.OK:
+		body = _migrated(slots[pick.slot], job.hero)
+	if code == LoadCode.OK and body.is_empty():
+		code = LoadCode.CORRUPT
+		note = ", миграция не удалась"
+	if not done.failed.is_empty():
+		note += ", слоты %s не прочитаны" % [done.failed]
+	if not done.failed.is_empty() and code != LoadCode.OK:
+		code = LoadCode.READ_ERROR
 	_log_line.call("save: load %s %s%s" % [job.key, LoadCode.keys()[code], note])
 	load_finished.emit(job.tickets[0], code, body)
 

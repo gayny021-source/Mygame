@@ -6,6 +6,7 @@ const LOAD_OK: int = SaveWriter.LoadCode.OK
 const LOAD_EMPTY: int = SaveWriter.LoadCode.EMPTY
 const LOAD_CORRUPT: int = SaveWriter.LoadCode.CORRUPT
 const LOAD_TOO_NEW: int = SaveWriter.LoadCode.TOO_NEW
+const LOAD_READ_ERROR: int = SaveWriter.LoadCode.READ_ERROR
 const RUN := WriterRig.RUN
 const A: int = WriterRig.A
 const B: int = WriterRig.B
@@ -353,18 +354,69 @@ func test_two_loads_without_a_write_between_share_one_token() -> void:
 	assert_int(_rig.io.reads).is_equal(1)
 
 
-func test_read_error_is_corrupt_not_empty_and_writes_nothing() -> void:
+func test_read_error_is_read_error_with_one_line_and_writes_nothing() -> void:
 	# Arrange
 	_rig.put(RUN, 14, WriterRig.run("r14"))
 	_rig.io.fail_reads = 1
 	var before: Array[PackedByteArray] = _slots()
+	_rig.lines.clear()
 	# Act
 	var code: int = _load()
 	# Assert
-	assert_int(code).is_equal(LOAD_CORRUPT)
+	assert_int(code).is_equal(LOAD_READ_ERROR)
 	assert_dict(_body()).is_empty()
+	assert_int(_rig.lines.size()).is_equal(1)
 	assert_int(_rig.io.written.size()).is_equal(0)
 	assert_bool(_slots() == before).is_true()
+
+
+func test_retry_after_read_error_loads_normally() -> void:
+	# Arrange
+	_rig.put(RUN, 14, WriterRig.run("r14"))
+	_rig.io.fail_reads = 1
+	var first: int = _load()
+	# Act
+	var retry: int = _load()
+	# Assert
+	assert_array([first, retry]).is_equal([LOAD_READ_ERROR, LOAD_OK])
+	assert_str(_body()["run_id"]).is_equal("r14")
+
+
+func test_unreadable_newer_slot_loads_the_valid_one_with_a_log_line() -> void:
+	# Arrange
+	_rig.put(RUN, 14, WriterRig.run("r14"))
+	_rig.put(RUN, 15, WriterRig.run("r15"))
+	_rig.io.fail_read_slot = B
+	_rig.lines.clear()
+	# Act
+	var code: int = _load()
+	# Assert
+	assert_int(code).is_equal(LOAD_OK)
+	assert_str(_body()["run_id"]).is_equal("r14")
+	assert_int(_rig.lines.size()).is_equal(1)
+	assert_str(_rig.lines[0]).contains("не прочитан")
+
+
+func test_unreadable_slot_beside_a_bad_one_is_read_error() -> void:
+	# Arrange
+	_rig.garbage(RUN, A)
+	_rig.put(RUN, 15, WriterRig.run("r15"))
+	_rig.io.fail_read_slot = B
+	# Act
+	var code: int = _load()
+	# Assert
+	assert_int(code).is_equal(LOAD_READ_ERROR)
+	assert_dict(_body()).is_empty()
+
+
+func test_unreadable_slot_beside_no_file_is_read_error_not_empty() -> void:
+	# Arrange
+	_rig.put(RUN, 15, WriterRig.run("r15"))
+	_rig.io.fail_read_slot = B
+	# Act
+	var code: int = _load()
+	# Assert
+	assert_int(code).is_equal(LOAD_READ_ERROR)
 
 
 func test_short_read_counts_the_missing_slot_as_no_file() -> void:
