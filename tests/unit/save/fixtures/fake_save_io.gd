@@ -69,9 +69,14 @@ func start_read(paths: PackedStringArray) -> void:
 	for slot: int in paths.size():
 		if whole or slot == fail_read_slot:
 			done.failed.append(slot)
+			done.statuses.append(SaveIo.IoDone.FileStatus.READ_ERROR)
 			done.reads.append(null)
+		elif files.has(paths[slot]):
+			done.statuses.append(SaveIo.IoDone.FileStatus.READ)
+			done.reads.append(files[paths[slot]])
 		else:
-			done.reads.append(files.get(paths[slot]))
+			done.statuses.append(SaveIo.IoDone.FileStatus.ABSENT)
+			done.reads.append(null)
 	fail_read_slot = -1
 	done.ok = done.failed.is_empty()
 	if read_slots >= 0:

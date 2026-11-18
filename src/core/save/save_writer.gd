@@ -4,8 +4,9 @@ extends RefCounted
 ## (save-system.md, rules 4-8, 11, 15, F1-F3, F6; ADR-0002 §1, §4; DD-022, DD-023; stories SV2, SV3).
 ## Runs on the main thread: the body is serialized at commit (AC-15), the header with gen and sum is
 ## framed when the write starts, and SaveIo only moves bytes. The clock is the `now_ms` of pump():
-## a commit or load_run is stamped with the time of the last pump (at most one frame early), 0 before
-## the first pump. The time never moves back: a smaller `now_ms` keeps the last one.
+## a commit or load_run is stamped with the time of the last pump (at most one frame early); one made
+## before the first pump is stamped by that pump. The time never moves back: a smaller `now_ms` keeps
+## the last one.
 ##
 ## Usage: [code]var ticket := writer.commit(1, "rovend", body, issues)[/code]; 0 means refused
 ## (the caller shows the screen at once, DD-022). Call [code]pump(now_ms)[/code] every frame with
@@ -79,6 +80,7 @@ var _last_done: int
 var _expired: Array[int] = []
 var _expired_loads: Array[Job] = []
 var _pumping: bool
+var _pumped: bool
 
 
 ## `log_line` takes one String per finished job, timeout or refusal. `wait_ms` is T_ожид (F3);
@@ -153,6 +155,8 @@ func pump(now_ms: int) -> void:
 	if _pumping:
 		return
 	_pumping = true
+	if not _pumped:
+		_stamp_early(now_ms)
 	_now = maxi(_now, now_ms)
 	if _job != null:
 		var done: SaveIo.IoDone = _io.poll()
@@ -164,6 +168,15 @@ func pump(now_ms: int) -> void:
 	_time_out_tickets()
 	_time_out_loads()
 	_pumping = false
+
+
+## The first pump stamps what came before it: the clock is unknown until then, not 0.
+func _stamp_early(now_ms: int) -> void:
+	_pumped = true
+	for ticket: int in _waiting:
+		_waiting[ticket] = now_ms
+	for job: Job in _loads:
+		job.queued_ms = now_ms
 
 
 ## The newest pending load of `hero_id`, or null.
@@ -239,7 +252,8 @@ func _advance(done: SaveIo.IoDone) -> void:
 
 
 ## The slots read by the first step of a job with an unknown gen (F2; AC-09, AC-43, AC-64).
-## A read error ends the job ERROR without a write and leaves gen_ok unknown.
+## A read error ends the job ERROR without a write and leaves gen_ok unknown: the unreadable slot's
+## gen is unknown, so the next gen could land on the newest valid one. A pair refuses too (Э-32).
 func _primed(done: SaveIo.IoDone) -> void:
 	if not done.ok:
 		_finish(Outcome.ERROR, "save: %s слоты не прочитаны, не пишется" % _job.key)
@@ -290,6 +304,8 @@ func _loaded(done: SaveIo.IoDone) -> void:
 		note = ", миграция не удалась"
 	if not done.failed.is_empty():
 		note += ", слоты %s не прочитаны" % [done.failed]
+	# READ_ERROR outranks EMPTY, CORRUPT and TOO_NEW on purpose: the unread file may be fine and the
+	# player retries (CEO decision «Сбой чтения сохранения», rule 12).
 	if not done.failed.is_empty() and code != LoadCode.OK:
 		code = LoadCode.READ_ERROR
 	_log_line.call("save: load %s %s%s" % [job.key, LoadCode.keys()[code], note])

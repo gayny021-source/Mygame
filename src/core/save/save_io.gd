@@ -11,12 +11,16 @@ extends RefCounted
 
 ## Result of one started operation.
 class IoDone extends RefCounted:
+	## Read status of one path.
+	enum FileStatus { ABSENT, READ, READ_ERROR }
 	## Write: the file opened, every byte stored and closed. Read: every existing file opened; false is
 	## a read error, not a missing file.
 	var ok: bool
 	## Read: per path the bytes, or null when the file does not exist or failed to open.
 	var reads: Array[Variant] = []
-	## Read: indexes of the paths whose existing file failed to open; empty when `ok`.
+	## Read: per path its status.
+	var statuses: Array[FileStatus] = []
+	## Read: indexes of the paths with READ_ERROR; empty when `ok`.
 	var failed: Array[int] = []
 
 
@@ -33,11 +37,11 @@ func start_write(path: String, bytes: PackedByteArray) -> void:
 func start_read(paths: PackedStringArray) -> void:
 	_done = IoDone.new()
 	for slot: int in paths.size():
-		var bytes: Variant = _read(paths[slot])
-		if bytes is bool:
+		var bytes: PackedByteArray = _read(paths[slot], _done)
+		var status: IoDone.FileStatus = _done.statuses[slot]
+		if status == IoDone.FileStatus.READ_ERROR:
 			_done.failed.append(slot)
-			bytes = null
-		_done.reads.append(bytes)
+		_done.reads.append(bytes if status == IoDone.FileStatus.READ else null)
 	_done.ok = _done.failed.is_empty()
 
 
@@ -57,11 +61,14 @@ static func _write(path: String, bytes: PackedByteArray) -> bool:
 	return stored
 
 
-## The bytes; null for a missing file; false when an existing file does not open.
-static func _read(path: String) -> Variant:
+## The bytes of `path`, empty unless READ; appends its status to `done.statuses`.
+static func _read(path: String, done: IoDone) -> PackedByteArray:
 	if not FileAccess.file_exists(path):
-		return null
+		done.statuses.append(IoDone.FileStatus.ABSENT)
+		return PackedByteArray()
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		return false
+		done.statuses.append(IoDone.FileStatus.READ_ERROR)
+		return PackedByteArray()
+	done.statuses.append(IoDone.FileStatus.READ)
 	return file.get_buffer(file.get_length())

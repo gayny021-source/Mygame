@@ -390,3 +390,62 @@ func test_pump_from_a_signal_handler_returns_at_once() -> void:
 	assert_array(lines_in_handler).is_equal([0])
 	assert_array(_outcomes(ticket)).is_equal([TIMEOUT_OUT])
 	assert_str(_rig.slot_run(WriterRig.RUN, WriterRig.B)).is_equal("t1@1")
+
+
+func test_commit_before_the_first_pump_is_stamped_by_that_pump() -> void:
+	# Arrange: the commit and the load come before any pump; the first frame is at 10000
+	_rig.io.hold_write = true
+	var ticket: int = _rig.commit("t1")
+	var token: int = _rig.load_run()
+	# Act
+	_rig.at(10000)
+	_rig.pump(3)
+	_rig.at(10000 + WAIT - 1)
+	var before: Array[int] = _outcomes(ticket)
+	var loads_before: int = _rig.load_results.size()
+	_rig.at(10000 + WAIT)
+	# Assert
+	assert_array(before).is_empty()
+	assert_int(loads_before).is_equal(0)
+	assert_array(_outcomes(ticket)).is_equal([TIMEOUT_OUT])
+	assert_array(_rig.load_results).is_equal([Vector2i(token, LOAD_TIMEOUT)])
+
+
+func test_unreadable_slot_pauses_writes_until_it_reads_again() -> void:
+	# Arrange: _a gen 14 reads, _b gen 15 does not; the load takes _a
+	_rig.put(WriterRig.RUN, 14, WriterRig.run("r14"))
+	_rig.put(WriterRig.RUN, 15, WriterRig.run("r15"))
+	_rig.io.fail_read_slot = WriterRig.B
+	_rig.load_run()
+	_rig.pump()
+	_rig.io.fail_read_slot = WriterRig.B
+	_rig.lines.clear()
+	# Act
+	var paused: int = _rig.commit("t1")
+	_rig.pump()
+	var written: int = _rig.io.written.size()
+	var lines: PackedStringArray = _rig.lines.duplicate()
+	var resumed: int = _rig.commit("t2")
+	_rig.pump()
+	# Assert: the write after the unreadable slot knows gen 15 and does not touch it
+	assert_str(_rig.load_bodies[0]["run_id"]).is_equal("r14")
+	assert_array(_outcomes(paused)).is_equal([SaveWriter.Outcome.ERROR])
+	assert_int(written).is_equal(0)
+	assert_int(lines.size()).is_equal(1)
+	assert_str(lines[0]).contains("не прочитаны")
+	assert_array(_outcomes(resumed)).is_equal([OK_OUT])
+	assert_str(_rig.slot_run(WriterRig.RUN, WriterRig.A)).is_equal("t2@16")
+	assert_str(_rig.slot_run(WriterRig.RUN, WriterRig.B)).is_equal("r15@15")
+
+
+func test_pair_with_an_unreadable_slot_refuses_entirely() -> void:
+	# Arrange
+	_rig.put(WriterRig.RUN, 14, WriterRig.run("R1"))
+	_rig.io.fail_read_slot = WriterRig.B
+	# Act
+	var pair: int = _rig.commit("R2", SaveWriter.PAIR_TRANSITION)
+	_rig.pump()
+	# Assert
+	assert_array(_outcomes(pair)).is_equal([SaveWriter.Outcome.ERROR])
+	assert_int(_rig.io.written.size()).is_equal(0)
+	assert_str(_rig.slot_run(WriterRig.RUN, WriterRig.A)).is_equal("R1@14")
