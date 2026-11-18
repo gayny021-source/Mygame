@@ -84,15 +84,19 @@ func test_a_start_while_a_task_runs_is_refused_and_the_running_one_finishes() ->
 	var io: ThreadSaveIo = ThreadSaveIo.new()
 	var bytes: PackedByteArray = "x".to_ascii_buffer()
 	# Act
-	io.start_write(SaveWriter.path_of(KEY, 0), bytes)
-	io.start_write(SaveWriter.path_of(KEY, 1), bytes)
+	var first: bool = io.start_write(SaveWriter.path_of(KEY, 0), bytes)
+	var second: bool = io.start_write(SaveWriter.path_of(KEY, 1), bytes)
+	var read: bool = io.start_read(PackedStringArray([SaveWriter.path_of(KEY, 0)]))
 	var done: SaveIo.IoDone = null
 	for frame: int in LIMIT_FRAMES:
 		done = io.poll()
 		if done != null:
 			break
 		OS.delay_msec(1)
-	# Assert (TD C5)
+	# Assert (TD C5, round 2: the refusal is reported)
+	assert_bool(first).is_true()
+	assert_bool(second).is_false()
+	assert_bool(read).is_false()
 	assert_object(done).is_not_null()
 	assert_bool(done.ok).is_true()
 	assert_bool(FileAccess.file_exists(SaveWriter.path_of(KEY, 0))).is_true()

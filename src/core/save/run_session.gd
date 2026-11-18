@@ -68,7 +68,8 @@ func screen() -> StoryScreen:
 	return _nav.screen() if _nav != null else null
 
 
-## Transition 6: a new run from the start of chapter 1, written as a pair; one ticket.
+## Transition 6: a new run from the start of chapter 1, written as a pair; one ticket. Null while the
+## ticket of an earlier start still waits (a double tap): the UI keeps the screen it has.
 func start_new() -> StoryScreen:
 	if _waiting != 0:
 		return null
@@ -120,6 +121,11 @@ func choose_check(option: OptionData) -> bool:
 	return _turn != null
 
 
+## «Передумать»: only before the roll; nothing is written. False when there is no such turn.
+func cancel_check() -> bool:
+	return _turn != null and _turn.cancel()
+
+
 ## «Бросить»: commit 3 inside.
 func roll() -> D20Result:
 	return _turn.roll() if _turn != null else null
@@ -144,6 +150,7 @@ func _begin(state: RunState) -> void:
 	_nav = StoryNavigator.new(_hero, _on_chapter_finished, _log)
 
 
+# StoryNavigator refuses to run without a valid chapter-finished Callable (story_navigator.gd:236).
 func _on_chapter_finished(_chapter_id: String) -> void:
 	pass
 
@@ -156,7 +163,9 @@ func _can_apply(outcome_id: String) -> bool:
 		_log.call("исход «%s» не применён: нет сцены на экране или исхода у героя" % outcome_id)
 		return false
 	for option: OptionData in page.scene.options:
-		if option.outcome == outcome_id or (option.check != null and (option.check.success == outcome_id or option.check.failure == outcome_id)):
+		var plain: bool = option.outcome == outcome_id
+		var risky: bool = option.check != null and (option.check.success == outcome_id or option.check.failure == outcome_id)
+		if plain or risky:
 			return true
 	_log.call("исход «%s» не применён: он не из вариантов сцены «%s»" % [outcome_id, page.scene.id])
 	return false

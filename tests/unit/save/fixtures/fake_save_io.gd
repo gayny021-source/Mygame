@@ -28,6 +28,8 @@ var kill_write: int
 ## Bytes the killed write leaves in the file; -1 — killed before open, the file is untouched.
 var kill_at: int = -1
 var dead: bool
+## Starts to refuse (false) before the next one is accepted, like a busy ThreadSaveIo.
+var refuse_starts: int
 var _result: SaveIo.IoDone
 var _held: SaveIo.IoDone
 
@@ -36,12 +38,14 @@ func _init(shared: Dictionary[String, PackedByteArray] = {}) -> void:
 	files = shared
 
 
-func start_write(path: String, bytes: PackedByteArray) -> void:
+func start_write(path: String, bytes: PackedByteArray) -> bool:
+	if _refused():
+		return false
 	if dead:
-		return
+		return true
 	if written.size() + 1 == kill_write:
 		_kill(path, bytes)
-		return
+		return true
 	written.append(path)
 	opens += 1
 	var done: SaveIo.IoDone = SaveIo.IoDone.new()
@@ -56,11 +60,14 @@ func start_write(path: String, bytes: PackedByteArray) -> void:
 		_held = done
 	else:
 		_result = done
+	return true
 
 
-func start_read(paths: PackedStringArray) -> void:
+func start_read(paths: PackedStringArray) -> bool:
+	if _refused():
+		return false
 	if dead:
-		return
+		return true
 	reads += 1
 	var done: SaveIo.IoDone = SaveIo.IoDone.new()
 	var whole: bool = fail_reads > 0
@@ -85,6 +92,14 @@ func start_read(paths: PackedStringArray) -> void:
 		_held = done
 	else:
 		_result = done
+	return true
+
+
+func _refused() -> bool:
+	if refuse_starts <= 0:
+		return false
+	refuse_starts -= 1
+	return true
 
 
 func poll() -> SaveIo.IoDone:

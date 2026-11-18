@@ -27,14 +27,16 @@ class IoDone extends RefCounted:
 var _done: IoDone
 
 
-## Overwrites `path` with `bytes` (open, store, close). One operation at a time.
-func start_write(path: String, bytes: PackedByteArray) -> void:
+## Overwrites `path` with `bytes` (open, store, close). One operation at a time; false when the start
+## was refused (an operation is running), then nothing started and poll() is not for this call.
+func start_write(path: String, bytes: PackedByteArray) -> bool:
 	_done = IoDone.new()
 	_done.ok = _write(path, bytes)
+	return true
 
 
-## Reads every path whole. One operation at a time.
-func start_read(paths: PackedStringArray) -> void:
+## Reads every path whole. One operation at a time; false when the start was refused.
+func start_read(paths: PackedStringArray) -> bool:
 	_done = IoDone.new()
 	for slot: int in paths.size():
 		var bytes: PackedByteArray = _read(paths[slot], _done)
@@ -43,6 +45,7 @@ func start_read(paths: PackedStringArray) -> void:
 			_done.failed.append(slot)
 		_done.reads.append(bytes if status == IoDone.FileStatus.READ else null)
 	_done.ok = _done.failed.is_empty()
+	return true
 
 
 ## The finished operation once, then null until the next start.

@@ -26,7 +26,7 @@ static func load_file(path: String, issues: Array[DataIssue]) -> SaveConfig:
 
 
 ## Config from a parsed object: `wait_ms` required (DT-03), a fraction or a value outside the range DT-02,
-## an unknown key DT-04. Any finding leaves the default and the default.
+## an unknown key DT-04. Any finding leaves wait_ms at DEFAULT_WAIT_MS.
 static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]) -> SaveConfig:
 	var config: SaveConfig = SaveConfig.new()
 	var before: int = issues.size()

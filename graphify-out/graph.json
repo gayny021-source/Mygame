@@ -2305,6 +2305,10 @@
    "target": "design/gdd/save-system.md"
   },
   {
+   "source": "src/core/save/run_session.gd",
+   "target": "src/core/story/story_navigator.gd"
+  },
+  {
    "source": "src/core/save/save_codec.gd",
    "target": "design/gdd/save-system.md"
   },

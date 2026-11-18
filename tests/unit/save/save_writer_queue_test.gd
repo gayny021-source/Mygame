@@ -159,3 +159,47 @@ func test_commit_body_of_other_hero_is_refused_and_keeps_gen() -> void:
 	_rig.commit("r_good")
 	_rig.pump()
 	assert_str(_rig.slot_run(WriterRig.RUN, WriterRig.B)).is_equal("r_good@15")
+
+
+# Round 2 (auditor MAJOR): a refused start ends the job ERROR, nothing stale is handed on.
+func test_refused_prime_read_ends_the_job_error_and_the_next_commit_writes() -> void:
+	# Arrange
+	var rig: WriterRig = WriterRig.new()
+	rig.io.refuse_starts = 1
+	# Act
+	var refused: int = rig.commit("R1")
+	rig.pump()
+	var later: int = rig.commit("R2")
+	rig.pump()
+	# Assert
+	assert_array(rig.finished).contains_exactly([Vector2i(refused, SaveWriter.Outcome.ERROR), Vector2i(later, SaveWriter.Outcome.OK)])
+	assert_str(rig.loaded_run()).is_equal("R2")
+
+
+func test_refused_write_start_ends_the_job_error_and_keeps_the_slots() -> void:
+	# Arrange
+	var rig: WriterRig = WriterRig.new()
+	rig.commit("R1")
+	rig.pump()
+	var written: int = rig.io.written.size()
+	rig.io.refuse_starts = 1
+	# Act
+	var refused: int = rig.commit("R2")
+	rig.pump()
+	# Assert
+	assert_array(rig.finished.slice(1)).contains_exactly([Vector2i(refused, SaveWriter.Outcome.ERROR)])
+	assert_int(rig.io.written.size()).is_equal(written)
+	assert_str(rig.loaded_run()).is_equal("R1")
+
+
+func test_refused_read_start_of_a_load_gives_read_error() -> void:
+	# Arrange
+	var rig: WriterRig = WriterRig.new()
+	rig.commit("R1")
+	rig.pump()
+	rig.io.refuse_starts = 1
+	# Act
+	var token: int = rig.load_run()
+	rig.pump()
+	# Assert
+	assert_array(rig.load_results).contains_exactly([Vector2i(token, SaveWriter.LoadCode.READ_ERROR)])

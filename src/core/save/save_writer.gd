@@ -219,15 +219,17 @@ func _enqueue(key: String, hero: String, body: Dictionary, pair: bool) -> int:
 
 
 func _start() -> void:
+	var paths: PackedStringArray = [path_of(_job.key, 0), path_of(_job.key, 1)]
 	if _job.is_load:
-		_io.start_read(PackedStringArray([path_of(_job.key, 0), path_of(_job.key, 1)]))
+		if not _io.start_read(paths):
+			_advance(_refused_read())
 		return
 	_job.writes_left = 2 if _job.pair else 1
 	if _gen_ok.has(_job.key):
 		_write_next()
 		return
-	var paths: PackedStringArray = [path_of(_job.key, 0), path_of(_job.key, 1)]
-	_io.start_read(paths)
+	if not _io.start_read(paths):
+		_advance(_refused_read())
 
 
 ## A failed write ends the job ERROR and leaves gen_ok as is: the retry of the next commit goes to the
@@ -346,7 +348,18 @@ func _write_next() -> void:
 		return
 	_job.gen = _gen_ok[_job.key] + 1
 	var bytes: PackedByteArray = SaveCodec.frame(_app_version, _job.gen, _job.payload)
-	_io.start_write(path_of(_job.key, SaveCodec.slot_of(_job.gen)), bytes)
+	if not _io.start_write(path_of(_job.key, SaveCodec.slot_of(_job.gen)), bytes):
+		_finish(Outcome.ERROR, "save: %s ввод-вывод занят, запись не начата" % _job.key)
+
+
+# A start SaveIo refused is a read error of both slots: nothing was read, nothing is left to poll.
+func _refused_read() -> SaveIo.IoDone:
+	var done: SaveIo.IoDone = SaveIo.IoDone.new()
+	for slot: int in SLOT_NAMES.size():
+		done.statuses.append(SaveIo.IoDone.FileStatus.READ_ERROR)
+		done.reads.append(null)
+		done.failed.append(slot)
+	return done
 
 
 ## Ends the job before the signals, so a handler may commit again. Tickets that already got TIMEOUT

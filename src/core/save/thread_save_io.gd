@@ -9,19 +9,21 @@ var _task: int = -1
 var _running: IoDone
 
 
-## A start while a task runs is ignored with a warning: one task at a time, the running one is not lost.
-func start_write(path: String, bytes: PackedByteArray) -> void:
+## False, with a warning, while a task runs: one task at a time, the running one is not lost.
+func start_write(path: String, bytes: PackedByteArray) -> bool:
 	if _busy():
-		return
+		return false
 	_running = IoDone.new()
 	_task = WorkerThreadPool.add_task(_write_task.bind(path, bytes, _running))
+	return true
 
 
-func start_read(paths: PackedStringArray) -> void:
+func start_read(paths: PackedStringArray) -> bool:
 	if _busy():
-		return
+		return false
 	_running = IoDone.new()
 	_task = WorkerThreadPool.add_task(_read_task.bind(paths, _running))
+	return true
 
 
 ## The finished operation once; null while the task runs or when none was started.

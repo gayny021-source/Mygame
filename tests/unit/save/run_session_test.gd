@@ -391,3 +391,36 @@ func test_new_run_tapped_twice_while_waiting_starts_once() -> void:
 	assert_object(second).is_null()
 	assert_int(_t.writes()).is_equal(2)
 	assert_str(_t.disk_body()["run_id"]).is_equal("run1")
+
+
+func test_cancel_before_the_roll_frees_the_choice_of_another_risky_option() -> void:
+	# Arrange
+	_t.started()
+	_t.session.choose_check(_t.option("r"))
+	var before: int = _t.writes()
+	# Act
+	var cancelled: bool = _t.session.cancel_check()
+	var chosen: bool = _t.session.choose_check(_t.option("r"))
+	var rolled: D20Result = _t.session.roll()
+	# Assert (round 2): the cancel wrote nothing and consumed no roll
+	assert_bool(cancelled).is_true()
+	assert_bool(chosen).is_true()
+	assert_object(rolled).is_not_null()
+	assert_int(_t.source.calls).is_equal(1)
+	assert_int(_t.writes() - before).is_equal(0)
+
+
+func test_cancel_after_the_roll_is_refused() -> void:
+	# Arrange
+	_t.started()
+	_t.session.choose_check(_t.option("r"))
+	_t.session.roll()
+	_t.settle()
+	var before: int = _t.writes()
+	# Act
+	var cancelled: bool = _t.session.cancel_check()
+	_t.settle()
+	# Assert
+	assert_bool(cancelled).is_false()
+	assert_int(_t.writes() - before).is_equal(0)
+	assert_bool(_t.disk_body()["roll"]["applied"]).is_false()
