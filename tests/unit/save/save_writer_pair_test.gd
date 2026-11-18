@@ -167,3 +167,16 @@ func test_pair_other_hero_waits_for_second_write() -> void:
 	assert_array(_rig.io.written).is_equal(order)
 	assert_str(_rig.slot_run(WriterRig.RUN_OTHER, WriterRig.B, WriterRig.OTHER)).is_equal("rb_new@5")
 	assert_str(_rig.slot_run(WriterRig.RUN_OTHER, WriterRig.A, WriterRig.OTHER)).is_equal("rb_new@6")
+
+
+func test_pair_waiting_pair_displaced_by_commit_stays_a_pair() -> void:
+	_old_run()
+	_rig.io.hold_write = true
+	_rig.commit("r1_cur")
+	_rig.pump(3)
+	_rig.commit("r2", PAIR)
+	_rig.commit("r2_next")
+	_rig.io.release()
+	_rig.pump()
+	assert_str(_rig.slot_run(WriterRig.RUN, WriterRig.A)).is_equal("r2_next@16")
+	assert_str(_rig.slot_run(WriterRig.RUN, WriterRig.B)).is_equal("r2_next@17")
