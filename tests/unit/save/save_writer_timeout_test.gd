@@ -356,7 +356,7 @@ func test_jump_after_background_times_out_once_by_real_time() -> void:
 	assert_array(_rig.load_results).is_equal([Vector2i(token, LOAD_TIMEOUT)])
 
 
-func test_pump_from_a_signal_handler_returns_at_once() -> void:
+func test_handlers_that_pump_get_each_signal_once() -> void:
 	# Arrange: two loads and three tickets expire in one frame; every handler pumps again
 	_rig.io.hold_write = true
 	var tickets: Array[int] = [_rig.commit("t1"), _rig.commit("m1", 1, WriterRig.OTHER), _rig.writer.write_gallery({"endings": []})]
@@ -371,3 +371,22 @@ func test_pump_from_a_signal_handler_returns_at_once() -> void:
 	for ticket: int in tickets:
 		assert_array(_outcomes(ticket)).is_equal([TIMEOUT_OUT])
 	assert_array(_rig.load_results).is_equal([Vector2i(loads[0], LOAD_TIMEOUT), Vector2i(loads[1], LOAD_TIMEOUT)])
+
+
+func test_pump_from_a_signal_handler_returns_at_once() -> void:
+	# Arrange: the TIMEOUT handler releases the held write and pumps again
+	var ticket: int = _held_commit(0, "t1")
+	var lines_in_handler: Array[int] = []
+	var again: Callable = func(_id: int, _outcome: int) -> void:
+		_rig.io.release()
+		var before: int = _rig.lines.size()
+		_rig.writer.pump(_rig.now_ms)
+		lines_in_handler.append(_rig.lines.size() - before)
+	_rig.writer.write_finished.connect(again)
+	# Act
+	_rig.at(WAIT)
+	_rig.pump()
+	# Assert: the inner pump did nothing; the next outer pump ended the write
+	assert_array(lines_in_handler).is_equal([0])
+	assert_array(_outcomes(ticket)).is_equal([TIMEOUT_OUT])
+	assert_str(_rig.slot_run(WriterRig.RUN, WriterRig.B)).is_equal("t1@1")

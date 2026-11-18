@@ -4,7 +4,8 @@ extends RefCounted
 ## (save-system.md, rules 4-8, 11, 15, F1-F3, F6; ADR-0002 §1, §4; DD-022, DD-023; stories SV2, SV3).
 ## Runs on the main thread: the body is serialized at commit (AC-15), the header with gen and sum is
 ## framed when the write starts, and SaveIo only moves bytes. The clock is the `now_ms` of pump():
-## a commit or load_run is stamped with the time of the last pump (at most one frame early).
+## a commit or load_run is stamped with the time of the last pump (at most one frame early), 0 before
+## the first pump. The time never moves back: a smaller `now_ms` keeps the last one.
 ##
 ## Usage: [code]var ticket := writer.commit(1, "rovend", body, issues)[/code]; 0 means refused
 ## (the caller shows the screen at once, DD-022). Call [code]pump(now_ms)[/code] every frame with
@@ -60,7 +61,7 @@ var _app_version: int
 var _log_line: Callable
 var _wait_ms: int
 ## Format version N -> migrate_vN→vN+1, a Callable(body: Dictionary) -> Dictionary or null on error.
-var _migrations: Dictionary[int, Callable]
+var _migrations: Dictionary[int, Callable] = {}
 var _queue: Array[Job] = []
 var _job: Job
 ## Key -> last gen closed with OK; a missing key is read from its slots first (rule 5).
@@ -68,22 +69,30 @@ var _gen_ok: Dictionary[String, int] = {}
 var _next_ticket: int = 1
 ## Ticket -> time of its commit, until its one signal (F3).
 var _waiting: Dictionary[int, int] = {}
-## Hero -> its pending load job; a second load_run gets the same token.
-var _loads: Dictionary[String, Job] = {}
+## Pending load jobs, oldest first; a hero may have two when a write was queued between them.
+var _loads: Array[Job] = []
 var _now: int
 ## Time the last job of any file ended with any outcome (rule 8, the token clock).
 var _last_done: int
+## Reused every frame: no allocation in pump.
 var _expired: Array[int] = []
+var _expired_loads: Array[Job] = []
+var _pumping: bool
 
 
 ## `log_line` takes one String per finished job, timeout or refusal. `wait_ms` is T_ожид (F3);
-## `migrations` is empty in the game until format_version 2 (rule 15).
+## `migrations` is empty in the game until format_version 2 (rule 15); a step with a version below 1
+## or an invalid Callable is refused here with a log line, so its chain loads CORRUPT.
 func _init(io: SaveIo, app_version: int, log_line: Callable, wait_ms: int, migrations: Dictionary[int, Callable] = {}) -> void:
 	_io = io
 	_app_version = app_version
 	_log_line = log_line
 	_wait_ms = wait_ms
-	_migrations = migrations
+	for version: int in migrations:
+		if version >= 1 and migrations[version].is_valid():
+			_migrations[version] = migrations[version]
+		else:
+			_log_line.call("save: миграция v%d отклонена: Callable не годен" % version)
 
 
 ## Slot file of a key: slot 0 is `_a`, 1 is `_b` (F1).
@@ -116,28 +125,34 @@ func write_settings(body: Dictionary) -> int:
 	return _enqueue(SETTINGS, "", body, false)
 
 
-## Queues the load of `hero_id` after every write queued before it (rule 8). Returns the token, the
-## pending one when this hero already waits, or 0 with a log line when the id is unfit for a path.
+## Queues the load of `hero_id` after every write queued before it (rule 8). Returns the token: the
+## pending one of this hero when no write of the hero was queued after it, else a new one; 0 with a
+## log line when the id is unfit for a path.
 ## The token ends with load_finished: the pick code, or LOAD_TIMEOUT after `wait_ms` with no job ended.
 func load_run(hero_id: String) -> int:
 	if not DictReader.is_id(hero_id):
 		return _refuse("id героя «%s» не годится для пути" % hero_id)
-	if _loads.has(hero_id):
-		return _loads[hero_id].tickets[0]
+	var pending: Job = _pending_load(hero_id)
+	if pending != null and not _write_after(pending):
+		return pending.tickets[0]
 	var job: Job = Job.new(RUN_PREFIX + hero_id, hero_id, PackedByteArray(), false)
 	job.is_load = true
 	job.queued_ms = _now
 	job.tickets.append(_next_ticket)
 	_next_ticket += 1
 	_queue.append(job)
-	_loads[hero_id] = job
+	_loads.append(job)
 	return job.tickets[0]
 
 
 ## One frame at monotonic `now_ms`: polls SaveIo, advances the running job, starts the next one when
-## idle, then times out tickets and loads (F3, rule 8).
+## idle, then times out tickets and loads (F3, rule 8). A pump from a signal handler returns at once:
+## the outer pump is still walking its lists.
 func pump(now_ms: int) -> void:
-	_now = now_ms
+	if _pumping:
+		return
+	_pumping = true
+	_now = maxi(_now, now_ms)
 	if _job != null:
 		var done: SaveIo.IoDone = _io.poll()
 		if done != null:
@@ -147,6 +162,23 @@ func pump(now_ms: int) -> void:
 		_start()
 	_time_out_tickets()
 	_time_out_loads()
+	_pumping = false
+
+
+## The newest pending load of `hero_id`, or null.
+func _pending_load(hero_id: String) -> Job:
+	for i: int in range(_loads.size() - 1, -1, -1):
+		if _loads[i].hero == hero_id:
+			return _loads[i]
+	return null
+
+
+## True when a write of the load's file waits after it; a running load counts every queued one.
+func _write_after(load_job: Job) -> bool:
+	for i: int in range(_queue.find(load_job) + 1, _queue.size()):
+		if _queue[i].key == load_job.key and not _queue[i].is_load:
+			return true
+	return false
 
 
 func _enqueue(key: String, hero: String, body: Dictionary, pair: bool) -> int:
@@ -189,10 +221,10 @@ func _start() -> void:
 ## the first slot and the ticket still gets ERROR (rule 11, AC-66 a).
 func _advance(done: SaveIo.IoDone) -> void:
 	if _job.is_load:
-		_loaded(done.reads)
+		_loaded(done)
 		return
 	if _job.gen == 0:
-		_primed(done.reads)
+		_primed(done)
 		return
 	if not done.ok:
 		_finish(Outcome.ERROR)
@@ -206,8 +238,12 @@ func _advance(done: SaveIo.IoDone) -> void:
 
 
 ## The slots read by the first step of a job with an unknown gen (F2; AC-09, AC-43, AC-64).
-func _primed(reads: Array[Variant]) -> void:
-	var slots: Array[SaveCodec.SlotRead] = _decoded(reads)
+## A read error ends the job ERROR without a write and leaves gen_ok unknown.
+func _primed(done: SaveIo.IoDone) -> void:
+	if not done.ok:
+		_finish(Outcome.ERROR, "save: %s слоты не прочитаны, не пишется" % _job.key)
+		return
+	var slots: Array[SaveCodec.SlotRead] = _decoded(done.reads)
 	var pick: SaveCodec.Pick = SaveCodec.pick(slots[0], slots[1])
 	if pick.code == SaveCodec.Pick.Code.TOO_NEW and not _job.pair:
 		_finish(Outcome.ERROR, "save: %s новее приложения, не пишется" % _job.key)
@@ -216,11 +252,12 @@ func _primed(reads: Array[Variant]) -> void:
 	_write_next()
 
 
-## Both slots of the running job checked by rule 2; null for a missing file.
+## Both slots of the running job checked by rule 2; null for a missing file or a slot the executor
+## did not return.
 func _decoded(reads: Array[Variant]) -> Array[SaveCodec.SlotRead]:
 	var slots: Array[SaveCodec.SlotRead] = []
-	for slot: int in reads.size():
-		var bytes: Variant = reads[slot]
+	for slot: int in SLOT_NAMES.size():
+		var bytes: Variant = reads[slot] if slot < reads.size() else null
 		var slot_read: SaveCodec.SlotRead = null
 		if bytes != null:
 			slot_read = SaveCodec.decode(bytes, slot, _app_version, _job.hero)
@@ -229,37 +266,56 @@ func _decoded(reads: Array[Variant]) -> Array[SaveCodec.SlotRead]:
 
 
 ## Ends a load job (rule 8, items 1-5). An expired one ends silently: its token already got
-## LOAD_TIMEOUT. Nothing is written, the slots stay as read (invariant 5).
-func _loaded(reads: Array[Variant]) -> void:
+## LOAD_TIMEOUT. A read error is CORRUPT, never EMPTY: the files may be there. Nothing is written,
+## the slots stay as read (invariant 5).
+func _loaded(done: SaveIo.IoDone) -> void:
 	var job: Job = _job
-	var slots: Array[SaveCodec.SlotRead] = _decoded(reads)
+	var slots: Array[SaveCodec.SlotRead] = _decoded(done.reads)
 	_job = null
 	_last_done = _now
 	if job.expired:
 		return
-	_loads.erase(job.hero)
-	var pick: SaveCodec.Pick = SaveCodec.pick(slots[0], slots[1])
-	var code: LoadCode = (pick.code as int) as LoadCode
+	_loads.erase(job)
+	var code: LoadCode = LoadCode.CORRUPT
 	var body: Dictionary = {}
-	if code == LoadCode.OK:
-		var slot_read: SaveCodec.SlotRead = slots[pick.slot]
-		var migrated: Variant = _migrated(slot_read.body, slot_read.version)
-		if migrated is Dictionary:
-			body = migrated
-		else:
+	var note: String = ", слоты не прочитаны"
+	if done.ok:
+		var pick: SaveCodec.Pick = SaveCodec.pick(slots[0], slots[1])
+		code = _code_of(pick.code)
+		note = ""
+		if code == LoadCode.OK:
+			body = _migrated(slots[pick.slot], job.hero)
+		if code == LoadCode.OK and body.is_empty():
 			code = LoadCode.CORRUPT
-	_log_line.call("save: load %s %s" % [job.key, LoadCode.keys()[code]])
+			note = ", миграция не удалась"
+	_log_line.call("save: load %s %s%s" % [job.key, LoadCode.keys()[code], note])
 	load_finished.emit(job.tickets[0], code, body)
 
 
-## The body brought from `version` to the app version in memory; null when a step is missing or
-## fails (rule 15: a migration error is CORRUPT).
-func _migrated(body: Dictionary, version: int) -> Variant:
-	var result: Variant = body
-	for step: int in range(version, _app_version):
+static func _code_of(code: SaveCodec.Pick.Code) -> LoadCode:
+	match code:
+		SaveCodec.Pick.Code.OK:
+			return LoadCode.OK
+		SaveCodec.Pick.Code.EMPTY:
+			return LoadCode.EMPTY
+		SaveCodec.Pick.Code.CORRUPT:
+			return LoadCode.CORRUPT
+		SaveCodec.Pick.Code.TOO_NEW:
+			return LoadCode.TOO_NEW
+	push_error("save: неизвестный код pick %d" % code)
+	return LoadCode.CORRUPT
+
+
+## The slot body brought to the app version in memory; empty when a step is missing, fails or
+## changes the hero of the file (rule 15: a migration error is CORRUPT).
+func _migrated(slot_read: SaveCodec.SlotRead, hero: String) -> Dictionary:
+	var result: Variant = slot_read.body
+	for step: int in range(slot_read.version, _app_version):
 		if not _migrations.has(step) or not (result is Dictionary):
-			return null
+			return {}
 		result = _migrations[step].call(result)
+	if not (result is Dictionary) or result.get("hero") != hero:
+		return {}
 	return result
 
 
@@ -312,10 +368,12 @@ func _time_out_tickets() -> void:
 func _time_out_loads() -> void:
 	if _loads.is_empty():
 		return
-	for job: Job in _loads.values():
-		if _now - maxi(job.queued_ms, _last_done) < _wait_ms:
-			continue
-		_loads.erase(job.hero)
+	_expired_loads.clear()
+	for job: Job in _loads:
+		if _now - maxi(job.queued_ms, _last_done) >= _wait_ms:
+			_expired_loads.append(job)
+	for job: Job in _expired_loads:
+		_loads.erase(job)
 		_queue.erase(job)
 		job.expired = true
 		_log_line.call("save: load %s LOAD_TIMEOUT" % job.key)

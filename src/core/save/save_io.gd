@@ -11,9 +11,10 @@ extends RefCounted
 
 ## Result of one started operation.
 class IoDone extends RefCounted:
-	## Write: the file opened, every byte stored and closed. Read: always true.
+	## Write: the file opened, every byte stored and closed. Read: every existing file opened; false is
+	## a read error, not a missing file.
 	var ok: bool
-	## Read: per path the bytes, or null when the file does not exist.
+	## Read: per path the bytes, or null when the file does not exist or failed to open.
 	var reads: Array[Variant] = []
 
 
@@ -31,7 +32,11 @@ func start_read(paths: PackedStringArray) -> void:
 	_done = IoDone.new()
 	_done.ok = true
 	for path: String in paths:
-		_done.reads.append(_read(path))
+		var bytes: Variant = _read(path)
+		if bytes is bool:
+			_done.ok = false
+			bytes = null
+		_done.reads.append(bytes)
 
 
 ## The finished operation once, then null until the next start.
@@ -50,8 +55,11 @@ static func _write(path: String, bytes: PackedByteArray) -> bool:
 	return stored
 
 
-## Null for a missing file; an unreadable one gives empty bytes, which the codec finds invalid.
+## The bytes; null for a missing file; false when an existing file does not open.
 static func _read(path: String) -> Variant:
 	if not FileAccess.file_exists(path):
 		return null
-	return FileAccess.get_file_as_bytes(path)
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return false
+	return file.get_buffer(file.get_length())
