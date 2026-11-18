@@ -401,6 +401,11 @@
    "group": "GDD / Docs"
   },
   {
+   "id": "design/ux/reading-screen.md",
+   "label": "reading-screen.md",
+   "group": "GDD / Docs"
+  },
+  {
    "id": "project.godot",
    "label": "project.godot",
    "group": "Scenes"
@@ -2239,6 +2244,58 @@
   {
    "source": "design/narrative/voices/rovend.md",
    "target": "design/narrative/chapter-writing-rules.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "USER_PREFERENCES.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/accessibility-requirements.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/art/art-bible.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/gdd/choice-system.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/gdd/game-concept.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/gdd/heroes.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/gdd/scene-illustrations.md"
+  },
+  {
+   "source": "design/ux/reading-screen.md",
+   "target": "design/gdd/systems-index.md"
   },
   {
    "source": "project.godot",
