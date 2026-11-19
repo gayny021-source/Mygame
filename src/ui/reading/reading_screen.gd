@@ -39,7 +39,6 @@ var _reporting: bool
 var _stake_label: RichTextLabel
 var _cards: Array[OptionCard] = []
 var _tween: Tween
-var _menu_page: bool = false
 var _error: VBoxContainer
 var _error_buttons: Array[Button] = []
 ## Height of the hint line, measured once per build (shaping the text on every scroll tick is waste).
@@ -136,15 +135,16 @@ func rebuild() -> void:
 		_build()
 
 
-## `loaded` of the session: only OK builds a screen, an empty slot starts a run, anything else is
+## `loaded` of the session: OK builds a screen. On the flow-error screen any other answer (an empty slot too)
+## is a failed load: the slot stays, the buttons come back. Elsewhere an empty slot starts a run; the rest is
 ## the business of the save-error spec (Q8).
 func on_loaded(code: SaveWriter.LoadCode, page: StoryScreen) -> void:
-	if code == SaveWriter.LoadCode.EMPTY:
-		start()
-	elif code == SaveWriter.LoadCode.OK and page != null:
+	if code == SaveWriter.LoadCode.OK and page != null:
 		show_page(page)
-	else:
-		_set_error_buttons(false)
+	elif _error != null:
+		_load_failed()
+	elif code == SaveWriter.LoadCode.EMPTY:
+		start()
 
 
 ## The last stake line is in view: the core raises the latch, the cards open.
@@ -386,7 +386,6 @@ func _build() -> void:
 	_kill_tween()
 	_cards = []
 	_stake_label = null
-	_menu_page = false
 	_clear_error()
 	_hint_h = _hint_height()
 	for child: Node in _flow.get_children():
@@ -511,14 +510,32 @@ func _error_load() -> void:
 		return
 	_set_error_buttons(true)
 	if _session.load_saved() == 0:
-		_set_error_buttons(false)
+		_load_failed()
 
 
+# «В меню» and Back do not switch the buttons off: the menu does not exist yet, so nothing leaves the screen.
 func _error_menu() -> void:
-	if _blocked() or _error_buttons[0].disabled:
+	if _blocked():
 		return
-	_set_error_buttons(true)
+	_say(tr("Меню появится позже. (текст пишет writer)"))
 	menu_requested.emit()
+
+
+func _load_failed() -> void:
+	_set_error_buttons(false)
+	_say(tr("Не удалось загрузить сохранение. (текст пишет writer)"))
+
+
+# One short message line under the explanation; the next one replaces it.
+func _say(text: String) -> void:
+	var line: Label = _error.find_child("Message", false, false) as Label
+	if line == null:
+		line = Label.new()
+		line.name = "Message"
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_error.add_child(line)
+		_error.move_child(line, 2)
+	line.text = text
 
 
 func _build_outcome() -> void:
@@ -541,7 +558,6 @@ func _add_note(text: String) -> void:
 
 
 func _add_menu_button() -> void:
-	_menu_page = true
 	_add_button("Menu", tr("В меню"), _menu_pressed)
 
 

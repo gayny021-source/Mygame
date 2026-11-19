@@ -550,6 +550,7 @@ func _apply(outcome_id: String) -> StoryScreen:
 	var outcome: OutcomeData = _find_outcome(outcome_id)
 	var chapter: ChapterData = _chapter_of(_nav.position().chapter)
 	var failed_before: bool = chapter != null and _fail_flag_set(chapter)
+	# unreachable while can_apply() answered true just before: kept as a guard for a State that changes between
 	if not _state.apply_outcome(scene_id, outcome_id, outcome.sets, outcome.clears):
 		_log.call("исход «%s» не применён: Состояние ответило «не применено»" % outcome_id)
 		_flow_error = true
@@ -648,6 +649,7 @@ func _on_load_finished(token: int, code: SaveWriter.LoadCode, raw: Dictionary) -
 			_log.call("загрузка: %s %s: %s" % [issue.code, issue.path, issue.message])
 		loaded.emit(SaveWriter.LoadCode.CORRUPT, null)
 		return
+	var had_flow_error: bool = _flow_error
 	_begin(body.resume.state)
 	_run_id = body.run_id
 	_schema = body.schema
@@ -655,6 +657,7 @@ func _on_load_finished(token: int, code: SaveWriter.LoadCode, raw: Dictionary) -
 	var page: StoryScreen = _nav.resume(body.resume.position, _state)
 	if page.kind == StoryScreen.Kind.ERROR:
 		_state = null
+		_flow_error = had_flow_error
 		loaded.emit(SaveWriter.LoadCode.CORRUPT, page)
 		return
 	_restore_goal(body.resume.position)

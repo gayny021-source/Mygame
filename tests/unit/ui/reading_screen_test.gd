@@ -301,17 +301,59 @@ func test_error_buttons_ignore_touches_in_the_guard_window() -> void:
 	assert_bool(_error_button("Menu").disabled).is_false()
 
 
-func test_menu_asks_once_and_disables_both_buttons() -> void:
+func test_menu_asks_with_a_message_and_keeps_both_buttons_available() -> void:
 	_fail_plain()
 	_open_guard()
 	var asked: Array[bool] = []
 	_screen.menu_requested.connect(func() -> void: asked.append(true))
 	_error_button("Menu").pressed.emit()
-	_error_button("Menu").pressed.emit()
-	_error_button("Load").pressed.emit()
 	assert_int(asked.size()).is_equal(1)
-	assert_bool(_error_button("Menu").disabled).is_true()
-	assert_bool(_error_button("Load").disabled).is_true()
+	assert_bool(_error_button("Menu").disabled).is_false()
+	assert_bool(_error_button("Load").disabled).is_false()
+	assert_object(_screen.find_child("Message", true, false)).is_not_null()
+	_error_button("Load").pressed.emit()
+	_t.settle()
+	assert_int(_t.loads.size()).is_equal(1)
+
+
+func test_back_works_while_the_buttons_are_disabled() -> void:
+	_fail_plain()
+	_open_guard()
+	var asked: Array[bool] = []
+	_screen.menu_requested.connect(func() -> void: asked.append(true))
+	_error_button("Load").disabled = true
+	_screen.go_back()
+	assert_int(asked.size()).is_equal(1)
+
+
+func test_load_of_an_empty_slot_on_the_error_screen_keeps_the_slot_and_the_screen() -> void:
+	_fail_plain()
+	_t.settle()
+	_open_guard()
+	var before: Dictionary = _t.disk_body()
+	_t.rig.files.clear()
+	_error_button("Load").pressed.emit()
+	_t.settle()
+	assert_int(_t.loads.size()).is_equal(1)
+	assert_bool(_t.session.flow_error()).is_true()
+	assert_bool(_error_button("Load").disabled).is_false()
+	assert_object(_screen.find_child("Message", true, false)).is_not_null()
+	assert_int(_t.rig.files.size()).is_equal(0)
+	assert_dict(before).is_not_empty()
+
+
+func test_load_of_a_corrupt_slot_keeps_the_error_screen_and_a_rebuild_draws_no_cards() -> void:
+	_fail_plain()
+	_t.settle()
+	_open_guard()
+	for path: String in _t.rig.files.keys():
+		_t.rig.files[path] = "not a save".to_utf8_buffer()
+	_error_button("Load").pressed.emit()
+	_t.settle()
+	_screen.rebuild()
+	assert_bool(_t.session.flow_error()).is_true()
+	assert_object(_screen.find_child("FlowError", true, false)).is_not_null()
+	assert_int(_screen.cards().size()).is_equal(0)
 
 
 func test_load_reloads_the_last_save_once_and_leaves_the_error_screen() -> void:
