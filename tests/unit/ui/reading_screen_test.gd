@@ -334,7 +334,9 @@ func test_the_sheet_lists_the_visible_flags_the_session_gives() -> void:
 		decl.title = "title_%s" % decl.id
 	_started()
 	_t.session.apply_plain(_t.option("a"))
-	_screen._fill_sheet()
+	_t.settle()
+	_open_guard()
+	_screen.goal_tapped()
 	var lines: Array[String] = []
 	for child: Node in _screen._sheet_body.get_children():
 		lines.append((child as Label).text)

@@ -213,31 +213,33 @@ func test_a_refused_load_keeps_the_flow_error_and_the_menu_still_leaves_it() -> 
 
 
 func test_visible_flags_is_empty_before_a_run_and_for_a_hero_without_flags() -> void:
+	# Arrange: a hero with no declared flags
+	_t.hero.flags.clear()
 	# Assert: before start
 	assert_array(_t.session.visible_flags()).is_empty()
-	# Arrange: a run, but no flag stands yet
+	# Act: a run with no flag declared
 	_t.started()
 	# Assert
 	assert_array(_t.session.visible_flags()).is_empty()
 
 
 func test_visible_flags_are_the_standing_visible_ones_in_declaration_order() -> void:
-	# Arrange: f_a, f_b visible, f_c hidden; oa sets f_b, oc sets f_c
+	# Arrange: f_a, f_b visible, f_c hidden; oa sets them in reverse order: f_c, f_b, f_a
 	for decl: FlagDecl in _t.hero.flags:
 		decl.visible = decl.id == "f_a" or decl.id == "f_b"
-	_t.restart()
+	for outcome: OutcomeData in _t.hero.chapters[0].outcomes:
+		if outcome.id == "oa":
+			outcome.sets = PackedStringArray(["f_c", "f_b", "f_a"])
 	_t.started()
-	_t.session.apply_plain(_t.option("c"))
-	var hidden_only: Array[FlagDecl] = _t.session.visible_flags()
-	_t.settle()
-	_t.started()
+	var before: Array[FlagDecl] = _t.session.visible_flags()
 	_t.session.apply_plain(_t.option("a"))
 	# Act
 	var shown: Array[FlagDecl] = _t.session.visible_flags()
 	# Assert
-	assert_array(hidden_only).is_empty()
-	assert_int(shown.size()).is_equal(1)
-	assert_str(shown[0].id).is_equal("f_b")
+	assert_array(before).is_empty()
+	assert_int(shown.size()).is_equal(2)
+	assert_str(shown[0].id).is_equal("f_a")
+	assert_str(shown[1].id).is_equal("f_b")
 
 
 func test_a_write_timeout_ends_once_before_show_released() -> void:
