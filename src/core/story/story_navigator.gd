@@ -23,6 +23,8 @@ var _chapter_index: int = -1
 var _state: RunState
 var _position: StoryPosition
 var _screen: StoryScreen
+## Id of the `starts` entry chosen by the last chapter entry; empty after resume.
+var _start_id: String
 ## True while `chapter_finished` runs: start_run and resume are refused then.
 var _in_callback: bool = false
 
@@ -53,6 +55,7 @@ func resume(saved: StoryPosition, state: RunState) -> StoryScreen:
 		return null
 	_state = state
 	_position = null
+	_start_id = ""
 	var index: int = _chapter_at(saved.chapter)
 	if index < 0:
 		return _fail("загрузка: главы «%s» нет у героя" % saved.chapter)
@@ -96,6 +99,14 @@ func advance() -> StoryScreen:
 	return null
 
 
+## Id of the `starts` entry that put the story on the scene on screen; empty when the scene was not
+## entered by a start (or after resume: the saved context holds it then).
+func start_id() -> String:
+	if _position == null or not _position.transition.is_empty():
+		return ""
+	return _start_id
+
+
 ## A copy of the position; null before the first scene.
 func position() -> StoryPosition:
 	if _position == null:
@@ -134,6 +145,7 @@ func _enter_chapter(index: int) -> StoryScreen:
 	if start == null:
 		return _fail("в главе «%s» нет годной записи starts" % chapter.id)
 	_check_goal_failure(index, start)
+	_start_id = start.id
 	return _enter_scene(start.scene, "", null)
 
 

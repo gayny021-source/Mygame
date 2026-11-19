@@ -37,7 +37,6 @@ var _guard_until: int
 var _stake_label: RichTextLabel
 var _cards: Array[OptionCard] = []
 var _tween: Tween
-var _milestone: int = -1
 var _menu_page: bool = false
 ## Height of the hint line, measured once per build (shaping the text on every scroll tick is waste).
 var _hint_h: float = 0.0
@@ -102,13 +101,11 @@ func setup(session: RunSession, hero: HeroData) -> void:
 	_disconnect()
 	_session = session
 	_hero = hero
-	_milestone = -1
 	_connect()
 
 
 ## A new run from chapter 1.
 func start() -> void:
-	_milestone = -1
 	_present(_session.start_new())
 
 
@@ -433,6 +430,7 @@ func _build_outcome() -> void:
 	_flow.add_child(context)
 	_add_paragraphs(_page.outcome.paragraphs)
 	_add_button("Next", tr("Дальше"), next_pressed)
+	_session.report_outcome_text_shown()
 
 
 func _add_note(text: String) -> void:
@@ -513,22 +511,28 @@ func _fill_goal() -> void:
 		return
 	var height: float = collapse_height if collapse_height > 0.0 else get_viewport().get_visible_rect().size.y
 	_goal_label.visible = not collapse_goal(_scale(), height)
-	_goal_label.text = tr("Цель: %s") % chapter.goal
+	var view: GoalView = _session.goal_view()
+	_goal_label.text = _caption_text(view)
 	for dot: Node in _dots.get_children():
 		_dots.remove_child(dot)
 		dot.queue_free()
-	var reached: int = _reached(chapter)
-	for index: int in chapter.milestones.size():
-		_dots.add_child(_dot(index <= reached, index == reached))
+	var finished: bool = view.mode in [GoalView.Mode.DONE_OK, GoalView.Mode.DONE_FAILED]
+	for number: int in range(1, view.milestones_total + 1):
+		var current: bool = number == view.position and not (finished and view.position == view.milestones_total)
+		_dots.add_child(_dot(number <= view.position, current))
 
 
-# shortcut: the core has no "milestone reached" read model; the screen keeps the last milestone it saw
-# in memory (lost after a load until the next milestone). Replace when «Цель главы» gets its core story.
-func _reached(chapter: ChapterData) -> int:
-	for index: int in chapter.milestones.size():
-		if chapter.milestones[index].id == _page.scene.milestone:
-			_milestone = index
-	return _milestone
+func _caption_text(view: GoalView) -> String:
+	match view.caption:
+		GoalView.Caption.GOAL:
+			return tr("Цель: %s") % view.caption_text
+		GoalView.Caption.FAILED:
+			return tr("Цель провалена: %s") % view.caption_text
+		GoalView.Caption.FULFILLED:
+			return tr("Цель исполнена: %s") % view.caption_text
+		GoalView.Caption.STEP:
+			return view.caption_text
+	return ""
 
 
 func _dot(done: bool, current: bool) -> Panel:

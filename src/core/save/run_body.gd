@@ -2,7 +2,7 @@ class_name RunBody
 extends RefCounted
 ## Body v1 of a run slot (save-system.md, rule 2; ADR-0002 §3, §5, §6; story SV1), the only owner of
 ## the raw run body. No `gen` (it lives in the header, AC-61), no generator `state` in the roll record
-## (B1), no status, start, milestone_max yet (B4). `chapter_map` waits for the GDD «Схема главы».
+## (B1), no status yet (B4); `start`, `milestone_max` ride inside each RunState.to_dict. `chapter_map` waits for the GDD «Схема главы».
 ##
 ## Usage: [code]var raw: Variant = body.to_dict(issues)[/code] — null with findings means no write.
 

@@ -20,8 +20,8 @@ var loads: Array[Array] = []
 var _ids: int
 
 
-func _init(hero_id: String = HERO_ID) -> void:
-	hero = NavigatorHarness.of([chapter_m_g(), chapter_m_h()]).hero
+func _init(hero_id: String = HERO_ID, chapters: Array = []) -> void:
+	hero = NavigatorHarness.of(chapters if not chapters.is_empty() else [chapter_m_g(), chapter_m_h()]).hero
 	hero.id = hero_id
 	var stat: StatData = StatData.new()
 	stat.id = "strength"

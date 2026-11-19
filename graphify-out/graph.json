@@ -641,6 +641,16 @@
    "group": "GDScript"
   },
   {
+   "id": "src/core/story/goal_rules.gd",
+   "label": "goal_rules.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/core/story/goal_view.gd",
+   "label": "goal_view.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/story/option_view.gd",
    "label": "option_view.gd",
    "group": "GDScript"
@@ -796,6 +806,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/fixtures/story/goal_fixtures.gd",
+   "label": "goal_fixtures.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/fixtures/story/graph_fixtures.gd",
    "label": "graph_fixtures.gd",
    "group": "GDScript"
@@ -901,6 +916,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/goal/goal_rules_test.gd",
+   "label": "goal_rules_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/save/fixtures/fake_save_io.gd",
    "label": "fake_save_io.gd",
    "group": "GDScript"
@@ -918,6 +938,11 @@
   {
    "id": "tests/unit/save/fixtures/writer_rig.gd",
    "label": "writer_rig.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/save/run_session_goal_test.gd",
+   "label": "run_session_goal_test.gd",
    "group": "GDScript"
   },
   {
@@ -988,6 +1013,11 @@
   {
    "id": "tests/unit/save/thread_save_io_watchdog_test.gd",
    "label": "thread_save_io_watchdog_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/state/run_state_attempt_test.gd",
+   "label": "run_state_attempt_test.gd",
    "group": "GDScript"
   },
   {
@@ -1133,6 +1163,11 @@
   {
    "id": "tests/unit/story/validator_options_test.gd",
    "label": "validator_options_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/ui/reading_goal_test.gd",
+   "label": "reading_goal_test.gd",
    "group": "GDScript"
   },
   {
@@ -2531,6 +2566,10 @@
   },
   {
    "source": "src/core/save/run_session.gd",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
+   "source": "src/core/save/run_session.gd",
    "target": "design/gdd/d20-checks.md"
   },
   {
@@ -2544,10 +2583,6 @@
   {
    "source": "src/core/save/run_session.gd",
    "target": "design/ux/reading-screen.md"
-  },
-  {
-   "source": "src/core/save/run_session.gd",
-   "target": "src/core/story/story_navigator.gd"
   },
   {
    "source": "src/core/save/save_codec.gd",
@@ -2572,6 +2607,10 @@
   {
    "source": "src/core/state/flag_decl.gd",
    "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "src/core/state/run_state.gd",
+   "target": "design/gdd/chapter-goal.md"
   },
   {
    "source": "src/core/state/run_state.gd",
@@ -2664,6 +2703,14 @@
   {
    "source": "src/core/story/data/transition_data.gd",
    "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "src/core/story/goal_rules.gd",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
+   "source": "src/core/story/goal_view.gd",
+   "target": "design/gdd/chapter-goal.md"
   },
   {
    "source": "src/core/story/option_view.gd",
@@ -2814,6 +2861,10 @@
    "target": "src/core/story/data/condition_context.gd"
   },
   {
+   "source": "tests/fixtures/story/goal_fixtures.gd",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
    "source": "tests/fixtures/story/meaning_fixtures.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -2898,6 +2949,10 @@
    "target": "design/gdd/d20-checks.md"
   },
   {
+   "source": "tests/unit/goal/goal_rules_test.gd",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
    "source": "tests/unit/save/fixtures/fake_save_io.gd",
    "target": "design/gdd/save-system.md"
   },
@@ -2908,6 +2963,10 @@
   {
    "source": "tests/unit/save/fixtures/save_fixtures.gd",
    "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "tests/unit/save/run_session_goal_test.gd",
+   "target": "design/gdd/chapter-goal.md"
   },
   {
    "source": "tests/unit/save/run_session_roll_ui_test.gd",
@@ -2960,6 +3019,10 @@
   {
    "source": "tests/unit/save/save_writer_timeout_test.gd",
    "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "tests/unit/state/run_state_attempt_test.gd",
+   "target": "design/gdd/chapter-goal.md"
   },
   {
    "source": "tests/unit/story/bridge_join_test.gd",
@@ -3068,6 +3131,14 @@
   {
    "source": "tests/unit/story/validate_data_args_test.gd",
    "target": "tools/validate_data.gd"
+  },
+  {
+   "source": "tests/unit/ui/reading_goal_test.gd",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
+   "source": "tests/unit/ui/reading_goal_test.gd",
+   "target": "src/ui/reading/reading_screen.tscn"
   },
   {
    "source": "tests/unit/ui/reading_screen_test.gd",

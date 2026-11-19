@@ -18,6 +18,9 @@ signal write_ended(outcome: SaveWriter.Outcome)
 ## A load ended: the load code and the resumed screen. CORRUPT with an ERROR screen is a refusal by id
 ## (rule 8, item 6): no run exists then and nothing was written.
 signal loaded(code: SaveWriter.LoadCode, screen: StoryScreen)
+## The goal view may differ: a scene entered, the outcome text shown, the chapter signal, a load
+## (chapter-goal.md, rule 1). One signal per event; the screen asks `goal_view()` after it.
+signal goal_changed()
 
 const TRANSITION_SCENE: int = 1
 const TRANSITION_PLAIN: int = 2
@@ -41,6 +44,12 @@ var _captions: CaptionTexts
 var _views: Array[OptionView] = []
 ## The stake of the scene was seen (reading-screen.md, «защёлка»): reset by a new scene or a load.
 var _stake_read: bool
+## «провал_ждёт» (chapter-goal.md, rule 1): the outcome that set the goal-fail flag is applied, its text not shown.
+var _goal_pending: bool
+## «финал_показан»: the text of the final outcome was shown; never stored, false after a load.
+var _final_shown: bool
+## The chapter signal came after the coda: the goal is «не начат» until the next start scene.
+var _chapter_done: bool
 
 
 ## `captions` null reads assets/data/config/captions.json.
@@ -85,6 +94,27 @@ func journal_size() -> int:
 	return _state.journal().size() if _state != null else 0
 
 
+## The goal view of the scene on show: a pure function of the chapter data, the state and the two
+## flags; «не начат» outside a chapter and after the chapter signal (chapter-goal.md, rule 1).
+func goal_view() -> GoalView:
+	if _state == null or _nav == null or _chapter_done or _nav.position() == null:
+		return GoalView.new()
+	var position: StoryPosition = _nav.position()
+	var chapter: ChapterData = _chapter_of(position.chapter)
+	if chapter == null:
+		return GoalView.new()
+	return GoalRules.view(chapter, _scene_of(chapter, position.scene), _state.attempt_start(), _state.milestone_max(), _fail_flag_set(chapter), _goal_pending, _final_shown)
+
+
+## The Reading screen shows the text of an outcome: one step lifts «провал_ждёт» and, on a final scene,
+## raises «финал_показан»; one `goal_changed` per event, none when nothing changed (chapter-goal.md, rule 1).
+func report_outcome_text_shown() -> void:
+	var page: StoryScreen = screen()
+	if _state == null or page == null or page.scene == null or page.kind != StoryScreen.Kind.OUTCOME:
+		return
+	_mark_text_shown(page.scene)
+
+
 ## The screen on show; null before a run.
 func screen() -> StoryScreen:
 	return _nav.screen() if _nav != null else null
@@ -102,6 +132,7 @@ func start_new() -> StoryScreen:
 	if page.kind != StoryScreen.Kind.SCENE:
 		_state = null
 		return page
+	_enter_goal(page)
 	_schema_chapter = _nav.position().chapter
 	_enter_views(page)
 	_waiting = _commit(TRANSITION_NEW, _nav.position(), null)
@@ -375,12 +406,95 @@ func _begin(state: RunState) -> void:
 	_state = state
 	_turn = null
 	_waiting = 0
+	_goal_pending = false
+	_final_shown = false
+	_chapter_done = false
 	_nav = StoryNavigator.new(_hero, _on_chapter_finished, _log)
 
 
-# StoryNavigator refuses to run without a valid chapter-finished Callable (story_navigator.gd:236).
-func _on_chapter_finished(_chapter_id: String) -> void:
-	pass
+# The chapter signal (chapter-goal.md, rule 11, «Сигнал и лог»): only a finished goal of this chapter goes
+# to «не начат»; every other case changes nothing and writes one line.
+func _on_chapter_finished(chapter_id: String) -> void:
+	var position: StoryPosition = _nav.position()
+	if position == null or position.chapter != chapter_id:
+		_log.call("цель главы: сигнал конца главы «%s» не своей главы" % chapter_id)
+		return
+	if _chapter_done:
+		_log.call("цель главы: повторный сигнал конца главы «%s»" % chapter_id)
+		return
+	var mode: GoalView.Mode = goal_view().mode
+	if mode != GoalView.Mode.DONE_OK and mode != GoalView.Mode.DONE_FAILED:
+		_log.call("цель главы: ошибка потока, сигнал конца главы «%s» до показа финала" % chapter_id)
+		return
+	_chapter_done = true
+	goal_changed.emit()
+
+
+# F2 on entering a scene, before the snapshot of the entry and commit 1 (chapter-goal.md, rule 5): the
+# context lands in the snapshot. A start scene writes `start` and resets both flags (rule 1, AC-77).
+func _enter_goal(page: StoryScreen) -> void:
+	var chapter: ChapterData = _chapter_of(_nav.position().chapter)
+	if chapter == null:
+		return
+	var start_id: String = _nav.start_id()
+	var on_start: bool = not start_id.is_empty()
+	if not page.scene.milestone.is_empty() and GoalRules.milestone_number(chapter, page.scene) == 0:
+		_log.call("цель главы: веха «%s» сцены «%s» не описана" % [page.scene.milestone, page.scene.id])
+	var reached: int = GoalRules.next_milestone_max(chapter, page.scene, on_start, _state.milestone_max(), _fail_flag_set(chapter))
+	_state.set_attempt(start_id if on_start else _state.attempt_start(), reached)
+	_goal_pending = false
+	_chapter_done = false
+	if on_start:
+		_final_shown = false
+	goal_changed.emit()
+
+
+func _mark_text_shown(scene: SceneData) -> void:
+	var chapter: ChapterData = _chapter_of(_nav.position().chapter)
+	var failed: bool = chapter != null and _fail_flag_set(chapter)
+	if GoalRules.is_impossible(failed, _goal_pending, _final_shown):
+		_log.call("цель главы: ошибка потока, признаки провал_ждёт и финал_показан несовместимы с флагом")
+	var shown: bool = _final_shown or scene.final
+	if not _goal_pending and shown == _final_shown:
+		return
+	_goal_pending = false
+	_final_shown = shown
+	goal_changed.emit()
+
+
+# Э-21 and Э-24 on a load: the context is made valid before the first view and F2, the corrected value
+# goes into the state; «провал_ждёт» is derived from the pending outcome, «финал_показан» is false.
+func _restore_goal(position: StoryPosition) -> void:
+	_final_shown = false
+	_goal_pending = false
+	var chapter: ChapterData = _chapter_of(position.chapter)
+	if chapter == null:
+		return
+	var failed: bool = _fail_flag_set(chapter)
+	var context: GoalRules.Context = GoalRules.normalize_context(chapter, _scene_of(chapter, position.scene), _state.attempt_start(), _state.milestone_max(), failed)
+	_state.set_attempt(context.start, context.milestone_max)
+	if not context.issue.is_empty():
+		_log.call(context.issue)
+	var pending: OutcomeData = _find_outcome(position.pending_outcome)
+	_goal_pending = failed and pending != null and pending.sets.has(chapter.goal_fail_flag)
+
+
+func _chapter_of(chapter_id: String) -> ChapterData:
+	for chapter: ChapterData in _hero.chapters:
+		if chapter.id == chapter_id:
+			return chapter
+	return null
+
+
+func _scene_of(chapter: ChapterData, scene_id: String) -> SceneData:
+	for scene: SceneData in chapter.scenes:
+		if scene.id == scene_id:
+			return scene
+	return null
+
+
+func _fail_flag_set(chapter: ChapterData) -> bool:
+	return not chapter.goal_fail_flag.is_empty() and _state.has_flag(chapter.goal_fail_flag)
 
 
 # Everything outcome_applied() checks, asked first: the state must change before the navigator routes
@@ -402,7 +516,10 @@ func _can_apply(outcome_id: String) -> bool:
 func _apply(outcome_id: String) -> StoryScreen:
 	var scene_id: String = _nav.position().scene
 	var outcome: OutcomeData = _find_outcome(outcome_id)
+	var chapter: ChapterData = _chapter_of(_nav.position().chapter)
+	var failed_before: bool = chapter != null and _fail_flag_set(chapter)
 	_state.apply_outcome(scene_id, outcome_id, outcome.sets, outcome.clears)
+	_goal_pending = chapter != null and not failed_before and _fail_flag_set(chapter)
 	return _after(_nav.outcome_applied(outcome_id))
 
 
@@ -422,8 +539,11 @@ func _after(page: StoryScreen) -> StoryScreen:
 	if page == null:
 		return null
 	var position: StoryPosition = _nav.position()
+	if page.kind == StoryScreen.Kind.CODA:
+		_mark_text_shown(page.scene)
 	if page.kind == StoryScreen.Kind.SCENE:
 		_turn = null
+		_enter_goal(page)
 		_enter_views(page)
 		_snapshot_schema(page, position)
 		_commit(TRANSITION_SCENE, position, null)
@@ -496,6 +616,7 @@ func _on_load_finished(token: int, code: SaveWriter.LoadCode, raw: Dictionary) -
 		_state = null
 		loaded.emit(SaveWriter.LoadCode.CORRUPT, page)
 		return
+	_restore_goal(body.resume.position)
 	_enter_views(page)
 	if body.roll != null:
 		_turn = CheckTurn.restore(page, body.roll, _commit_roll, _log)

@@ -10,8 +10,9 @@ extends ConditionContext
 
 ## Journal outcome id for flags cleared at the end of a chapter.
 const CHAPTER_END_OUTCOME := "chapter_end"
-## Keys of a snapshot (ADR-0002 §3; status, start, milestone_max come with their stories, B4).
-const KEYS: PackedStringArray = ["flags", "journal"]
+## Keys of a snapshot (ADR-0002 §3, B4; status comes with the endings story). `start` and `milestone_max`
+## are the attempt context of the chapter goal (chapter-goal.md, rules 5, 12); a slot without them loads.
+const KEYS: PackedStringArray = ["flags", "journal", "start", "milestone_max"]
 const ENTRY_KEYS: PackedStringArray = ["flag", "action", "scene", "outcome"]
 ## Journal `action` in a snapshot, indexed by Entry.Action.
 const ACTIONS: PackedStringArray = ["set", "cleared"]
@@ -39,6 +40,8 @@ var _active: Dictionary[String, bool] = {}
 var _journal: Array[Entry] = []
 var _reported: Dictionary[String, bool] = {}
 var _log_error: Callable
+var _attempt_start: String
+var _milestone_max: int
 
 
 ## `declarations` are all flags of the hero; `log_error` takes one String.
@@ -64,6 +67,23 @@ func end_chapter() -> void:
 	for decl: FlagDecl in _decls.values():
 		if decl.scope == FlagDecl.SCOPE_CHAPTER:
 			_drop(decl.id, "", CHAPTER_END_OUTCOME)
+
+
+## Attempt context of the chapter goal: the id of the `starts` entry the attempt began with and the
+## highest milestone number reached (0 = not written). Only the story core writes it (chapter-goal.md, rule 12).
+func set_attempt(start_id: String, milestone_max: int) -> void:
+	_attempt_start = start_id
+	_milestone_max = milestone_max
+
+
+## Id of the `starts` entry of the attempt; empty when not written.
+func attempt_start() -> String:
+	return _attempt_start
+
+
+## Highest milestone number of the attempt; 0 when not written.
+func milestone_max() -> int:
+	return _milestone_max
 
 
 ## True when the flag stands. An undeclared id is logged and answers false.
@@ -128,7 +148,7 @@ func to_dict() -> Dictionary:
 	var records: Array[Dictionary] = []
 	for entry: Entry in _journal:
 		records.append({"flag": entry.flag, "action": ACTIONS[entry.action], "scene": entry.scene, "outcome": entry.outcome})
-	return {"flags": flags, "journal": records}
+	return {"flags": flags, "journal": records, "start": _attempt_start, "milestone_max": _milestone_max}
 
 
 ## State restored from a snapshot (run-state.md, rule 11): flags and journal are assigned as they
@@ -144,6 +164,10 @@ static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], d
 	for key: Variant in raw:
 		if not KEYS.has(key):
 			reader.issue("DT-04", str(key), "неизвестный ключ")
+	if raw.has("start"):
+		state._attempt_start = reader.text("start", false)
+	if raw.has("milestone_max"):
+		state._milestone_max = reader.integer("milestone_max")
 	for id: String in reader.strings("flags"):
 		if state._declared(id):
 			state._active[id] = true

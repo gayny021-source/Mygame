@@ -75,7 +75,7 @@ GDD «Сохранение» оставляет ADR: `T_ожид`, поток и
 
 ### 3. Тело v1
 `{run_id, hero, resume:{state, position}, schema:[{state, position}], chapter_map?, roll?}`.
-- `resume.state` и `schema[].state` = `RunState.to_dict()`: `flags` (id стоящих), `journal` [{flag, action, scene, outcome}]. Ничего больше (B4).
+- `resume.state` и `schema[].state` = `RunState.to_dict()`: `flags` (id стоящих), `journal` [{flag, action, scene, outcome}]. `start`, `milestone_max` (контекст попытки, B4; при чтении необязательны, нормализует История). Ничего больше (B4).
 - `position` = `StoryPosition.to_dict()`; `roll` = `RollRecord.to_dict()` как есть, **без `state` генератора** (B1).
 - Лишний ключ — отказ загрузки (`DT-04`); неизвестный `format_version` новее приложения — TOO_NEW.
 
@@ -90,7 +90,7 @@ GDD «Сохранение» оставляет ADR: `T_ожид`, поток и
 - **B1.** Поле `state` генератора в записи о броске **не пишется**. `RollRecord` его не хранит (d20 правило 10); `RollRecord.from_dict` отвергает лишний ключ (DT-04). Правило 2 (строка `state`) и AC-04 заменяются; последовательность сбрасывается при запуске процесса (d20), детерминизм тестов не страдает.
 - **B2.** commit 1 вызывается только `RunSession` после возврата `advance()`/`outcome_applied()` видом `SCENE`, не из `_enter_scene`. `resume` при загрузке, экран `ERROR` и отказ (`null`) не пишут (инвариант 5, AC-38).
 - **B3.** Флаг в снимке, не объявленный у героя (удалён из данных), **не отказ**: по `run-state.md` AC-24 и Edge Case `RunState.from_dict` отбрасывает флаг и его записи журнала, логирует `id` один раз, прохождение продолжается; флаги `устарел` восстанавливаются. Отказ по id остаётся только для сцен и исходов (правило 8, п. 6). Восстановление присваивает `_active/_journal` напрямую, мимо `apply_outcome`. Предложение схемы Opus (отказ) отвергнуто: дизайн уже решён.
-- **B4.** До истории «Цель главы» тело **не содержит** `status`, `start`, `milestone_max` (в `RunState` их нет, YAGNI, непрозрачных заготовок не вводим). Их добавляет своя история: ключ в `to_dict`/`from_dict` и в этот ADR одним изменением; `format_version` остаётся 1 до первого APK (без миграции), после — шаг миграции. Статус — история Концовки.
+- **B4.** До истории «Цель главы» тело **не содержит** `status`, `start`, `milestone_max` (в `RunState` их нет, YAGNI, непрозрачных заготовок не вводим). Их добавляет своя история: ключ в `to_dict`/`from_dict` и в этот ADR одним изменением; `format_version` остаётся 1 до первого APK (без миграции), после — шаг миграции. Статус — история Концовки. **2026-11-19:** поля `start` и `milestone_max` добавлены историей GC1 в `RunState.to_dict`/`from_dict`, `format_version` = 1, миграции нет (APK ещё не собирался).
 
 ### 6. Закрытый список сырого словаря (дополнение ADR-0001)
 Входы: `RunState.from_dict`, `RunBody`, `SaveConfig.from_dict`. Выходы в слой сохранений: `RunState.to_dict()` (вместе с `StoryPosition.to_dict()`, `RollRecord.to_dict()`). Остальной код сырой словарь не получает.

@@ -280,15 +280,6 @@ func test_the_boot_menu_handler_leaves_the_save_and_the_screen_alone() -> void:
 	assert_int(_screen.page_kind()).is_equal(StoryScreen.Kind.ENDING)
 
 
-func test_a_new_run_and_a_new_setup_reset_the_remembered_milestone() -> void:
-	_screen._milestone = 2
-	_screen.start()
-	assert_int(_screen._milestone).is_equal(-1)
-	_screen._milestone = 2
-	_screen.setup(_t.session, _t.hero)
-	assert_int(_screen._milestone).is_equal(-1)
-
-
 func test_band_is_the_strip_plus_the_hint_and_scales() -> void:
 	assert_float(ReadingScreen.band(1.0, 70.0)).is_equal(125.0)
 	assert_float(ReadingScreen.band(2.0, 70.0)).is_equal(180.0)
