@@ -14,6 +14,10 @@ func before_test() -> void:
 	_t = SessionRig.new()
 	_now = 10000
 	_checks = []
+	_make_screen()
+
+
+func _make_screen() -> void:
 	_screen = (load(SCENE) as PackedScene).instantiate() as ReadingScreen
 	_screen.clock = func() -> int: return _now
 	_screen.check_requested.connect(func(option: OptionData) -> void: _checks.append(option))
@@ -522,8 +526,14 @@ func _plate() -> Label:
 	return _screen.find_child("Cartouche", true, false) as Label
 
 
-func _frame_height() -> float:
-	return (_screen.find_child("Frame", true, false) as Control).get_combined_minimum_size().y
+func _frame_rect() -> Rect2:
+	var frame: Control = _screen.find_child("Frame", true, false) as Control
+	return Rect2(frame.global_position, frame.size)
+
+
+func _flow_bottom() -> float:
+	var scroll: Control = _screen.find_child("Scroll", true, false) as Control
+	return scroll.global_position.y + scroll.size.y
 
 
 func test_outcome_with_bonk_shows_the_plate_over_the_frame_slot() -> void:
@@ -561,9 +571,22 @@ func test_plate_is_at_least_42_px_times_the_text_scale_and_ignores_touch() -> vo
 
 func test_plate_does_not_shift_the_layout() -> void:
 	_open_outcome("c")
-	var without: float = _frame_height()
-	_screen.queue_free()
-	before_test()
+	await await_idle_frame()
+	var without: Rect2 = _frame_rect()
+	_screen.free()
+	_t = SessionRig.new()
+	_make_screen()
 	_set_cartouche("oa", "bonk")
 	_open_outcome("a")
-	assert_float(_frame_height()).is_equal(without)
+	await await_idle_frame()
+	assert_object(_plate()).is_not_null()
+	assert_vector(_frame_rect().position).is_equal(without.position)
+	assert_vector(_frame_rect().size).is_equal(without.size)
+
+
+func test_outcome_page_flow_reaches_the_bottom_margin() -> void:
+	_set_cartouche("oa", "bonk")
+	_open_outcome("a")
+	await await_idle_frame()
+	var view: float = _screen.get_viewport().get_visible_rect().size.y
+	assert_float(_flow_bottom()).is_greater_equal(view - 200.0)

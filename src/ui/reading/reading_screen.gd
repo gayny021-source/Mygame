@@ -592,6 +592,8 @@ func _frame() -> PanelContainer:
 	var frame: PanelContainer = PanelContainer.new()
 	frame.name = "Frame"
 	frame.custom_minimum_size.y = FRAME_HEIGHT
+	# exception to reading-screen.md:59 (slot takes the touch, STOP): the fallback frame is empty and has no touch,
+	# so PASS; becomes STOP with the full-screen view (see the shortcut above).
 	frame.mouse_filter = Control.MOUSE_FILTER_PASS
 	frame.add_theme_stylebox_override(&"panel", get_theme_stylebox(&"disabled", &"Button"))
 	return frame

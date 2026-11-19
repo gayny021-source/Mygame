@@ -7,9 +7,8 @@ const LIMITS := "res://assets/data/config/story_limits.json"
 const MILESTONE_IDS: Array[String] = ["ch1_start", "ch1_bridge", "ch1_village", "ch1_forest", "ch1_hill", "ch1_temple"]
 const RISKY_SCENES: Array[String] = ["s03_bridge", "s05_village", "s07_forest", "s11_temple"]
 const CHECKS_PER_PATH := 4
-const CHECK_BUDGET := 5
 const SCENE_COUNT := 12
-## Dialogue box limit (.claude/rules/narrative.md).
+## Temporary dialogue box limit (narrative.md); the real one is an open question of d20-checks (OQ).
 const CRIT_LINE_MAX := 120
 
 var _hero: HeroData
@@ -48,6 +47,8 @@ func _paths(scene_id: String, trail: Array[String], checks: Array[String], sets:
 	for option: OptionData in _scenes[scene_id].options:
 		var taken: Array[String] = risky
 		var branches: Array[String] = []
+		if option.kind == OptionData.KIND_RISKY:
+			assert_object(option.check).is_not_null()
 		if option.check != null:
 			branches.append(option.check.success)
 			branches.append(option.check.failure)
@@ -64,6 +65,11 @@ func _paths(scene_id: String, trail: Array[String], checks: Array[String], sets:
 			else:
 				found.append({"scenes": here, "checks": taken, "sets": flags, "end": transition.to_id})
 	return found
+
+
+func _limits() -> Dictionary:
+	var issues: Array[DataIssue] = []
+	return ChapterLoader.read_object(LIMITS, issues)
 
 
 func test_chapter_loads_and_hero_lists_it() -> void:
@@ -113,7 +119,7 @@ func test_stake_fits_the_limit() -> void:
 func test_four_checks_on_every_path_within_budget() -> void:
 	for path: Dictionary in _paths(_chapter.starts[0].scene, [], [], []):
 		assert_int(path["checks"].size()).is_equal(CHECKS_PER_PATH)
-		assert_int(path["checks"].size()).is_less_equal(CHECK_BUDGET)
+		assert_int(path["checks"].size()).is_less_equal(int(_limits()["k_budget"]))
 		assert_array(path["checks"]).is_equal(RISKY_SCENES)
 
 
