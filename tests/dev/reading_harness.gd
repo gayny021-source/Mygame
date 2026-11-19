@@ -1,6 +1,6 @@
 extends Control
 ## Dev harness of the Reading screen for screenshots (story SCR1): the hero_stub fixture over an
-## in-memory writer. Not game data. Args after `--`: scale=1|2, state=scene|unread|closed|panel|bridge|hint|bridgeend|bridgepanel,
+## in-memory writer. Not game data. Args after `--`: scale=1|2, state=scene|unread|closed|panel|bridge|hint|bridgeend|bridgepanel|flowerror,
 ## end=1 (scroll to the end). `closed` gives the hero a wound that shuts Сила before s02.
 
 const ROOT := "res://tests/fixtures/story"
@@ -34,7 +34,7 @@ func _ready() -> void:
 		return _tick
 	add_child(_screen)
 	_screen.setup(_session, hero)
-	_steps.assign({"scene": ["start"], "unread": ["start"], "panel": ["start", "panel"],
+	_steps.assign({"flowerror": ["start", "refuse", "wait", "wait", "scroll", "wait", "wait", "card:s01_go", "wait", "wait"], "scene": ["start"], "unread": ["start"], "panel": ["start", "panel"],
 		"bridge": _TO_BRIDGE,
 		"hint": _TO_BRIDGE + ["card:s02_risk"],
 		"bridgeend": _TO_BRIDGE + ["wait", "wait", "scroll", "wait"],
@@ -68,6 +68,8 @@ func _process(_delta: float) -> void:
 		"scroll":
 			var scroll: ScrollContainer = _screen.find_child("Scroll", true, false) as ScrollContainer
 			scroll.scroll_vertical = 100000
+		"refuse":
+			_session._state = RefusingState.new(_session._hero.flags, Callable())
 		"panel":
 			_screen.goal_tapped()
 		"wait":

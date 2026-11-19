@@ -40,6 +40,8 @@ var _stake_label: RichTextLabel
 var _cards: Array[OptionCard] = []
 var _tween: Tween
 var _menu_page: bool = false
+var _error: VBoxContainer
+var _error_buttons: Array[Button] = []
 ## Height of the hint line, measured once per build (shaping the text on every scroll tick is waste).
 var _hint_h: float = 0.0
 
@@ -141,6 +143,8 @@ func on_loaded(code: SaveWriter.LoadCode, page: StoryScreen) -> void:
 		start()
 	elif code == SaveWriter.LoadCode.OK and page != null:
 		show_page(page)
+	else:
+		_set_error_buttons(false)
 
 
 ## The last stake line is in view: the core raises the latch, the cards open.
@@ -179,20 +183,22 @@ func close_panel() -> void:
 	_sheet_layer.visible = false
 
 
-## System Back: swallowed in the guard window, closes only the panel, otherwise nothing (the game stays;
-## an ending, error or fallback page too, until the menu story exists: TD round 2).
+## System Back: swallowed in the guard window; on the flow-error screen it is «В меню», otherwise it closes
+## only the panel (the game stays; an ending, error or fallback page too, until the menu story exists).
 func go_back() -> void:
 	if _now() < _guard_until:
+		return
+	if _error != null:
+		_error_menu()
 		return
 	close_panel()
 
 
 ## The session changed outside a touch of this screen (the Roll screen closed after a flow error):
-## the cards take the new states and a flow error gets its way out.
+## the cards take the new states and a flow error gets its screen.
 func refresh() -> void:
 	_refresh_cards()
-	if _session.flow_error() and not _menu_page and _page != null and _page.kind == StoryScreen.Kind.SCENE:
-		_add_menu_button()
+	_show_flow_error()
 
 
 func panel_open() -> bool:
@@ -347,6 +353,7 @@ func _choose(option: OptionData) -> void:
 	var page: StoryScreen = _session.apply_plain(option)
 	_refresh_cards()
 	_present(page)
+	_show_flow_error()
 
 
 func _refresh_cards() -> void:
@@ -380,13 +387,17 @@ func _build() -> void:
 	_cards = []
 	_stake_label = null
 	_menu_page = false
+	_clear_error()
 	_hint_h = _hint_height()
 	for child: Node in _flow.get_children():
 		_flow.remove_child(child)
 		child.queue_free()
 	match _page.kind:
 		StoryScreen.Kind.SCENE:
-			_build_scene()
+			if _session.flow_error():
+				_build_flow_error()
+			else:
+				_build_scene()
 		StoryScreen.Kind.OUTCOME:
 			_build_outcome()
 		StoryScreen.Kind.CODA:
@@ -399,7 +410,7 @@ func _build() -> void:
 	_flow.add_child(_spacer(_band() + BAND_PX * _scale()))
 	_fill_goal()
 	_fade.custom_minimum_size.y = _band()
-	_fade.visible = _page.kind == StoryScreen.Kind.SCENE and not _session.stake_read()
+	_fade.visible = _page.kind == StoryScreen.Kind.SCENE and not _session.stake_read() and _error == null
 	_appear()
 	_check_stake.call_deferred()
 	if _page.kind == StoryScreen.Kind.OUTCOME:
@@ -429,11 +440,85 @@ func _build_scene() -> void:
 		card.bind(view)
 		card.tapped.connect(card_tapped.bind(card))
 		_cards.append(card)
-	if _session.flow_error():
-		_add_menu_button()
 	if _stake_label == null:
 		# no bridge and no paragraph: there is no stake line to read, the cards open at once (TD C3)
 		stake_seen()
+
+
+# The screen after a refused outcome (СВ Э-23): it replaces the scroll, buttons pinned to the bottom of
+# the Safe Area column; the title and the line are above them. «Загрузить» reloads the last save.
+func _build_flow_error() -> void:
+	_scroll.visible = false
+	_hint.visible = false
+	_error = VBoxContainer.new()
+	_error.name = "FlowError"
+	_error.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_error.add_theme_constant_override(&"separation", int(maxf(SPACING * _scale(), SPACING)))
+	_scroll.get_parent().add_child(_error)
+	var title: Label = Label.new()
+	title.name = "Title"
+	title.theme_type_variation = &"TitleLabel"
+	title.text = tr("Не удалось продолжить")
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_error.add_child(title)
+	var note: Label = Label.new()
+	note.name = "Note"
+	note.text = tr("Заглушка, текст пишет writer: ход не продолжился.")
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_error.add_child(note)
+	var fill: Control = Control.new()
+	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_error.add_child(fill)
+	_error_buttons = [_error_button("Load", tr("Загрузить"), _error_load), _error_button("Menu", tr("В меню"), _error_menu)]
+	_error_buttons[0].grab_focus.call_deferred()
+
+
+func _error_button(node_name: String, text: String, action: Callable) -> Button:
+	var button: Button = Button.new()
+	button.name = node_name
+	button.text = text
+	button.custom_minimum_size = Vector2(OptionCard.MIN_HEIGHT, OptionCard.MIN_HEIGHT)
+	button.pressed.connect(action)
+	_error.add_child(button)
+	return button
+
+
+# A flow error that appeared on the page on show: the page is drawn again, as the error screen.
+func _show_flow_error() -> void:
+	if _session.flow_error() and _error == null and _page != null and _page.kind == StoryScreen.Kind.SCENE:
+		show_page(_page)
+
+
+func _clear_error() -> void:
+	_scroll.visible = true
+	_error_buttons = []
+	if _error == null:
+		return
+	_error.get_parent().remove_child(_error)
+	_error.queue_free()
+	_error = null
+
+
+func _set_error_buttons(disabled: bool) -> void:
+	for button: Button in _error_buttons:
+		button.disabled = disabled
+
+
+# The first accepted touch switches both buttons off (reading-screen.md, Interaction Map).
+func _error_load() -> void:
+	if _blocked() or _error_buttons[0].disabled:
+		return
+	_set_error_buttons(true)
+	if _session.load_saved() == 0:
+		_set_error_buttons(false)
+
+
+func _error_menu() -> void:
+	if _blocked() or _error_buttons[0].disabled:
+		return
+	_set_error_buttons(true)
+	menu_requested.emit()
 
 
 func _build_outcome() -> void:

@@ -230,15 +230,141 @@ func test_a_scene_without_text_raises_the_latch_at_once() -> void:
 	assert_int(_card("a").view.state).is_equal(OptionView.State.OPEN)
 
 
-func test_a_flow_error_shows_the_menu_button() -> void:
+func _refuse() -> RefusingState:
+	var state: RefusingState = RefusingState.new(_t.hero.flags, Callable())
+	_t.session._state = state
+	return state
+
+
+func _error_button(node_name: String) -> Button:
+	return _screen.find_child("FlowError", true, false).find_child(node_name, true, false) as Button
+
+
+func _fail_plain() -> void:
+	_started()
+	_refuse()
+	_screen.card_tapped(_card("a"))
+
+
+func _fail_roll() -> void:
 	_started()
 	_screen.card_tapped(_card("r"))
 	_t.session.roll()
 	_t.settle()
-	assert_bool(_t.session.close_check()).is_true()
+	_refuse()
+	_t.session.continue_check()
+	_t.session.close_check()
 	_screen.refresh()
-	assert_object(_menu_button()).is_not_null()
-	assert_int(_card("a").view.state).is_not_equal(OptionView.State.OPEN)
+
+
+func test_a_flow_error_after_a_roll_shows_the_error_screen_without_cards() -> void:
+	_fail_roll()
+	assert_object(_screen.find_child("FlowError", true, false)).is_not_null()
+	assert_object(_error_button("Load")).is_not_null()
+	assert_object(_error_button("Menu")).is_not_null()
+	assert_bool((_screen.find_child("Scroll", true, false) as Control).visible).is_false()
+
+
+func test_a_flow_error_without_a_check_shows_the_error_screen_and_writes_nothing() -> void:
+	_fail_plain()
+	var writes: int = _t.writes()
+	assert_object(_error_button("Load")).is_not_null()
+	assert_bool((_screen.find_child("Scroll", true, false) as Control).visible).is_false()
+	assert_int(_t.writes()).is_equal(writes)
+
+
+func test_the_error_buttons_are_big_stacked_and_apart() -> void:
+	_fail_plain()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var load_button: Button = _error_button("Load")
+	var menu_button: Button = _error_button("Menu")
+	assert_float(load_button.size.y).is_greater_equal(168.0)
+	assert_float(menu_button.size.y).is_greater_equal(168.0)
+	assert_float(load_button.size.x).is_greater_equal(168.0)
+	assert_float(menu_button.position.y - (load_button.position.y + load_button.size.y)).is_greater_equal(24.0)
+
+
+func test_the_error_screen_has_a_title_and_a_writer_placeholder_line() -> void:
+	_fail_plain()
+	var panel: Node = _screen.find_child("FlowError", true, false)
+	assert_str((panel.find_child("Title", true, false) as Label).text).is_equal("Не удалось продолжить")
+	assert_str((panel.find_child("Note", true, false) as Label).text).contains("writer")
+
+
+func test_error_buttons_ignore_touches_in_the_guard_window() -> void:
+	_fail_plain()
+	var asked: Array[bool] = []
+	_screen.menu_requested.connect(func() -> void: asked.append(true))
+	_error_button("Menu").pressed.emit()
+	assert_int(asked.size()).is_equal(0)
+	assert_bool(_error_button("Menu").disabled).is_false()
+
+
+func test_menu_asks_once_and_disables_both_buttons() -> void:
+	_fail_plain()
+	_open_guard()
+	var asked: Array[bool] = []
+	_screen.menu_requested.connect(func() -> void: asked.append(true))
+	_error_button("Menu").pressed.emit()
+	_error_button("Menu").pressed.emit()
+	_error_button("Load").pressed.emit()
+	assert_int(asked.size()).is_equal(1)
+	assert_bool(_error_button("Menu").disabled).is_true()
+	assert_bool(_error_button("Load").disabled).is_true()
+
+
+func test_load_reloads_the_last_save_once_and_leaves_the_error_screen() -> void:
+	_fail_plain()
+	_open_guard()
+	_error_button("Load").pressed.emit()
+	_error_button("Load").pressed.emit()
+	_t.settle()
+	assert_int(_t.loads.size()).is_equal(1)
+	assert_bool(_t.session.flow_error()).is_false()
+	assert_object(_screen.find_child("FlowError", true, false)).is_null()
+	assert_int(_screen.cards().size()).is_equal(3)
+
+
+func test_a_failed_load_gives_the_buttons_back() -> void:
+	_fail_plain()
+	_open_guard()
+	_t.settle()
+	for path: String in _t.rig.files.keys():
+		_t.rig.files[path] = "not a save".to_utf8_buffer()
+	_error_button("Load").pressed.emit()
+	_t.settle()
+	assert_int(_t.loads.size()).is_equal(1)
+	assert_bool(_error_button("Load").disabled).is_false()
+	assert_bool(_error_button("Menu").disabled).is_false()
+
+
+func test_back_on_the_error_screen_is_the_menu_and_swallowed_in_the_guard() -> void:
+	_fail_plain()
+	var asked: Array[bool] = []
+	_screen.menu_requested.connect(func() -> void: asked.append(true))
+	_screen.go_back()
+	assert_int(asked.size()).is_equal(0)
+	_open_guard()
+	_screen.go_back()
+	assert_int(asked.size()).is_equal(1)
+
+
+func test_the_save_is_not_touched_by_the_error_screen_and_the_menu() -> void:
+	_fail_plain()
+	_t.settle()
+	var before: Dictionary = _t.disk_body()
+	_open_guard()
+	_error_button("Menu").pressed.emit()
+	_t.settle()
+	assert_dict(_t.disk_body()).is_equal(before)
+
+
+func test_a_rebuild_keeps_the_error_screen() -> void:
+	_fail_plain()
+	_screen.rebuild()
+	assert_object(_screen.find_child("FlowError", true, false)).is_not_null()
+	assert_int(_screen.cards().size()).is_equal(0)
 
 
 func test_menu_button_asks_for_the_menu() -> void:
