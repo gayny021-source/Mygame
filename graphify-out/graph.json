@@ -1994,6 +1994,10 @@
    "target": "design/gdd/systems-index.md"
   },
   {
+   "source": "design/gdd/choice-system.md",
+   "target": "design/ux/reading-screen.md"
+  },
+  {
    "source": "design/gdd/d20-checks.md",
    "target": ".claude/skills/design-system/SKILL.md"
   },
@@ -2060,6 +2064,14 @@
   {
    "source": "design/gdd/d20-checks.md",
    "target": "design/narrative/voices/rovend.md"
+  },
+  {
+   "source": "design/gdd/d20-checks.md",
+   "target": "design/ux/reading-screen.md"
+  },
+  {
+   "source": "design/gdd/d20-checks.md",
+   "target": "design/ux/roll-screen.md"
   },
   {
    "source": "design/gdd/game-concept.md",
