@@ -956,6 +956,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/save/thread_save_io_watchdog_test.gd",
+   "label": "thread_save_io_watchdog_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/story/bridge_join_test.gd",
    "label": "bridge_join_test.gd",
    "group": "GDScript"
@@ -2412,6 +2417,10 @@
   {
    "source": "src/boot/boot.gd",
    "target": "design/accessibility-requirements.md"
+  },
+  {
+   "source": "src/boot/boot.gd",
+   "target": "design/ux/reading-screen.md"
   },
   {
    "source": "src/boot/boot.tscn",

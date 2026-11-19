@@ -6,10 +6,15 @@ extends Node
 
 ## Highest format_version this build reads (ADR-0002 §2).
 const FORMAT_VERSION: int = 1
+## Sleep between pumps of a flush.
+const FLUSH_STEP_MS: int = 10
 
 var writer: SaveWriter
 ## Longest wait of `flush` in ms; save.json `wait_ms` (T_ожид) unless a test sets it.
 var flush_ms: int = SaveConfig.DEFAULT_WAIT_MS
+## Ceiling of `flush` on APPLICATION_PAUSED: the main thread must not block for seconds (ANR, TD C1).
+var pause_flush_ms: int = 500
+var _flushing: bool = false
 
 
 func _ready() -> void:
@@ -28,26 +33,36 @@ func _process(_delta: float) -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST:
+	if what == NOTIFICATION_APPLICATION_PAUSED:
+		flush(pause_flush_ms)
+	elif what == NOTIFICATION_WM_CLOSE_REQUEST:
 		flush()
 
 
-## Waits for the running and queued writes, at most `flush_ms` (DD-024). Polls `is_task_completed`
-## through the writer instead of `wait_for_task_completion`, which has no timeout: a hung disk
-## cannot freeze the main thread into an ANR. Starts no write (AC-22). False on timeout, with a log line.
-func flush() -> bool:
+## Waits for the running and queued writes, at most `max_ms` (default `flush_ms`; never above it)
+## (DD-024). Polls `is_task_completed` through the writer instead of `wait_for_task_completion`,
+## which has no timeout: a hung disk cannot freeze the main thread into an ANR. Starts no write
+## (AC-22). False on timeout or when a flush is already running, with a log line.
+func flush(max_ms: int = -1) -> bool:
 	if writer == null:
 		return true
+	if _flushing:
+		_log("save: flush уже идёт, повторный вызов отклонён")
+		return false
+	var limit: int = flush_ms if max_ms < 0 else mini(max_ms, flush_ms)
+	_flushing = true
 	var started: int = Time.get_ticks_msec()
 	writer.pump(started)
+	var done: bool = true
 	while not writer.idle():
-		var now: int = Time.get_ticks_msec()
-		if now - started >= flush_ms:
-			_log("save: flush не дождался записи за %d мс" % flush_ms)
-			return false
-		OS.delay_msec(1)
+		if Time.get_ticks_msec() - started >= limit:
+			_log("save: flush не дождался записи за %d мс" % limit)
+			done = false
+			break
+		OS.delay_msec(FLUSH_STEP_MS)
 		writer.pump(Time.get_ticks_msec())
-	return true
+	_flushing = false
+	return done
 
 
 func _log(line: String) -> void:

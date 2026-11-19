@@ -10,32 +10,39 @@ extends Control
 ## (design/accessibility-requirements.md, M12: Back closes or returns without side effects).
 
 
-## Emitted when the Back button is pressed; later screens can connect to navigate.
-signal back_requested
-
 ## Null until `_ready`; the screens of later stories take sessions from here.
 var services: BootServices
+## Text scale of the theme: 1.0 = 100 %, 2.0 = 200 % (reading-screen.md; later a setting).
+@export_range(1.0, 2.0) var text_scale: float = 1.0
+
+var _quitting: bool = false
 
 @onready var _status: Label = %Status
 
 
 func _ready() -> void:
+	if services != null:
+		return
+	theme = ThemeScale.scaled(theme, text_scale)
 	var save: SaveNode = get_node_or_null("/root/SaveService") as SaveNode
-	if save == null or save.writer == null:
-		_status.text = "Сохранение недоступно"
+	if save == null:
+		# the service is missing at start, not a failed write: rule 13 keeps write failures from the player
+		_status.text = tr("Сохранение недоступно")
 		push_error("RT-02 автозагрузка SaveService не найдена: сервисы не собраны")
 		return
 	services = BootServices.build(save.writer, _log)
-	_status.text = services.status
+	_status.text = tr(services.status)
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
-		back_requested.emit()
 		_quit()
 
 
 func _quit() -> void:
+	if _quitting:
+		return
+	_quitting = true
 	var save: SaveNode = get_node_or_null("/root/SaveService") as SaveNode
 	if save != null:
 		save.flush()

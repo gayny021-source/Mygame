@@ -12,6 +12,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_theme")
+mouse_filter = 2
 script = ExtResource("3_boot")
 
 [node name="Background" type="Panel" parent="."]
@@ -35,10 +36,12 @@ theme_override_constants/margin_left = 48
 theme_override_constants/margin_top = 96
 theme_override_constants/margin_right = 48
 theme_override_constants/margin_bottom = 72
+mouse_filter = 2
 script = ExtResource("2_safe")
 
 [node name="Column" type="VBoxContainer" parent="Safe"]
 layout_mode = 2
+mouse_filter = 2
 alignment = 1
 
 [node name="Title" type="Label" parent="Safe/Column"]

@@ -79,3 +79,52 @@ func test_pause_notification_flushes_the_pending_write_without_new_ones() -> voi
 	# Assert
 	assert_bool(rig.writer.idle()).is_true()
 	assert_int(rig.io.written.size()).is_equal(1)
+
+
+func test_pause_flush_is_capped_below_the_full_flush_when_the_write_hangs() -> void:
+	# Arrange
+	var rig: WriterRig = WriterRig.new()
+	rig.io.hold_write = true
+	var node: SaveNode = auto_free(SaveNode.new())
+	node.writer = rig.writer
+	node.flush_ms = 5000
+	node.pause_flush_ms = 60
+	rig.commit("R1")
+	var started: int = Time.get_ticks_msec()
+	# Act
+	node.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	# Assert
+	assert_int(Time.get_ticks_msec() - started).is_less(1000)
+	assert_bool(rig.writer.idle()).is_false()
+
+
+func test_a_second_flush_while_one_runs_is_refused_and_logged() -> void:
+	# Arrange
+	var rig: WriterRig = WriterRig.new()
+	var node: SaveNode = auto_free(SaveNode.new())
+	node.writer = rig.writer
+	node._flushing = true
+	# Act
+	var done: bool = node.flush()
+	# Assert
+	assert_bool(done).is_false()
+	assert_bool(node._flushing).is_true()
+
+
+func test_flush_without_a_writer_returns_true() -> void:
+	# Arrange
+	var node: SaveNode = auto_free(SaveNode.new())
+	# Act / Assert
+	assert_bool(node.flush()).is_true()
+
+
+func test_flush_resets_the_guard_so_the_next_flush_runs() -> void:
+	# Arrange
+	var rig: WriterRig = WriterRig.new()
+	var node: SaveNode = auto_free(SaveNode.new())
+	node.writer = rig.writer
+	# Act
+	node.flush()
+	# Assert
+	assert_bool(node._flushing).is_false()
+	assert_bool(node.flush()).is_true()
