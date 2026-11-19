@@ -72,7 +72,9 @@ func _ready() -> void:
 	# layout settles after the page is built and after a size change: look again then, not per frame
 	_flow.sort_children.connect(_check_stake)
 	_scroll.get_v_scroll_bar().changed.connect(_check_stake)
-	_scroll.get_v_scroll_bar().value_changed.connect(_check_stake.unbind(1))
+	# a scroll moves the children after the value changes: look again once they have moved
+	_scroll.sort_children.connect(_check_stake)
+	_scroll.get_v_scroll_bar().value_changed.connect(_on_scrolled)
 	_sheet_layer.visible = false
 	_hint.visible = false
 	_fade.visible = false
@@ -345,6 +347,10 @@ func _on_scrim_input(event: InputEvent) -> void:
 	var button: InputEventMouseButton = event as InputEventMouseButton
 	if button != null and button.button_index == MOUSE_BUTTON_LEFT and not button.pressed:
 		close_panel()
+
+
+func _on_scrolled(_value: float) -> void:
+	_check_stake.call_deferred()
 
 
 func _check_stake() -> void:
