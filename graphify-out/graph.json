@@ -1606,6 +1606,10 @@
    "target": "design/gdd/heroes.md"
   },
   {
+   "source": "USER_PREFERENCES.md",
+   "target": "design/narrative/chapter-01-script.md"
+  },
+  {
    "source": "design/DIRECTOR_DECISIONS.md",
    "target": ".claude/agents/balance-simulator.md"
   },

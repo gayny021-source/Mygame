@@ -54,7 +54,8 @@
           "outcome": "o_s01_intro"
         }
       ],
-      "milestone": "ch1_start"
+      "milestone": "ch1_start",
+      "title": "Полтора килограмма бога"
     },
     {
       "id": "s02_lavka",
@@ -98,7 +99,9 @@
             "stat": "strength",
             "level": "easy",
             "success": "s03_bridge_1_success",
-            "failure": "s03_bridge_1_failure"
+            "failure": "s03_bridge_1_failure",
+            "crit_success_line": "Настил моста приседает под Ровендом на два пальца, и Гарзуг впервые за смену перестаёт считать вслух.",
+            "crit_failure_line": "Гарзуг заранее раскрывает книгу тарифов на разделе «Ущерб мостовому имуществу»."
           }
         },
         {
@@ -181,7 +184,9 @@
             "stat": "charisma",
             "level": "medium",
             "success": "s05_village_1_success",
-            "failure": "s05_village_1_failure"
+            "failure": "s05_village_1_failure",
+            "crit_success_line": "Солнце выходит из-за транспаранта и светит Бельдраку прямо в глаза.",
+            "crit_failure_line": "Ровенд набирает воздуха на десятиминутную речь, и Бельдрак успевает прикинуть, сколько это в медяках."
           }
         },
         {
@@ -228,7 +233,9 @@
             "stat": "mind",
             "level": "medium",
             "success": "s07_forest_1_success",
-            "failure": "s07_forest_1_failure"
+            "failure": "s07_forest_1_failure",
+            "crit_success_line": "Гильдия мостов пишет мелко в расчёте на путника, который читает на бегу, а Ровенд на бегу не читает.",
+            "crit_failure_line": "Гильдия вкапывает указатели в пятницу, в последний час смены."
           }
         },
         {
@@ -358,7 +365,9 @@
             "stat": "faith",
             "level": "medium",
             "success": "s11_temple_1_success",
-            "failure": "s11_temple_1_failure"
+            "failure": "s11_temple_1_failure",
+            "crit_success_line": "Голуби на крыше храма замолкают и садятся в ряд, как на построении.",
+            "crit_failure_line": "Слова обряда Ровенд помнит до единого, а язык за день выучил тарифы Гильдии мостов."
           }
         },
         {
@@ -452,7 +461,8 @@
         {
           "transition": "t_to_b01"
         }
-      ]
+      ],
+      "cartouche": "bonk"
     },
     {
       "id": "s03_bridge_2_safe",
@@ -627,7 +637,8 @@
         {
           "transition": "t_to_s08"
         }
-      ]
+      ],
+      "cartouche": "bonk"
     },
     {
       "id": "s07_forest_2_safe",
@@ -761,7 +772,8 @@
         {
           "transition": "t_end_walks"
         }
-      ]
+      ],
+      "cartouche": "censor"
     },
     {
       "id": "s11_temple_3_safe",

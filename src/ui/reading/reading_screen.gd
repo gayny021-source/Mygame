@@ -21,6 +21,8 @@ const FADE_S: float = 0.12
 const BASE_FONT: float = 48.0
 const SPACING: int = 24
 const FRAME_HEIGHT: float = 656.0
+## Cartouche plate font at 100 % text; the text scale multiplies it (reading-screen.md, Component Inventory, НП-60).
+const CARTOUCHE_PX: int = 42
 const INK := Color(0.09019608, 0.07843137, 0.05882353)
 const ACCENTS: Dictionary[String, Color] = {"carmine": Color(0.58, 0.1, 0.16)}
 
@@ -539,7 +541,9 @@ func _say(text: String) -> void:
 
 
 func _build_outcome() -> void:
-	_flow.add_child(_frame())
+	var frame: PanelContainer = _frame()
+	_flow.add_child(frame)
+	_add_cartouche(frame, _page.outcome.cartouche)
 	var context: Label = Label.new()
 	context.theme_type_variation = &"CaptionLabel"
 	context.text = _page.option.text if _page.option != null else ""
@@ -586,10 +590,34 @@ func _paragraph(text: String) -> RichTextLabel:
 # replace with the real frame and the full-screen view when «Иллюстрации сцен» is built.
 func _frame() -> PanelContainer:
 	var frame: PanelContainer = PanelContainer.new()
+	frame.name = "Frame"
 	frame.custom_minimum_size.y = FRAME_HEIGHT
 	frame.mouse_filter = Control.MOUSE_FILTER_PASS
 	frame.add_theme_stylebox_override(&"panel", get_theme_stylebox(&"disabled", &"Button"))
 	return frame
+
+
+# Static plate over the frame slot: no field, no plate. The centering layer fills the slot, so the layout
+# does not move; every layer ignores the touch. The text goes through tr(), the id is closed (OutcomeData.CARTOUCHES).
+func _add_cartouche(frame: Control, id: String) -> void:
+	var text: String = {"bonk": tr("БОНК!"), "censor": tr("@#$%&!")}.get(id, "")
+	if text.is_empty():
+		return
+	var layer: CenterContainer = CenterContainer.new()
+	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var plate: Label = Label.new()
+	plate.name = "Cartouche"
+	plate.text = text
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.autowrap_mode = TextServer.AUTOWRAP_OFF
+	plate.add_theme_font_size_override(&"font_size", roundi(CARTOUCHE_PX * _scale()))
+	plate.add_theme_color_override(&"font_color", Color.WHITE)
+	var back: StyleBoxFlat = StyleBoxFlat.new()
+	back.bg_color = INK
+	back.set_content_margin_all(SPACING)
+	plate.add_theme_stylebox_override(&"normal", back)
+	layer.add_child(plate)
+	frame.add_child(layer)
 
 
 func _add_button(node_name: String, text: String, action: Callable) -> void:

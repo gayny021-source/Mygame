@@ -246,3 +246,19 @@ func test_np62_straight_quote_in_a_bridge_base_or_insert_is_an_error() -> void:
 	assert_int(_punctuation_errors("Мост{insert}, \"тихий\".", good, "UR-1: НП-62")).is_equal(1)
 	assert_int(_punctuation_errors("Мост{insert}.", [{"text": "и \"ветер\"", "if": "f_a"}], "UR-1: НП-62")).is_equal(1)
 	assert_int(_punctuation_errors("Мост{insert}, «тихий».", good, "UR-1: НП-62")).is_equal(0)
+
+
+func test_f4_three_cartouches_in_a_chapter_pass_and_four_warn() -> void:
+	# Arrange
+	var three: Dictionary = MeaningFixtures.fork()
+	var four: Dictionary = MeaningFixtures.fork()
+	for i: int in 3:
+		three["outcomes"][i]["cartouche"] = "bonk"
+	for i: int in 3:
+		four["outcomes"][i]["cartouche"] = "censor"
+	var extra: Dictionary = GraphFixtures.outcome("o_extra", ["t_s1"])
+	extra["cartouche"] = "bonk"
+	four["outcomes"].append(extra)
+	# Act / Assert
+	assert_int(_tagged(three, "F4/cartouche")).is_equal(0)
+	assert_int(_tagged(four, "F4/cartouche")).is_equal(1)

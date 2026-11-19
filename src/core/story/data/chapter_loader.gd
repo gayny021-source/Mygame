@@ -12,7 +12,7 @@ const SCENE_KEYS: PackedStringArray = ["id", "title", "paragraphs", "illustratio
 const PARAGRAPH_KEYS: PackedStringArray = ["text", "if", "speaks", "damage"]
 const OPTION_KEYS: PackedStringArray = ["id", "text", "kind", "if", "reason", "check", "outcome", "exception"]
 const CHECK_KEYS: PackedStringArray = ["id", "stat", "level", "success", "failure", "crit_success_line", "crit_failure_line"]
-const OUTCOME_KEYS: PackedStringArray = ["id", "paragraphs", "sets", "clears", "routes", "deprecated"]
+const OUTCOME_KEYS: PackedStringArray = ["id", "paragraphs", "sets", "clears", "routes", "cartouche", "deprecated"]
 const ROUTE_KEYS: PackedStringArray = ["if", "transition"]
 const TRANSITION_KEYS: PackedStringArray = ["id", "to", "bridge", "coda", "early", "deprecated"]
 const BRIDGE_KEYS: PackedStringArray = ["base", "inserts"]
@@ -202,6 +202,9 @@ static func _outcome(reader: DictReader) -> OutcomeData:
 		route.condition = item.condition()
 		route.transition = item.text("transition")
 		outcome.routes.append(route)
+	outcome.cartouche = reader.text("cartouche", false)
+	if reader.has_text("cartouche") and not OutcomeData.CARTOUCHES.has(outcome.cartouche):
+		reader.issue("DT-02", "cartouche", "картуш «%s» не из набора: %s" % [outcome.cartouche, ", ".join(OutcomeData.CARTOUCHES)])
 	outcome.deprecated = reader.flag("deprecated")
 	return outcome
 

@@ -1,6 +1,6 @@
 extends Control
 ## Dev harness of the Reading screen for screenshots (story SCR1): the hero_stub fixture over an
-## in-memory writer. Not game data. Args after `--`: scale=1|2, state=scene|unread|closed|panel|bridge|hint|bridgeend|bridgepanel|flowerror,
+## in-memory writer. Not game data. Args after `--`: scale=1|2, state=scene|cartouche|unread|closed|panel|bridge|hint|bridgeend|bridgepanel|flowerror,
 ## end=1 (scroll to the end). `closed` gives the hero a wound that shuts Сила before s02.
 
 const ROOT := "res://tests/fixtures/story"
@@ -24,6 +24,8 @@ func _ready() -> void:
 	var state: String = _args.get("state", "scene")
 	if state == "closed":
 		_wound(hero)
+	if state == "cartouche":
+		_cartouche(hero, _args.get("id", "bonk"))
 	var d20: D20Check = D20Check.new(D20Config.load_file(D20Config.PATH, issues), EngineD20Source.new())
 	_session = RunSession.new(hero, _rig.writer, d20, func() -> String: return "dev", func(line: String) -> void: print(line), CaptionTexts.load_file(CaptionTexts.PATH, issues))
 	var base: Theme = load("res://src/ui/reading_theme.tres") as Theme
@@ -40,9 +42,16 @@ func _ready() -> void:
 		"hint": _TO_BRIDGE + ["card:s02_risk"],
 		"bridgeend": _TO_BRIDGE + ["wait", "wait", "scroll", "wait"],
 		"bridgepanel": _TO_BRIDGE + ["panel"],
+		"cartouche": ["start", "wait", "wait", "scroll", "wait", "wait", "card:s01_go", "wait", "wait", "wait"],
 		"closed": ["start", "wait", "wait", "scroll", "wait", "wait", "card:s01_go", "next", "wait", "wait", "scroll", "wait", "wait"]}[state])
 	if _args.has("end") and state != "closed":
 		_steps.append_array(["wait", "wait", "scroll", "wait"])
+
+
+func _cartouche(hero: HeroData, id: String) -> void:
+	for outcome: OutcomeData in hero.chapters[0].outcomes:
+		if outcome.id == "o_s01":
+			outcome.cartouche = id
 
 
 func _wound(hero: HeroData) -> void:

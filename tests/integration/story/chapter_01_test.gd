@@ -9,6 +9,8 @@ const RISKY_SCENES: Array[String] = ["s03_bridge", "s05_village", "s07_forest", 
 const CHECKS_PER_PATH := 4
 const CHECK_BUDGET := 5
 const SCENE_COUNT := 12
+## Dialogue box limit (.claude/rules/narrative.md).
+const CRIT_LINE_MAX := 120
 
 var _hero: HeroData
 var _chapter: ChapterData
@@ -120,3 +122,26 @@ func test_goal_fail_flag_is_set_only_by_the_s11_failure() -> void:
 	for outcome: OutcomeData in _chapter.outcomes:
 		var sets_it: bool = outcome.sets.has(_chapter.goal_fail_flag)
 		assert_bool(sets_it).is_equal(outcome.id == "s11_temple_1_failure")
+
+
+func test_cartouches_sit_on_the_three_failures_of_the_sheet() -> void:
+	var found: Dictionary[String, String] = {}
+	for outcome: OutcomeData in _chapter.outcomes:
+		if not outcome.cartouche.is_empty():
+			found[outcome.id] = outcome.cartouche
+	assert_dict(found).is_equal({"s03_bridge_1_failure": "bonk", "s07_forest_1_failure": "bonk", "s11_temple_1_failure": "censor"})
+	assert_str(_scenes["s01_intro"].title).is_equal("Полтора килограмма бога")
+
+
+func test_every_check_has_crit_lines_within_the_dialogue_limit() -> void:
+	var checks: int = 0
+	for scene: SceneData in _chapter.scenes:
+		for option: OptionData in scene.options:
+			if option.check == null:
+				continue
+			checks += 1
+			assert_str(option.check.crit_success_line).is_not_empty()
+			assert_str(option.check.crit_failure_line).is_not_empty()
+			assert_int(option.check.crit_success_line.length()).is_less_equal(CRIT_LINE_MAX)
+			assert_int(option.check.crit_failure_line.length()).is_less_equal(CRIT_LINE_MAX)
+	assert_int(checks).is_equal(CHECKS_PER_PATH)

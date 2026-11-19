@@ -27,5 +27,6 @@
 	"coda_paragraphs_max": 3,
 	"path_enum_max": 5000,
 	"stake_max": 120,
+  "cartouche_max": 3,
 	"bs25_is_error": false
 }

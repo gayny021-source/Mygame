@@ -502,3 +502,68 @@ func test_the_sheet_lists_the_visible_flags_the_session_gives() -> void:
 	# Assert
 	assert_bool(lines.has("title_f_b")).is_true()
 	assert_bool(lines.has("title_f_a")).is_false()
+
+
+# --- cartouche over the frame slot of the outcome page (НП-60, reading-screen.md Component Inventory) ---
+
+func _set_cartouche(outcome_id: String, id: String) -> void:
+	for outcome: OutcomeData in _t.hero.chapters[0].outcomes:
+		if outcome.id == outcome_id:
+			outcome.cartouche = id
+
+
+func _open_outcome(card_id: String) -> void:
+	_started()
+	_screen.card_tapped(_card(card_id))
+	_t.settle()
+
+
+func _plate() -> Label:
+	return _screen.find_child("Cartouche", true, false) as Label
+
+
+func _frame_height() -> float:
+	return (_screen.find_child("Frame", true, false) as Control).get_combined_minimum_size().y
+
+
+func test_outcome_with_bonk_shows_the_plate_over_the_frame_slot() -> void:
+	_set_cartouche("oa", "bonk")
+	_open_outcome("a")
+	assert_object(_plate()).is_not_null()
+	assert_str(_plate().text).is_equal("БОНК!")
+	assert_bool(_plate().is_visible_in_tree()).is_true()
+
+
+func test_censor_shows_its_own_text() -> void:
+	_set_cartouche("oa", "censor")
+	_open_outcome("a")
+	assert_str(_plate().text).is_equal("@#$%&!")
+
+
+func test_outcome_without_a_cartouche_has_no_plate() -> void:
+	_set_cartouche("oa", "bonk")
+	_open_outcome("c")
+	assert_object(_plate()).is_null()
+
+
+func test_scene_page_has_no_plate() -> void:
+	_set_cartouche("oa", "bonk")
+	_started()
+	assert_object(_plate()).is_null()
+
+
+func test_plate_is_at_least_42_px_times_the_text_scale_and_ignores_touch() -> void:
+	_set_cartouche("oa", "bonk")
+	_open_outcome("a")
+	assert_int(_plate().get_theme_font_size(&"font_size")).is_greater_equal(roundi(ReadingScreen.CARTOUCHE_PX * _screen._scale()))
+	assert_int(_plate().mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
+
+
+func test_plate_does_not_shift_the_layout() -> void:
+	_open_outcome("c")
+	var without: float = _frame_height()
+	_screen.queue_free()
+	before_test()
+	_set_cartouche("oa", "bonk")
+	_open_outcome("a")
+	assert_float(_frame_height()).is_equal(without)

@@ -31,6 +31,11 @@ static func check(graph: StoryGraph, usage: FlagUsage, options: ValidatorOptions
 		_paragraph_words(outcome.paragraphs, path, outcome.id, options, issues)
 		if outcome.paragraphs.size() > options.outcome_paragraphs_max:
 			_warn(issues, "F4/outcome", path, outcome.id, "абзацев в исходе %d, не больше %d" % [outcome.paragraphs.size(), options.outcome_paragraphs_max])
+	var cartouches: int = 0
+	for outcome: OutcomeData in chapter.outcomes:
+		cartouches += 0 if outcome.cartouche.is_empty() else 1
+	if cartouches > options.cartouche_max:
+		_warn(issues, "F4/cartouche", chapter.id + "/outcomes", chapter.id, "картушей в главе %d, не больше %d" % [cartouches, options.cartouche_max])
 	for transition: TransitionData in chapter.transitions:
 		var path: String = "%s/transitions/%s" % [chapter.id, transition.id]
 		_paragraph_words(transition.coda, path, transition.id, options, issues)

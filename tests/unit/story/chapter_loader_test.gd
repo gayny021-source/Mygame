@@ -77,6 +77,32 @@ func test_load_from_dict_underscore_key_is_ignored() -> void:
 	assert_array(_lines(result)).is_empty()
 
 
+# --- cartouche of an outcome (НП-60, ADR-0001) ---
+
+func test_load_from_dict_outcome_cartouche_is_read_and_absent_means_none() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["outcomes"][0]["cartouche"] = "bonk"
+	# Act
+	var result: LoadResult = _load(chapter)
+	var plain: LoadResult = _load(StoryFixtures.minimal_chapter())
+	# Assert
+	assert_array(_lines(result)).is_empty()
+	assert_str((result.data as ChapterData).outcomes[0].cartouche).is_equal("bonk")
+	assert_str((plain.data as ChapterData).outcomes[0].cartouche).is_empty()
+
+
+func test_load_from_dict_unknown_cartouche_is_dt02() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["outcomes"][0]["cartouche"] = "boom"
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_int(_count(result, "DT-02")).is_equal(1)
+	assert_str(_first(result, "DT-02").path).contains("cartouche")
+
+
 # --- DT-02: types ---
 
 func test_load_from_dict_number_instead_of_string_returns_dt02() -> void:
