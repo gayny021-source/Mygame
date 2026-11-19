@@ -13,6 +13,9 @@ var _reading: ReadingScreen
 var _session: RunSession
 ## The Roll screen on show, null when none.
 var roll_screen: RollScreen
+## Passed to every Roll screen before it opens (a test replaces them).
+var clock: Callable = Time.get_ticks_msec
+var fade_s: float = 0.2
 
 
 func _init() -> void:
@@ -33,6 +36,8 @@ func _open(_option: OptionData) -> void:
 		return
 	roll_screen = SCENE.instantiate() as RollScreen
 	roll_screen.theme = _reading.theme
+	roll_screen.clock = clock
+	roll_screen.fade_s = fade_s
 	add_child(roll_screen)
 	roll_screen.setup(_session)
 	roll_screen.exited.connect(_on_exited)

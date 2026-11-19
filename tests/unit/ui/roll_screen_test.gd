@@ -165,7 +165,7 @@ func test_i5_pause_resume_shows_the_static_result_once() -> void:
 	assert_array(_shown).has_size(1)
 	assert_bool((_node("Action") as Button).disabled).is_true()
 	_now += 1000
-	await get_tree().create_timer(0.45).timeout
+	_screen.tick()
 	assert_bool((_node("Action") as Button).disabled).is_false()
 
 
@@ -176,8 +176,30 @@ func test_i5_pause_inside_the_result_window_does_not_freeze_the_button() -> void
 	_screen.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
 	_screen.notification(Node.NOTIFICATION_APPLICATION_RESUMED)
 	_now += 1000
-	await get_tree().create_timer(0.45).timeout
+	_screen.tick()
 	assert_bool((_node("Action") as Button).disabled).is_false()
+
+
+func test_i5_resume_keeps_the_rest_of_the_crit_window() -> void:
+	_make(20)
+	_rolled()
+	_t.settle()
+	_screen.skip()
+	_now += 100
+	_screen.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	_screen.notification(Node.NOTIFICATION_APPLICATION_RESUMED)
+	_now += 350
+	_screen.tick()
+	assert_bool((_node("Action") as Button).disabled).is_true()
+	_now += 100
+	_screen.tick()
+	assert_bool((_node("Action") as Button).disabled).is_false()
+
+
+func test_a_release_before_the_page_is_known_does_not_exit() -> void:
+	_screen.phase = RollScreen.Phase.APPLYING
+	_t.session.show_released.emit()
+	assert_array(_exits).is_empty()
 
 
 func test_the_tumble_really_spins_the_die() -> void:

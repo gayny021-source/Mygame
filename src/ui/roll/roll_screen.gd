@@ -48,7 +48,7 @@ const LIGHT_MARGIN_PX: float = 20.0
 ## At 200 % the slot takes the free height, the spacers keep the rest (ratio against 1).
 const SLOT_RATIO_BIG: float = 100.0
 ## The digit leaves the face of a crit pose free (eyes and mouth above it).
-const CRIT_DIGIT_SHIFT_PX: float = 50.0
+const CRIT_DIGIT_SHIFT_PX: float = 36.0
 const DIE_PX: float = 340.0
 const DIE_PX_BIG: float = 280.0
 const MINUS := "−"
@@ -284,7 +284,10 @@ func flicker() -> void:
 
 ## Turns the continue button on once the window (and a crit animation) are over; the arm tween calls it.
 func tick() -> void:
-	if phase != Phase.SHOWN or _now() < _guard_until:
+	if phase != Phase.SHOWN:
+		return
+	if _now() < _guard_until:
+		_arm_after(_guard_until - _now())
 		return
 	_action.disabled = false
 	_action.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -564,10 +567,13 @@ func _flash_frame() -> void:
 
 
 func _resumed() -> void:
+	var left_ms: int = _guard_until - _now()
 	_start_guard()
 	_reduced = reduce_motion or bool(reduce_motion_source.call())
 	if phase == Phase.SHOWN:
-		_arm_after(GUARD_MS)
+		var wait_ms: int = maxi(GUARD_MS, left_ms)
+		_guard_until = _now() + wait_ms
+		_arm_after(wait_ms)
 		return
 	var rolling: bool = phase == Phase.TUMBLING or phase == Phase.WAITING or phase == Phase.REVEALING
 	if not rolling:

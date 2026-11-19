@@ -16,6 +16,8 @@ func before_test() -> void:
 	add_child(_reading)
 	_reading.setup(_t.session, _t.hero)
 	_host = RollHost.new()
+	_host.clock = func() -> int: return _now
+	_host.fade_s = 0.0
 	add_child(_host)
 	_host.setup(_reading, _t.session)
 	_reading.start()
@@ -39,8 +41,6 @@ func _risky() -> OptionCard:
 func _open_roll() -> RollScreen:
 	_reading.card_tapped(_risky())
 	var roll: RollScreen = _host.roll_screen
-	roll.fade_s = 0.0
-	roll.clock = func() -> int: return _now
 	return roll
 
 
@@ -53,7 +53,6 @@ func test_a_risky_card_opens_the_roll_screen_once() -> void:
 
 func test_cancel_returns_to_the_choice_and_the_card_can_be_taken_again() -> void:
 	var roll: RollScreen = _open_roll()
-	roll.open()
 	_now += 400
 	roll.cancel_pressed()
 	await get_tree().process_frame
@@ -64,7 +63,6 @@ func test_cancel_returns_to_the_choice_and_the_card_can_be_taken_again() -> void
 
 func test_continue_shows_the_outcome_page() -> void:
 	var roll: RollScreen = _open_roll()
-	roll.open()
 	_now += 400
 	roll.roll_pressed()
 	_t.settle()
@@ -80,7 +78,6 @@ func test_continue_shows_the_outcome_page() -> void:
 
 func test_a_loaded_restored_roll_opens_the_roll_screen() -> void:
 	var roll: RollScreen = _open_roll()
-	roll.open()
 	_now += 400
 	roll.roll_pressed()
 	_t.settle()
@@ -92,6 +89,8 @@ func test_a_loaded_restored_roll_opens_the_roll_screen() -> void:
 	add_child(_reading)
 	_reading.setup(_t.session, _t.hero)
 	_host = RollHost.new()
+	_host.clock = func() -> int: return _now
+	_host.fade_s = 0.0
 	add_child(_host)
 	_host.setup(_reading, _t.session)
 	_t.session.load_saved()
