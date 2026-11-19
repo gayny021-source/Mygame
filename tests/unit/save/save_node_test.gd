@@ -37,3 +37,45 @@ func test_ready_without_an_injected_writer_builds_one_from_the_project_config() 
 	add_child(node)
 	# Assert
 	assert_object(node.writer).is_not_null()
+
+
+func test_flush_waits_for_a_queued_write_and_returns_true() -> void:
+	# Arrange
+	var rig: WriterRig = WriterRig.new()
+	var node: SaveNode = auto_free(SaveNode.new())
+	node.writer = rig.writer
+	rig.commit("R1")
+	# Act
+	var done: bool = node.flush()
+	# Assert
+	assert_bool(done).is_true()
+	assert_bool(rig.writer.idle()).is_true()
+
+
+func test_flush_gives_up_after_the_timeout_when_the_write_hangs() -> void:
+	# Arrange
+	var rig: WriterRig = WriterRig.new()
+	rig.io.hold_write = true
+	var node: SaveNode = auto_free(SaveNode.new())
+	node.writer = rig.writer
+	node.flush_ms = 30
+	rig.commit("R1")
+	var started: int = Time.get_ticks_msec()
+	# Act
+	var done: bool = node.flush()
+	# Assert
+	assert_bool(done).is_false()
+	assert_int(Time.get_ticks_msec() - started).is_less(1000)
+
+
+func test_pause_notification_flushes_the_pending_write_without_new_ones() -> void:
+	# Arrange
+	var rig: WriterRig = WriterRig.new()
+	var node: SaveNode = auto_free(SaveNode.new())
+	node.writer = rig.writer
+	rig.commit("R1")
+	# Act
+	node.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	# Assert
+	assert_bool(rig.writer.idle()).is_true()
+	assert_int(rig.io.written.size()).is_equal(1)

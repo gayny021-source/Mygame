@@ -170,6 +170,11 @@ func pump(now_ms: int) -> void:
 	_pumping = false
 
 
+## True when no job runs and none waits: nothing left to flush.
+func idle() -> bool:
+	return _job == null and _queue.is_empty()
+
+
 ## The first pump stamps what came before it: the clock is unknown until then, not 0.
 func _stamp_early(now_ms: int) -> void:
 	_pumped = true

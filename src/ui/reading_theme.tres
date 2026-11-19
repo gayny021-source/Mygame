@@ -1,5 +1,14 @@
 [gd_resource type="Theme" format=3]
 
+[ext_resource type="FontFile" path="res://assets/fonts/Literata-Regular.ttf" id="font_regular"]
+[ext_resource type="FontFile" path="res://assets/fonts/Literata-Bold.ttf" id="font_bold"]
+[ext_resource type="FontFile" path="res://assets/fonts/Literata-Italic.ttf" id="font_italic"]
+[ext_resource type="FontFile" path="res://assets/fonts/YesevaOne-Regular.ttf" id="font_title"]
+
+[sub_resource type="FontVariation" id="FontVariation_bold_italic"]
+base_font = ExtResource("font_italic")
+variation_embolden = 0.6
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_background"]
 bg_color = Color(0.9137255, 0.8745098, 0.7764706, 1)
 
@@ -80,6 +89,7 @@ corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
 [resource]
+default_font = ExtResource("font_regular")
 default_font_size = 48
 Button/colors/font_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
 Button/colors/font_disabled_color = Color(0.3529412, 0.3176471, 0.2588235, 1)
@@ -101,11 +111,18 @@ Label/colors/font_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
 Label/font_sizes/font_size = 48
 RichTextLabel/colors/default_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
 RichTextLabel/constants/line_separation = 3
+RichTextLabel/fonts/bold_font = ExtResource("font_bold")
+RichTextLabel/fonts/bold_italics_font = SubResource("FontVariation_bold_italic")
+RichTextLabel/fonts/italics_font = ExtResource("font_italic")
 RichTextLabel/font_sizes/bold_font_size = 48
 RichTextLabel/font_sizes/bold_italics_font_size = 48
 RichTextLabel/font_sizes/italics_font_size = 48
 RichTextLabel/font_sizes/mono_font_size = 48
 RichTextLabel/font_sizes/normal_font_size = 48
 RichTextLabel/styles/focus = SubResource("StyleBoxFlat_focus_inset")
+TitleLabel/base_type = &"Label"
+TitleLabel/colors/font_color = Color(0.09019608, 0.07843137, 0.05882353, 1)
+TitleLabel/font_sizes/font_size = 72
+TitleLabel/fonts/font = ExtResource("font_title")
 ScreenBackground/base_type = &"Panel"
 ScreenBackground/styles/panel = SubResource("StyleBoxFlat_background")

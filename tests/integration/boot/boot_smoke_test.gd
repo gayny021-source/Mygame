@@ -4,7 +4,7 @@ extends GdUnitTestSuite
 ## so boot.gd cannot call quit().
 
 const BOOT_SCENE := "res://src/boot/boot.tscn"
-const TITLE_PATH := "Safe/Title"
+const TITLE_PATH := "Safe/Column/Title"
 
 
 func test_boot_scene_instantiated_contains_title_label() -> void:

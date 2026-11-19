@@ -12,6 +12,12 @@ run/main_scene="res://src/boot/boot.tscn"
 ; Android Back must not quit; boot.gd handles NOTIFICATION_WM_GO_BACK_REQUEST (1007).
 config/quit_on_go_back=false
 
+[autoload]
+
+; DD-024: SaveNode pumps the writer every frame and flushes it on pause and close. The name
+; differs from the class_name SaveNode (Godot refuses an autoload that hides a class).
+SaveService="*res://src/core/save/save_node.gd"
+
 [display]
 
 ; Portrait phone layout (user decision: portrait, touch). Base 1080x1920 is the
