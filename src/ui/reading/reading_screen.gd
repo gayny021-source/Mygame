@@ -674,6 +674,9 @@ func _fill_sheet() -> void:
 	_sheet_line(tr("Цель главы"), &"CaptionLabel")
 	if not view.goal.is_empty():
 		_sheet_line(view.goal, &"Label")
+	if not view.stake.is_empty():
+		_sheet_line(tr("Ставка"), &"CaptionLabel")
+		_sheet_line(view.stake, &"Label")
 	_sheet_line(tr(_hero.name) if not _hero.name.is_empty() else _hero.id, &"TitleLabel")
 	for stat: StatData in _hero.stats:
 		_sheet_line("%s %s" % [stat.name, _signed(stat.bonus)], &"Label")

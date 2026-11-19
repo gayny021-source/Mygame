@@ -20,6 +20,7 @@ func _ready() -> void:
 		_args[pair[0]] = pair[1] if pair.size() > 1 else "1"
 	var issues: Array[DataIssue] = []
 	var hero: HeroData = HeroLoader.load_hero("hero_stub", ROOT).data as HeroData
+	hero.chapters[0].stake = "Склеп не отпустит чужака: без реликвии назад не выйти."
 	var state: String = _args.get("state", "scene")
 	if state == "closed":
 		_wound(hero)

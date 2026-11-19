@@ -141,3 +141,28 @@ func test_the_panel_shows_the_hero_name_and_falls_back_to_the_id() -> void:
 	_screen.goal_tapped()
 	assert_array(_sheet_texts()).contains(["сэр Тест"])
 	assert_array(_sheet_texts()).not_contains([SessionRig.HERO_ID])
+
+
+func _open_panel() -> void:
+	_screen.start()
+	_t.settle()
+	_now += ReadingScreen.GUARD_MS + 1
+	_screen.goal_tapped()
+
+
+func test_the_panel_shows_the_stake_line_after_the_goal_and_before_the_hero_card() -> void:
+	_t.hero.chapters[0].stake = "Склеп не отпустит чужака."
+	_open_panel()
+	var texts: Array[String] = _sheet_texts()
+	var at: int = texts.find("Ставка")
+	assert_int(at).is_greater(0)
+	assert_str(texts[at - 1]).is_equal(GoalFixtures.GOAL)
+	assert_str(texts[at + 1]).is_equal("Склеп не отпустит чужака.")
+	assert_str(texts[at + 2]).is_equal(_t.hero.name)
+	assert_str((_screen.get_node("%SheetBody").get_child(at) as Label).theme_type_variation).is_equal("CaptionLabel")
+
+
+func test_the_panel_has_no_stake_line_when_the_chapter_has_no_stake() -> void:
+	_t.hero.chapters[0].stake = ""
+	_open_panel()
+	assert_array(_sheet_texts()).not_contains(["Ставка"])
