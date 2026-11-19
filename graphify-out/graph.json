@@ -391,6 +391,11 @@
    "group": "GDD / Docs"
   },
   {
+   "id": "design/narrative/chapter-01-script.md",
+   "label": "chapter-01-script.md",
+   "group": "GDD / Docs"
+  },
+  {
    "id": "design/narrative/chapter-01-sheet.md",
    "label": "chapter-01-sheet.md",
    "group": "GDD / Docs"
@@ -2394,6 +2399,14 @@
   {
    "source": "design/gdd/systems-index.md",
    "target": "design/gdd/scene-illustrations.md"
+  },
+  {
+   "source": "design/narrative/chapter-01-script.md",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "design/narrative/chapter-01-script.md",
+   "target": "design/narrative/chapter-01-sheet.md"
   },
   {
    "source": "design/narrative/chapter-01-sheet.md",
