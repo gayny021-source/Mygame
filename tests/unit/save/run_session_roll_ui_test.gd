@@ -189,3 +189,24 @@ func test_flow_error_is_visible_and_load_or_a_new_run_is_the_way_out() -> void:
 	assert_bool(after).is_true()
 	assert_object(screen).is_not_null()
 	assert_bool(_t.session.flow_error()).is_false()
+
+
+func test_a_refused_load_keeps_the_flow_error_and_the_menu_still_leaves_it() -> void:
+	# Arrange
+	for outcome: OutcomeData in _t.hero.chapters[0].outcomes.duplicate():
+		if outcome.id == "ow":
+			_t.hero.chapters[0].outcomes.erase(outcome)
+	_rolled()
+	_t.settle()
+	_t.session.continue_check()
+	_t.session.close_check()
+	_t.rig.files.clear()
+	# Act
+	_t.session.load_saved()
+	_t.settle()
+	var kept: bool = _t.session.flow_error()
+	_t.session.start_new()
+	# Assert
+	assert_int(_t.loads[0][0]).is_not_equal(SaveWriter.LoadCode.OK)
+	assert_bool(kept).is_true()
+	assert_bool(_t.session.flow_error()).is_false()

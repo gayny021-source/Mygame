@@ -47,9 +47,9 @@ static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]
 	return texts
 
 
-## Word of a check level; its id when the file does not name it.
+## Word of a check level, one of CheckData.LEVELS (the file names all of them).
 func level_word(level: String) -> String:
-	return _levels.get(level, level)
+	return _levels[level]
 
 
 ## «+4», «0», «−1».
@@ -78,7 +78,7 @@ func closed(stat_name: String, reason: String) -> String:
 	return _fill(_closed, {"stat": stat_name, "reason": reason})
 
 
-static func _fill(template: String, values: Dictionary) -> String:
+static func _fill(template: String, values: Dictionary[String, String]) -> String:
 	var line: String = template
 	for key: String in values:
 		line = line.replace("{%s}" % key, values[key])

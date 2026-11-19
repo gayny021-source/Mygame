@@ -26,10 +26,6 @@ func test_risky_closed_and_plain_lines() -> void:
 	assert_str(texts.plain("цена")).is_equal("Без броска\u00a0· цена")
 
 
-func test_an_unnamed_level_falls_back_to_the_id() -> void:
-	assert_str(_texts().level_word("epic")).is_equal("epic")
-
-
 func test_a_file_without_a_template_or_a_level_is_reported() -> void:
 	var issues: Array[DataIssue] = []
 	var data: Dictionary = {"schema_version": 1, "risky": "x", "plain": "p", "plain_price": "pp", "closed": "c", "levels": {"easy": "E"}}

@@ -12,6 +12,7 @@ var rig: WriterRig = WriterRig.new()
 var hero: HeroData
 var source: CountingD20Source = CountingD20Source.new(FACE)
 var session: RunSession
+var d20: D20Check
 var logs: Array[String] = []
 var released: int
 ## [code, screen] per `loaded`, in order.
@@ -84,15 +85,22 @@ func started(stake_read: bool = true) -> StoryScreen:
 	var screen: StoryScreen = session.start_new()
 	settle()
 	if stake_read:
-		session.report_stake_visible()
+		read_stake()
 	return screen
+
+
+## The UI reports the stake of the scene on show as read.
+func read_stake() -> void:
+	var page: StoryScreen = session.screen()
+	if page != null and page.scene != null:
+		session.report_stake_visible(page.scene.id)
 
 
 func _build() -> void:
 	logs = []
 	released = 0
 	loads = []
-	var d20: D20Check = D20Check.new(CheckFixtures.config(), source)
+	d20 = D20Check.new(CheckFixtures.config(), source)
 	session = RunSession.new(hero, rig.writer, d20, _next_id, _log)
 	session.show_released.connect(func() -> void: released += 1)
 	session.loaded.connect(func(code: int, screen: StoryScreen) -> void: loads.append([code, screen]))

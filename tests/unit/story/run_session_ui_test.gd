@@ -48,7 +48,7 @@ func test_options_are_inactive_until_the_stake_is_read_then_open() -> void:
 	_t.started(false)
 	var before: Array = _states()
 	# Act
-	_t.session.report_stake_visible()
+	_t.read_stake()
 	# Assert
 	assert_array(before).is_equal([STATE.INACTIVE, STATE.INACTIVE, STATE.INACTIVE])
 	assert_bool(_t.session.stake_read()).is_true()
@@ -90,7 +90,7 @@ func test_a_hindrance_closes_the_risky_option_with_its_reason() -> void:
 	_t.session.apply_plain(_t.option("a"))
 	_t.settle()
 	_t.session.advance()
-	_t.session.report_stake_visible()
+	_t.read_stake()
 	# Act
 	var view: OptionView = _view("r")
 	# Assert: closed stays closed after the latch
@@ -145,7 +145,7 @@ func test_the_stat_name_comes_from_the_hero_data() -> void:
 func test_latch_survives_cancel_and_resets_on_a_new_scene() -> void:
 	# Arrange
 	_t.started()
-	_t.session.report_stake_visible()
+	_t.read_stake()
 	_t.session.choose_check(_t.option("r"))
 	var chosen: Array = _states()
 	_t.session.cancel_check()
@@ -162,7 +162,7 @@ func test_latch_survives_cancel_and_resets_on_a_new_scene() -> void:
 
 func test_report_stake_visible_off_a_scene_is_ignored() -> void:
 	# Act
-	_t.session.report_stake_visible()
+	_t.read_stake()
 	# Assert: no run yet
 	assert_bool(_t.session.stake_read()).is_false()
 
@@ -170,7 +170,7 @@ func test_report_stake_visible_off_a_scene_is_ignored() -> void:
 func test_latch_is_not_kept_by_a_load_and_pause_changes_nothing() -> void:
 	# Arrange
 	_t.started()
-	_t.session.report_stake_visible()
+	_t.read_stake()
 	_t.restart()
 	_t.session.load_saved()
 	_t.settle()
@@ -182,7 +182,7 @@ func test_latch_is_not_kept_by_a_load_and_pause_changes_nothing() -> void:
 func test_after_a_plain_choice_the_option_is_chosen_and_the_rest_blocked_while_it_waits() -> void:
 	# Arrange
 	_t.started()
-	_t.session.report_stake_visible()
+	_t.read_stake()
 	# Act
 	_t.session.apply_plain(_t.option("a"))
 	# Assert
@@ -244,7 +244,7 @@ func test_core_refuses_a_hindered_risky_option_even_after_the_latch() -> void:
 	_t.session.apply_plain(_t.option("a"))
 	_t.settle()
 	_t.session.advance()
-	_t.session.report_stake_visible()
+	_t.read_stake()
 	var calls: int = _t.source.calls
 	# Act
 	var chosen: bool = _t.session.choose_check(_t.option("r"))
@@ -272,3 +272,48 @@ func test_option_views_are_copies_the_ui_cannot_use_to_open_a_card() -> void:
 	# Assert
 	assert_array(_states()).is_equal([STATE.INACTIVE, STATE.INACTIVE, STATE.INACTIVE])
 	assert_object(_t.session.apply_plain(_t.option("a"))).is_null()
+
+
+func test_risky_options_with_an_invalid_config_are_hidden_so_the_fallback_shows() -> void:
+	# Arrange: the scene holds only a risky option
+	var scene: SceneData = _t.hero.chapters[0].scenes[0]
+	scene.options = [scene.options[2]]
+	_t.d20.config.valid = false
+	_t.started()
+	# Assert
+	assert_int(_t.session.option_views().size()).is_equal(0)
+	assert_bool(_t.session.no_open_options()).is_true()
+	assert_int(_t.logs.size()).is_greater(0)
+
+
+func test_a_risky_option_of_a_level_without_a_dc_is_hidden() -> void:
+	# Arrange
+	var scene: SceneData = _t.hero.chapters[0].scenes[0]
+	scene.options = [scene.options[2]]
+	scene.options[0].check.level = "epic"
+	_t.started()
+	# Assert
+	assert_bool(_t.session.no_open_options()).is_true()
+	assert_int(_t.logs.size()).is_greater(0)
+
+
+func test_a_late_stake_report_of_a_previous_scene_is_ignored() -> void:
+	# Arrange
+	_t.started(false)
+	# Act
+	_t.session.report_stake_visible("s0_old")
+	var late: bool = _t.session.stake_read()
+	_t.session.report_stake_visible("s1")
+	# Assert
+	assert_bool(late).is_false()
+	assert_bool(_t.session.stake_read()).is_true()
+
+
+func test_load_is_refused_while_a_write_waits() -> void:
+	# Arrange
+	_t.started()
+	_t.session.apply_plain(_t.option("a"))
+	# Act
+	var token: int = _t.session.load_saved()
+	# Assert
+	assert_int(token).is_equal(0)

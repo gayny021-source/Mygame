@@ -101,8 +101,12 @@ func start_new() -> StoryScreen:
 	return page
 
 
-## Queues the load of this hero; the token, 0 when the writer refused. Ends with `loaded`.
+## Queues the load of this hero; the token, 0 when the writer refused or a write still waits (the load
+## would read the disk before the write lands). Ends with `loaded`. A refused load changes nothing, so
+## a flow error stays and «В меню» (start_new) is its way out.
 func load_saved() -> int:
+	if _waiting != 0:
+		return 0
 	_load_token = _writer.load_run(_hero.id)
 	return _load_token
 
@@ -210,10 +214,11 @@ func stake_read() -> bool:
 	return _stake_read
 
 
-## UI to core: the last line of the stake is in the visible area. Ignored off a scene.
-func report_stake_visible() -> void:
+## UI to core: the last line of the stake of scene `scene_id` is in the visible area. Ignored off a
+## scene and for another scene (a late call from the one just left).
+func report_stake_visible(scene_id: String) -> void:
 	var page: StoryScreen = screen()
-	if page != null and page.kind == StoryScreen.Kind.SCENE:
+	if page != null and page.kind == StoryScreen.Kind.SCENE and page.scene.id == scene_id:
 		_stake_read = true
 
 
@@ -271,7 +276,7 @@ func _enter_views(page: StoryScreen) -> void:
 	_stake_read = false
 	_views = []
 	if page.kind == StoryScreen.Kind.OUTCOME:
-		_views.append(_view_of(page.option))
+		_add_view(page.option)
 		return
 	if page.kind != StoryScreen.Kind.SCENE:
 		return
@@ -281,27 +286,37 @@ func _enter_views(page: StoryScreen) -> void:
 		if option.check != null and not _has_stat(option.check.stat):
 			_log.call("у героя нет характеристики или её названия «%s»: вариант «%s» скрыт" % [option.check.stat, option.id])
 			continue
-		_views.append(_view_of(option))
+		_add_view(option)
 
 
+func _add_view(option: OptionData) -> void:
+	var view: OptionView = _view_of(option)
+	if view != null:
+		_views.append(view)
+
+
+# Null when a risky option cannot be thrown (invalid d20 config, no DC for the level): hidden, logged
+# (d20-checks.md, «конфиг уровней»).
 func _view_of(option: OptionData) -> OptionView:
 	var view: OptionView = OptionView.new()
 	view.option = option
 	if option.check == null:
 		view.caption = _captions.plain(_price_of(option) if option.kind == OptionData.KIND_SAFE else "")
 		return view
+	var issues: Array[DataIssue] = []
+	var dc: int = _d20.config.dc(option.check.level, issues)
+	for issue: DataIssue in issues:
+		_log.call("%s %s (%s): %s" % [issue.code, issue.path, option.check.id, issue.message])
+	if not _d20.config.valid or dc < 0:
+		_log.call("%s рискованный вариант «%s» скрыт: бросок невозможен" % [_d20.config.issue_code, option.id])
+		return null
 	var hindrance: FlagDecl = _hindrance(option.check.stat)
 	if hindrance != null:
 		view.reason = hindrance.title
 		view.caption = _captions.closed(_stat_name(option.check.stat), hindrance.title)
 		return view
 	var bonus: int = D20Check.bonus_of(_hero, option.check.stat)
-	var issues: Array[DataIssue] = []
-	var dc: int = _d20.config.dc(option.check.level, issues)
-	for issue: DataIssue in issues:
-		_log.call("%s %s (%s): %s" % [issue.code, issue.path, option.check.id, issue.message])
-	if dc >= 0:
-		view.caption = _captions.risky(_stat_name(option.check.stat), bonus, option.check.level, dc, D20Check.chance(dc, bonus))
+	view.caption = _captions.risky(_stat_name(option.check.stat), bonus, option.check.level, dc, D20Check.chance(dc, bonus))
 	return view
 
 

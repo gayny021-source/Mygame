@@ -149,6 +149,8 @@ func brief() -> CheckBrief:
 	else:
 		var issues: Array[DataIssue] = []
 		data.dc = _d20.config.dc(check.level, issues)
+		for issue: DataIssue in issues:
+			_log.call("%s %s (%s): %s" % [issue.code, issue.path, check.id, issue.message])
 		if data.dc < 0:
 			return null
 		data.bonus = D20Check.bonus_of(_hero, check.stat)

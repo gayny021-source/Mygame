@@ -73,7 +73,7 @@ func test_flags_survive_a_second_restart_after_the_outcome_scene_was_entered() -
 	_play_and_load(true)
 	_t.session.continue_check()
 	_t.session.advance()
-	_t.session.report_stake_visible()
+	_t.read_stake()
 	_t.settle()
 	_t.restart()
 	# Act

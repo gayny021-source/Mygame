@@ -2447,6 +2447,10 @@
   },
   {
    "source": "src/core/save/run_session.gd",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "src/core/save/run_session.gd",
    "target": "design/gdd/heroes.md"
   },
   {
