@@ -17,6 +17,7 @@ var services: BootServices
 
 var _started: bool = false
 var _screen: ReadingScreen
+var _host: RollHost
 var _quitting: bool = false
 
 @onready var _title: Label = %Title
@@ -68,6 +69,9 @@ func _open_reading(hero_id: String) -> void:
 	_screen.theme = theme
 	_screen.setup(services.sessions[hero_id], services.heroes[hero_id])
 	_screen.menu_requested.connect(on_menu_requested)
+	_host = RollHost.new()
+	add_child(_host)
+	_host.setup(_screen, services.sessions[hero_id])
 	_screen.resume()
 	$Safe.visible = false
 

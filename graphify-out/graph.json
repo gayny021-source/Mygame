@@ -761,6 +761,11 @@
    "group": "GDScript"
   },
   {
+   "id": "src/ui/roll/roll_host.gd",
+   "label": "roll_host.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/ui/roll/roll_screen.gd",
    "label": "roll_screen.gd",
    "group": "GDScript"
@@ -1203,6 +1208,11 @@
   {
    "id": "tests/unit/ui/reading_screen_test.gd",
    "label": "reading_screen_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/ui/roll_host_test.gd",
+   "label": "roll_host_test.gd",
    "group": "GDScript"
   },
   {
@@ -2864,6 +2874,14 @@
    "target": "design/ux/reading-screen.md"
   },
   {
+   "source": "src/ui/roll/roll_host.gd",
+   "target": "design/ux/roll-screen.md"
+  },
+  {
+   "source": "src/ui/roll/roll_host.gd",
+   "target": "src/ui/roll/roll_screen.tscn"
+  },
+  {
    "source": "src/ui/roll/roll_screen.gd",
    "target": "design/ux/roll-screen.md"
   },
@@ -3221,6 +3239,14 @@
   },
   {
    "source": "tests/unit/ui/reading_screen_test.gd",
+   "target": "src/ui/reading/reading_screen.tscn"
+  },
+  {
+   "source": "tests/unit/ui/roll_host_test.gd",
+   "target": "design/ux/roll-screen.md"
+  },
+  {
+   "source": "tests/unit/ui/roll_host_test.gd",
    "target": "src/ui/reading/reading_screen.tscn"
   },
   {

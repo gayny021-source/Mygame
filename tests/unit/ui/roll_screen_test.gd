@@ -229,6 +229,19 @@ func test_i9_released_write_reveals_at_the_end_of_the_tumble() -> void:
 	assert_int(_screen.phase()).is_equal(RollScreen.Phase.REVEALING)
 
 
+func test_i9_refused_commit_leaves_no_wait_and_reveals_without_show_released() -> void:
+	_t.hero.id = "Bad Id"
+	_open_guard()
+	_screen.roll_pressed()
+	assert_bool(_t.session.waiting()).is_false()
+	_screen.finish_tumble()
+	assert_int(_screen.phase()).is_equal(RollScreen.Phase.REVEALING)
+	_open_guard()
+	_screen.skip()
+	assert_int(_screen.phase()).is_equal(RollScreen.Phase.SHOWN)
+	assert_array(_shown).has_size(1)
+
+
 func test_i11_wait_after_the_tumble_stops_flicker() -> void:
 	_rolled()
 	_screen.finish_tumble()

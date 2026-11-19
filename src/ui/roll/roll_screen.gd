@@ -332,6 +332,8 @@ func _apply_scale() -> void:
 	_die.offset_right = half
 	_die.offset_bottom = half
 	_die.pivot_offset = Vector2(half, half)
+	# 200 % on 16:9: a two-line cartouche and a wrapped calculation fit without scrolling (roll-screen.md, Layout)
+	_slot.custom_minimum_size.y = 640.0 if text_scale >= 2.0 else 520.0
 	_verdict.add_theme_font_size_override(&"font_size", int(maxf(64.0, BASE_FONT * text_scale)))
 	_cartouche_label.add_theme_font_size_override(&"font_size", int(maxf(88.0, BASE_FONT * text_scale)))
 
