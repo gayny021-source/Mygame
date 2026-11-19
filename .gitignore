@@ -182,3 +182,4 @@ $RECYCLE.BIN/
 # graphify: the AST cache is rebuilt in seconds (graphify update .); the graph itself is committed
 graphify-out/cache/
 reports/
+override.cfg
