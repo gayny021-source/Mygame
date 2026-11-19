@@ -7,9 +7,12 @@ extends Control
 ##
 ## Usage: [code]host = RollHost.new(); add_child(host); host.setup(reading_screen, session)[/code]
 
+const SCENE: PackedScene = preload("res://src/ui/roll/roll_screen.tscn")
+
 var _reading: ReadingScreen
 var _session: RunSession
-var _roll: RollScreen
+## The Roll screen on show, null when none.
+var roll_screen: RollScreen
 
 
 func _init() -> void:
@@ -22,27 +25,29 @@ func setup(reading: ReadingScreen, session: RunSession) -> void:
 	_reading = reading
 	_session = session
 	_reading.check_requested.connect(_open)
-
-
-## The Roll screen on show, null when none.
-func roll_screen() -> RollScreen:
-	return _roll
+	_session.loaded.connect(_on_loaded)
 
 
 func _open(_option: OptionData) -> void:
-	if _roll != null:
+	if roll_screen != null:
 		return
-	_roll = (load("res://src/ui/roll/roll_screen.tscn") as PackedScene).instantiate() as RollScreen
-	_roll.theme = _reading.theme
-	add_child(_roll)
-	_roll.setup(_session)
-	_roll.exited.connect(_on_exited)
-	_roll.open()
+	roll_screen = SCENE.instantiate() as RollScreen
+	roll_screen.theme = _reading.theme
+	add_child(roll_screen)
+	roll_screen.setup(_session)
+	roll_screen.exited.connect(_on_exited)
+	roll_screen.open()
+
+
+# A roll saved before the process died: the Roll screen shows it at once (roll-screen.md, Lifecycle).
+func _on_loaded(code: SaveWriter.LoadCode, _page: StoryScreen) -> void:
+	if code == SaveWriter.LoadCode.OK and _session.has_restored_turn():
+		_open(null)
 
 
 func _on_exited(kind: int, page: StoryScreen) -> void:
-	_roll.queue_free()
-	_roll = null
+	roll_screen.queue_free()
+	roll_screen = null
 	if kind == RollScreen.Exit.CONTINUED:
 		_reading.show_page(page)
 	else:

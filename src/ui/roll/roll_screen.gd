@@ -35,6 +35,20 @@ const CRIT_MS: int = 800
 const CRIT_SHORT_MS: int = 500
 const FRAME_FLASH_S: float = 0.3
 const BASE_FONT: float = 48.0
+const SLOT_MIN_PX: float = 520.0
+const SLOT_MIN_PX_BIG: float = 0.0
+const VERDICT_MIN_PX: float = 64.0
+const CARTOUCHE_MIN_PX: float = 88.0
+const DIGIT_PX: int = 120
+## Gap between the zones; at 200 % on 16:9 it is halved so that a crit result fits without scrolling.
+const GAP_PX: int = 24
+const GAP_PX_BIG: int = 12
+## The circle of light reaches this far past the die; the dice zone is as tall as the circle.
+const LIGHT_MARGIN_PX: float = 20.0
+## At 200 % the slot takes the free height, the spacers keep the rest (ratio against 1).
+const SLOT_RATIO_BIG: float = 100.0
+## The digit leaves the face of a crit pose free (eyes and mouth above it).
+const CRIT_DIGIT_SHIFT_PX: float = 50.0
 const DIE_PX: float = 340.0
 const DIE_PX_BIG: float = 280.0
 const MINUS := "−"
@@ -64,7 +78,8 @@ var reduce_motion_source: Callable = func() -> bool: return false
 var _session: RunSession
 var _brief: CheckBrief
 var _result: D20Result
-var _phase: Phase = Phase.CLOSED
+## Current state of the screen.
+var phase: Phase = Phase.CLOSED
 var _reduced: bool
 var _guard_until: int
 var _skip_wanted: bool
@@ -72,11 +87,12 @@ var _landed: bool
 var _announced: bool
 var _page: StoryScreen
 var _motion: Tween
+var _spin: Tween
 var _arm: Tween
 var _fade: Tween
 var _flash: Tween
-var _need_text: String
 
+@onready var _column: VBoxContainer = %Column
 @onready var _back: Button = %Back
 @onready var _reroll: Button = %Reroll
 @onready var _action: Button = %Action
@@ -89,6 +105,7 @@ var _need_text: String
 @onready var _calc: Label = %Calc
 @onready var _bonus: Label = %Bonus
 @onready var _need: Label = %NeedLabel
+@onready var _dice_zone: Control = %DiceZone
 @onready var _die: Control = %Die
 @onready var _die_art: TextureRect = %DieArt
 @onready var _die_label: Label = %DieLabel
@@ -97,7 +114,6 @@ var _need_text: String
 
 
 func _ready() -> void:
-	_back.text = tr("Передумать")
 	_back.pressed.connect(cancel_pressed)
 	_action.pressed.connect(_on_action)
 	_reroll.disabled = true
@@ -115,7 +131,7 @@ func _ready() -> void:
 	# shortcut: tabular digits (tnum) of Literata are not verified (RS-D4): check on a device
 	digits.opentype_features = {"tnum": 1}
 	_die_label.add_theme_font_override(&"font", digits)
-	_die_label.add_theme_font_size_override(&"font_size", 120)
+	_die_label.add_theme_font_size_override(&"font_size", DIGIT_PX)
 	_fade_rect.modulate.a = 0.0
 	_apply_scale()
 
@@ -159,7 +175,9 @@ func open() -> void:
 	_kill(_arm)
 	_brief = _session.check_brief()
 	if _brief == null:
-		push_warning("SCR2 нет открытой проверки: экран не открыт")
+		push_warning("SCR2 нет открытой проверки: экран закрыт без исхода")
+		phase = Phase.CLOSED
+		exited.emit(Exit.FLOW_ERROR, null)
 		return
 	_reduced = reduce_motion or bool(reduce_motion_source.call())
 	_skip_wanted = false
@@ -171,20 +189,20 @@ func open() -> void:
 		_result = _session.restored_result()
 		_show_full(CRIT_SHORT_MS)
 		return
-	_phase = Phase.CHOSEN
+	phase = Phase.CHOSEN
 	_fade_in()
 
 
 ## «Бросить»: the core rolls and commits; the tumble starts at once.
 func roll_pressed() -> void:
-	if _phase != Phase.CHOSEN or _blocked():
+	if phase != Phase.CHOSEN or _blocked():
 		return
 	var result: D20Result = _session.roll()
 	if result == null:
 		push_warning("SCR2 бросок не принят ядром: остаёмся в «Выбрана»")
 		return
 	_result = result
-	_phase = Phase.TUMBLING
+	phase = Phase.TUMBLING
 	_start_guard()
 	_hide_slot(_back)
 	_hide_slot(_action)
@@ -198,25 +216,27 @@ func roll_pressed() -> void:
 		_motion.tween_interval(interval / 1000.0)
 		_motion.tween_callback(flicker)
 	_motion.tween_callback(_tumble_over)
-	_motion.parallel().tween_property(_die, ^"rotation", TAU * 2.0, SPIN_S).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	_spin = create_tween()
+	_spin.tween_property(_die, ^"rotation", TAU * 2.0, SPIN_S).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 
 
 ## «Передумать»: only before the roll.
 func cancel_pressed() -> void:
-	if _phase != Phase.CHOSEN or _blocked():
+	if phase != Phase.CHOSEN or _blocked():
 		return
 	if not _session.cancel_check():
 		return
-	_phase = Phase.CLOSED
+	phase = Phase.CLOSED
 	_leave(Exit.CANCELLED, null)
 
 
 ## «Продолжить»: commit 7 inside the core; the outcome page follows `show_released`.
 func continue_pressed() -> void:
-	if _phase != Phase.SHOWN or _blocked() or _action.disabled:
+	if phase != Phase.SHOWN or _blocked() or _action.disabled:
 		return
-	_phase = Phase.APPLYING
+	phase = Phase.APPLYING
 	_action.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_page = null
 	var page: StoryScreen = _session.continue_check()
 	if page != null:
 		_page = page
@@ -224,17 +244,17 @@ func continue_pressed() -> void:
 			_leave(Exit.CONTINUED, page)
 		return
 	if _session.flow_error():
-		_phase = Phase.ERROR
-		if _session.close_check():
-			_leave(Exit.FLOW_ERROR, null)
+		phase = Phase.ERROR
+		_session.close_check()
+		_leave(Exit.FLOW_ERROR, null)
 		return
-	_phase = Phase.SHOWN
+	phase = Phase.SHOWN
 	tick()
 
 
 ## Skip: the whole result at once; with a write still waiting the wish is kept until `show_released`.
 func skip() -> void:
-	var rolling: bool = _phase == Phase.TUMBLING or _phase == Phase.WAITING or _phase == Phase.REVEALING
+	var rolling: bool = phase == Phase.TUMBLING or phase == Phase.WAITING or phase == Phase.REVEALING
 	if not rolling or _blocked():
 		return
 	if _session.waiting():
@@ -247,7 +267,7 @@ func skip() -> void:
 func go_back() -> void:
 	if _blocked():
 		return
-	match _phase:
+	match phase:
 		Phase.CHOSEN:
 			cancel_pressed()
 		Phase.TUMBLING, Phase.WAITING, Phase.REVEALING:
@@ -264,7 +284,7 @@ func flicker() -> void:
 
 ## Turns the continue button on once the window (and a crit animation) are over; the arm tween calls it.
 func tick() -> void:
-	if _phase != Phase.SHOWN or _now() < _guard_until:
+	if phase != Phase.SHOWN or _now() < _guard_until:
 		return
 	_action.disabled = false
 	_action.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -273,13 +293,9 @@ func tick() -> void:
 
 # ---- test-only (TD G4) ----
 
-func phase() -> int:
-	return _phase
-
-
 ## Plays the end of the tumble at once.
 func finish_tumble() -> void:
-	if _phase != Phase.TUMBLING:
+	if phase != Phase.TUMBLING:
 		return
 	_kill_motion()
 	_tumble_over()
@@ -287,7 +303,7 @@ func finish_tumble() -> void:
 
 ## Plays the end of the write wait flicker at once: the last flicker, then the static die.
 func finish_wait() -> void:
-	if _phase != Phase.WAITING:
+	if phase != Phase.WAITING:
 		return
 	_kill_motion()
 	flicker()
@@ -320,6 +336,7 @@ func _kill(tween: Tween) -> void:
 
 func _kill_motion() -> void:
 	_kill(_motion)
+	_kill(_spin)
 	_die.rotation = 0.0
 	_die.scale = Vector2.ONE
 
@@ -331,11 +348,23 @@ func _apply_scale() -> void:
 	_die.offset_top = -half
 	_die.offset_right = half
 	_die.offset_bottom = half
-	_die.pivot_offset = Vector2(half, half)
+	var glow: float = half + LIGHT_MARGIN_PX
+	_dice_zone.custom_minimum_size.y = glow * 2.0
+	_spotlight.offset_left = -glow
+	_spotlight.offset_top = -glow
+	_spotlight.offset_right = glow
+	_spotlight.offset_bottom = glow
+	_spotlight.pivot_offset = Vector2(glow, glow)
+	if _die.pivot_offset != Vector2(half, half):
+		_die.pivot_offset = Vector2(half, half)
 	# 200 % on 16:9: a two-line cartouche and a wrapped calculation fit without scrolling (roll-screen.md, Layout)
-	_slot.custom_minimum_size.y = 640.0 if text_scale >= 2.0 else 520.0
-	_verdict.add_theme_font_size_override(&"font_size", int(maxf(64.0, BASE_FONT * text_scale)))
-	_cartouche_label.add_theme_font_size_override(&"font_size", int(maxf(88.0, BASE_FONT * text_scale)))
+	var big: bool = text_scale >= 2.0
+	_slot.custom_minimum_size.y = SLOT_MIN_PX_BIG if big else SLOT_MIN_PX
+	_slot.size_flags_vertical = Control.SIZE_EXPAND_FILL if big else Control.SIZE_FILL
+	_slot.size_flags_stretch_ratio = SLOT_RATIO_BIG
+	_column.add_theme_constant_override(&"separation", GAP_PX_BIG if big else GAP_PX)
+	_verdict.add_theme_font_size_override(&"font_size", int(maxf(VERDICT_MIN_PX, BASE_FONT * text_scale)))
+	_cartouche_label.add_theme_font_size_override(&"font_size", int(maxf(CARTOUCHE_MIN_PX, BASE_FONT * text_scale)))
 
 
 func _fill_stake() -> void:
@@ -346,8 +375,7 @@ func _fill_stake() -> void:
 	_option_text.visible = true
 	_caption.text = _brief.caption
 	_caption.visible = true
-	_need_text = tr("Нужно выбросить %d") % _brief.need if _brief.need >= 20 else tr("Нужно выбросить %d или больше") % _brief.need
-	_need.text = _need_text
+	_need.text = tr("Нужно выбросить %d") % _brief.need if _brief.need >= 20 else tr("Нужно выбросить %d или больше") % _brief.need
 	_verdict.modulate.a = 0.0
 	_verdict.visible = true
 	_cartouche.visible = false
@@ -355,6 +383,7 @@ func _fill_stake() -> void:
 	_bonus.visible = false
 	_die_art.texture = TEX_UNKNOWN
 	_die_label.text = "?"
+	_shift_digit(0.0)
 	_slot.scroll_vertical = 0
 	_show_slot(_back)
 	_show_slot(_action)
@@ -382,7 +411,7 @@ func _set_face(face: int) -> void:
 func _tumble_over() -> void:
 	_kill_motion()
 	if _session.waiting():
-		_phase = Phase.WAITING
+		phase = Phase.WAITING
 		_die_art.texture = TEX_NEUTRAL
 		if not _reduced:
 			_motion = create_tween()
@@ -394,10 +423,10 @@ func _tumble_over() -> void:
 
 
 func _on_released() -> void:
-	if _phase == Phase.WAITING:
+	if phase == Phase.WAITING:
 		_kill_motion()
 		_reveal()
-	elif _phase == Phase.APPLYING:
+	elif phase == Phase.APPLYING and _page != null:
 		_leave(Exit.CONTINUED, _page)
 
 
@@ -405,7 +434,7 @@ func _reveal() -> void:
 	if _skip_wanted or _reduced:
 		_show_full(CRIT_SHORT_MS if _skip_wanted else 0)
 		return
-	_phase = Phase.REVEALING
+	phase = Phase.REVEALING
 	_land()
 	_set_calc(1)
 	_motion = create_tween()
@@ -448,7 +477,7 @@ func _set_calc(stage: int) -> void:
 
 
 func _conclude(crit_ms: int) -> void:
-	_phase = Phase.SHOWN
+	phase = Phase.SHOWN
 	var crit: bool = _result.crit != D20Result.Crit.NONE
 	var texture: Texture2D = TEX_SUCCESS if _result.success else TEX_FAILURE
 	if crit:
@@ -456,6 +485,7 @@ func _conclude(crit_ms: int) -> void:
 	_die_art.texture = texture
 	_die_label.add_theme_color_override(&"font_color", Color(0.09019608, 0.07843137, 0.05882353) if _result.success else Color.WHITE)
 	_fill_verdict(crit)
+	_shift_digit(CRIT_DIGIT_SHIFT_PX if crit else 0.0)
 	var anim_ms: int = 0 if (_reduced or not crit) else crit_ms
 	if anim_ms > 0:
 		_play_crit(anim_ms)
@@ -468,13 +498,22 @@ func _conclude(crit_ms: int) -> void:
 	_action.disabled = true
 	var wait_ms: int = maxi(GUARD_MS, anim_ms)
 	_guard_until = _now() + wait_ms
-	_kill(_arm)
-	_arm = create_tween()
-	_arm.tween_interval(wait_ms / 1000.0)
-	_arm.tween_callback(tick)
+	_arm_after(wait_ms)
 	if not _announced:
 		_announced = true
 		result_shown.emit(_result.success, _result.crit)
+
+
+func _shift_digit(shift: float) -> void:
+	_die_label.offset_top = shift
+	_die_label.offset_bottom = shift
+
+
+func _arm_after(ms: int) -> void:
+	_kill(_arm)
+	_arm = create_tween()
+	_arm.tween_interval(ms / 1000.0)
+	_arm.tween_callback(tick)
 
 
 func _fill_verdict(crit: bool) -> void:
@@ -527,11 +566,14 @@ func _flash_frame() -> void:
 func _resumed() -> void:
 	_start_guard()
 	_reduced = reduce_motion or bool(reduce_motion_source.call())
-	var rolling: bool = _phase == Phase.TUMBLING or _phase == Phase.WAITING or _phase == Phase.REVEALING
+	if phase == Phase.SHOWN:
+		_arm_after(GUARD_MS)
+		return
+	var rolling: bool = phase == Phase.TUMBLING or phase == Phase.WAITING or phase == Phase.REVEALING
 	if not rolling:
 		return
 	if _session.waiting():
-		_phase = Phase.WAITING
+		phase = Phase.WAITING
 		_die_art.texture = TEX_NEUTRAL
 		return
 	_show_full(CRIT_SHORT_MS)
@@ -547,7 +589,7 @@ func _fade_in() -> void:
 
 
 func _leave(kind: int, page: StoryScreen) -> void:
-	_phase = Phase.CLOSED
+	phase = Phase.CLOSED
 	if fade_s <= 0.0 or _reduced:
 		exited.emit(kind, page)
 		return
@@ -558,7 +600,7 @@ func _leave(kind: int, page: StoryScreen) -> void:
 
 
 func _on_action() -> void:
-	if _phase == Phase.CHOSEN:
+	if phase == Phase.CHOSEN:
 		roll_pressed()
 	else:
 		continue_pressed()

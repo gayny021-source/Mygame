@@ -89,29 +89,29 @@ func test_u5_same_seed_gives_the_same_flicker() -> void:
 
 func test_i1_touch_inside_the_open_window_is_dropped_and_not_queued() -> void:
 	_screen.roll_pressed()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.CHOSEN)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.CHOSEN)
 	_open_guard()
 	_screen.roll_pressed()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.TUMBLING)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.TUMBLING)
 
 
 func test_i1_skip_inside_the_roll_window_is_dropped() -> void:
 	_open_guard()
 	_screen.roll_pressed()
 	_screen.skip()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.TUMBLING)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.TUMBLING)
 
 
 func test_i2_slow_write_holds_the_face_until_the_signal() -> void:
 	_rolled()
 	assert_bool(_t.session.waiting()).is_true()
 	_screen.finish_tumble()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.WAITING)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.WAITING)
 	_screen.skip()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.WAITING)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.WAITING)
 	assert_array(_shown).is_empty()
 	_t.settle()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.SHOWN)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.SHOWN)
 	assert_array(_shown).has_size(1)
 
 
@@ -145,7 +145,7 @@ func test_i4_back_on_the_active_result_applies_nothing_and_stays() -> void:
 	_screen.tick()
 	_screen.go_back()
 	assert_array(_exits).is_empty()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.SHOWN)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.SHOWN)
 
 
 func test_i4_back_while_rolling_skips_and_does_not_cancel() -> void:
@@ -153,7 +153,7 @@ func test_i4_back_while_rolling_skips_and_does_not_cancel() -> void:
 	_t.settle()
 	_screen.go_back()
 	assert_array(_exits).is_empty()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.SHOWN)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.SHOWN)
 
 
 func test_i5_pause_resume_shows_the_static_result_once() -> void:
@@ -161,12 +161,64 @@ func test_i5_pause_resume_shows_the_static_result_once() -> void:
 	_screen.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
 	_t.settle()
 	_screen.notification(Node.NOTIFICATION_APPLICATION_RESUMED)
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.SHOWN)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.SHOWN)
 	assert_array(_shown).has_size(1)
 	assert_bool((_node("Action") as Button).disabled).is_true()
-	_now += 301
-	_screen.tick()
+	_now += 1000
+	await get_tree().create_timer(0.45).timeout
 	assert_bool((_node("Action") as Button).disabled).is_false()
+
+
+func test_i5_pause_inside_the_result_window_does_not_freeze_the_button() -> void:
+	_rolled()
+	_t.settle()
+	_screen.skip()
+	_screen.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	_screen.notification(Node.NOTIFICATION_APPLICATION_RESUMED)
+	_now += 1000
+	await get_tree().create_timer(0.45).timeout
+	assert_bool((_node("Action") as Button).disabled).is_false()
+
+
+func test_the_tumble_really_spins_the_die() -> void:
+	_open_guard()
+	_screen.roll_pressed()
+	await get_tree().create_timer(0.25).timeout
+	assert_float(_node("Die").rotation).is_not_equal(0.0)
+
+
+func test_open_without_a_check_exits_with_a_flow_error() -> void:
+	_t = SessionRig.new()
+	_t.started()
+	_exits.clear()
+	_screen.queue_free()
+	_screen = _build()
+	assert_array(_exits).is_equal([RollScreen.Exit.FLOW_ERROR])
+
+
+func test_a_refused_continue_closes_the_check_with_a_flow_error() -> void:
+	_rolled()
+	_t.settle()
+	_screen.skip()
+	_now += 400
+	_screen.tick()
+	_t.session._state = RefusingState.new(_t.hero.flags, Callable())
+	_screen.continue_pressed()
+	assert_array(_exits).is_equal([RollScreen.Exit.FLOW_ERROR])
+
+
+func test_continue_without_a_wait_exits_with_the_page() -> void:
+	_rolled()
+	_t.settle()
+	_screen.skip()
+	_now += 400
+	_screen.tick()
+	_t.hero.id = "Bad Id"
+	var pages: Array[StoryScreen] = []
+	_screen.exited.connect(func(_kind: int, page: StoryScreen) -> void: pages.append(page))
+	_screen.continue_pressed()
+	assert_array(_exits).is_equal([RollScreen.Exit.CONTINUED])
+	assert_object(pages[0]).is_not_null()
 
 
 func test_i6_resize_keeps_the_state_and_the_result() -> void:
@@ -176,7 +228,7 @@ func test_i6_resize_keeps_the_state_and_the_result() -> void:
 	var calc: String = (_node("Calc") as Label).text
 	_screen.size = Vector2(1080, 2400)
 	_screen.size = Vector2(1080, 1920)
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.SHOWN)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.SHOWN)
 	assert_str((_node("Calc") as Label).text).is_equal(calc)
 
 
@@ -191,7 +243,7 @@ func test_i7_restored_turn_opens_on_the_result_without_cancel() -> void:
 	_shown.clear()
 	_screen.queue_free()
 	_screen = _build()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.SHOWN)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.SHOWN)
 	assert_float(_node("Back").modulate.a).is_equal(0.0)
 	assert_int(_node("Back").mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
 	assert_array(_shown).has_size(1)
@@ -226,7 +278,7 @@ func test_i9_released_write_reveals_at_the_end_of_the_tumble() -> void:
 	_t.settle()
 	assert_bool(_t.session.waiting()).is_false()
 	_screen.finish_tumble()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.REVEALING)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.REVEALING)
 
 
 func test_i9_refused_commit_leaves_no_wait_and_reveals_without_show_released() -> void:
@@ -235,10 +287,10 @@ func test_i9_refused_commit_leaves_no_wait_and_reveals_without_show_released() -
 	_screen.roll_pressed()
 	assert_bool(_t.session.waiting()).is_false()
 	_screen.finish_tumble()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.REVEALING)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.REVEALING)
 	_open_guard()
 	_screen.skip()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.SHOWN)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.SHOWN)
 	assert_array(_shown).has_size(1)
 
 
@@ -247,7 +299,7 @@ func test_i11_wait_after_the_tumble_stops_flicker() -> void:
 	_screen.finish_tumble()
 	_faces.clear()
 	_screen.finish_wait()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.WAITING)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.WAITING)
 	_now += 1
 	assert_array(_faces).has_size(1)
 
@@ -258,7 +310,7 @@ func test_i12_reduced_motion_one_face_change_and_instant_crit() -> void:
 	_screen.open()
 	_rolled()
 	_t.settle()
-	assert_int(_screen.phase()).is_equal(RollScreen.Phase.SHOWN)
+	assert_int(_screen.phase).is_equal(RollScreen.Phase.SHOWN)
 	assert_array(_faces).has_size(1)
 	assert_bool(_node("Cartouche").visible).is_true()
 	_now += 301
