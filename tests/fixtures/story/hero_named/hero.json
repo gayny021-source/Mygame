@@ -1,0 +1,16 @@
+{
+  "_note": "Герой-фикстура с отображаемым именем (ключ name необязателен).",
+  "schema_version": 1,
+  "id": "hero_named",
+  "name": "сэр Тест Непоколебимый",
+  "stats": [
+    {"id": "strength", "name": "Сила", "bonus": 4},
+    {"id": "charisma", "name": "Харизма", "bonus": 2},
+    {"id": "mind", "name": "Ум", "bonus": 0},
+    {"id": "faith", "name": "Вера", "bonus": -1}
+  ],
+  "chapters": ["ch_f1"],
+  "endings": ["end_a", "end_b", "end_c", "end_d"],
+  "portrait": "portrait_stub",
+  "accent": "carmine"
+}

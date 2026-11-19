@@ -8,7 +8,7 @@ extends RefCounted
 ## flag vocabulary for the BS-01 check of conditions, sets, clears and goal_fail_flag.
 
 const DATA_ROOT := "res://assets/data/heroes"
-const HERO_KEYS: PackedStringArray = ["schema_version", "id", "stats", "chapters", "endings", "portrait", "accent", "sum_exception"]
+const HERO_KEYS: PackedStringArray = ["schema_version", "id", "name", "stats", "chapters", "endings", "portrait", "accent", "sum_exception"]
 ## Bonus range of a stat (heroes.md, rule 1; DD-021).
 const STAT_KEYS: PackedStringArray = ["id", "name", "bonus"]
 
@@ -33,6 +33,7 @@ static func load_hero(hero_id: String, root: String = DATA_ROOT) -> LoadResult:
 	hero.id = reader.id()
 	if not hero.id.is_empty() and hero.id != hero_id:
 		reader.issue("BS-01", "id", "каталог героя «%s» содержит id «%s»" % [hero_id, hero.id])
+	hero.name = reader.text("name", false)
 	var stat_ids: PackedStringArray = []
 	for stat_reader: DictReader in reader.children("stats", STAT_KEYS):
 		var stat: StatData = StatData.new()

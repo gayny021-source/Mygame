@@ -674,8 +674,7 @@ func _fill_sheet() -> void:
 	_sheet_line(tr("Цель главы"), &"CaptionLabel")
 	if not view.goal.is_empty():
 		_sheet_line(view.goal, &"Label")
-	# shortcut: heroes.md gives no display name yet; the id stands in for it
-	_sheet_line(_hero.id, &"TitleLabel")
+	_sheet_line(tr(_hero.name) if not _hero.name.is_empty() else _hero.id, &"TitleLabel")
 	for stat: StatData in _hero.stats:
 		_sheet_line("%s %s" % [stat.name, _signed(stat.bonus)], &"Label")
 	for decl: FlagDecl in _session.visible_flags():

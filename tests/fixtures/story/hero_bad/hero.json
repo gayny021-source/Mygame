@@ -1,8 +1,8 @@
 {
-  "_note": "Битый паспорт: дробный bonus (DT-02), ключ name вне таблицы ADR (DT-04), id главы не по шаблону (DT-06).",
+  "_note": "Битый паспорт: дробный bonus (DT-02), ключ nickname вне таблицы ADR (DT-04), id главы не по шаблону (DT-06).",
   "schema_version": 1,
   "id": "hero_bad",
-  "name": "Ровенд",
+  "nickname": "Ровенд",
   "stats": [
     {"id": "strength", "name": "Сила", "bonus": 1.5}
   ],

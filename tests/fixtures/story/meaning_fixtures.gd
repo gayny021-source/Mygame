@@ -28,6 +28,7 @@ static func words(count: int) -> String:
 static func hero_of(chapters: Array, flag_dicts: Array = []) -> HeroData:
 	var result: HeroData = HeroData.new()
 	result.id = "hero_g"
+	result.name = "Тест"
 	var issues: Array[DataIssue] = []
 	result.flags = FlagLoader.parse(StoryFixtures.flags_file(flag_dicts), "test", PackedStringArray(["strength"]), issues)
 	var known: ConditionVocabulary = FlagLoader.vocabulary(result.flags)

@@ -127,3 +127,17 @@ func test_the_panel_does_not_substitute_the_chapter_goal_for_a_lost_start() -> v
 func test_the_outcome_text_event_refreshes_the_goal_zone_through_the_signal() -> void:
 	_to_failed_outcome()
 	assert_str((_screen.get_node("%GoalLabel") as Label).text).is_equal("Цель провалена: %s" % GoalFixtures.GOAL)
+
+
+func test_the_panel_shows_the_hero_name_and_falls_back_to_the_id() -> void:
+	_t.hero.name = ""
+	_screen.start()
+	_t.settle()
+	_now += ReadingScreen.GUARD_MS + 1
+	_screen.goal_tapped()
+	assert_array(_sheet_texts()).contains([SessionRig.HERO_ID])
+	_screen.close_panel()
+	_t.hero.name = "сэр Тест"
+	_screen.goal_tapped()
+	assert_array(_sheet_texts()).contains(["сэр Тест"])
+	assert_array(_sheet_texts()).not_contains([SessionRig.HERO_ID])

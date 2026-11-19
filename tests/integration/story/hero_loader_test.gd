@@ -129,6 +129,22 @@ func test_load_hero_bad_fractional_bonus_returns_dt02() -> void:
 	assert_array(_paths(result, "DT-02")).is_equal([path])
 
 
+func test_load_hero_named_keeps_the_display_name() -> void:
+	# Act
+	var result: LoadResult = _load("hero_named")
+	# Assert
+	assert_array(_lines(result)).is_empty()
+	assert_str((result.data as HeroData).name).is_equal("сэр Тест Непоколебимый")
+
+
+func test_load_hero_without_name_key_has_empty_name_and_no_issue() -> void:
+	# Act
+	var result: LoadResult = _load("hero_stub")
+	# Assert
+	assert_array(_lines(result)).is_empty()
+	assert_str((result.data as HeroData).name).is_empty()
+
+
 func test_load_hero_bonus_outside_range_returns_dt02_only_for_the_outside_stats() -> void:
 	# Act
 	var result: LoadResult = _load("hero_bonus_range")
@@ -141,7 +157,7 @@ func test_load_hero_bad_key_outside_adr_table_returns_dt04() -> void:
 	# Act
 	var result: LoadResult = _load("hero_bad")
 	# Assert
-	var path: String = StoryFixtures.DIR + "/hero_bad/hero.json/name"
+	var path: String = StoryFixtures.DIR + "/hero_bad/hero.json/nickname"
 	assert_array(_paths(result, "DT-04")).is_equal([path])
 
 

@@ -133,6 +133,50 @@ func test_f4_bridge_of_61_words_warns() -> void:
 	assert_int(_tagged(data, "F4/bridge")).is_equal(1)
 
 
+func _stake_of(length: int) -> Dictionary:
+	var data: Dictionary = MeaningFixtures.chain(["s1", "s2"])
+	data["stake"] = "я".repeat(length)
+	return data
+
+
+func test_f4_stake_of_120_chars_passes_and_121_warns() -> void:
+	assert_int(_tagged(_stake_of(120), "F4/stake")).is_equal(0)
+	assert_int(_tagged(_stake_of(121), "F4/stake")).is_equal(1)
+
+
+func test_f4_chapter_without_stake_does_not_warn() -> void:
+	assert_int(_tagged(MeaningFixtures.chain(["s1", "s2"]), "F4/stake")).is_equal(0)
+
+
+func test_f4_stake_limit_comes_from_the_options() -> void:
+	# Arrange
+	var options: ValidatorOptions = ValidatorOptions.new()
+	options.stake_max = 10
+	# Act / Assert
+	assert_int(_tagged(_stake_of(11), "F4/stake", options)).is_equal(1)
+
+
+func test_hero_without_name_warns_and_a_named_hero_does_not() -> void:
+	# Arrange
+	var hero: HeroData = MeaningFixtures.hero_of([MeaningFixtures.chain(["s1", "s2"])], MeaningFixtures.flags())
+	hero.name = ""
+	var options: ValidatorOptions = ValidatorOptions.new()
+	# Act
+	var unnamed: int = _name_warnings(DataValidator.validate(hero, options))
+	hero.name = "Тест"
+	var named: int = _name_warnings(DataValidator.validate(hero, options))
+	# Assert
+	assert_int(unnamed).is_equal(1)
+	assert_int(named).is_equal(0)
+
+
+func _name_warnings(issues: Array[DataIssue]) -> int:
+	var total: int = 0
+	for issue: DataIssue in issues:
+		total += 1 if issue.code == "BS-01" and issue.severity == DataIssue.WARNING and issue.path.ends_with("/name") else 0
+	return total
+
+
 func test_f4_limits_come_from_the_options() -> void:
 	# Arrange
 	var options: ValidatorOptions = ValidatorOptions.new()

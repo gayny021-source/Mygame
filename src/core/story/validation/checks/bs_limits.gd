@@ -14,6 +14,8 @@ const STRAIGHT_QUOTE := "\""
 ## Appends the findings of one chapter to `issues`.
 static func check(graph: StoryGraph, usage: FlagUsage, options: ValidatorOptions, issues: Array[DataIssue]) -> void:
 	var chapter: ChapterData = graph.chapter
+	if chapter.stake.length() > options.stake_max:
+		_warn(issues, "F4/stake", chapter.id + "/stake", chapter.id, "в ставке главы %d знаков, не больше %d" % [chapter.stake.length(), options.stake_max])
 	for scene: SceneData in chapter.scenes:
 		var path: String = "%s/scenes/%s" % [chapter.id, scene.id]
 		_paragraph_words(scene.paragraphs, path, scene.id, options, issues)

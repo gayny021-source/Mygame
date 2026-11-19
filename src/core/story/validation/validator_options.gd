@@ -13,7 +13,7 @@ const LIMIT_KEYS: PackedStringArray = [
 	"branch_max", "path_words_min", "path_words_max", "k_budget", "k_min", "s_path_min", "spine_risky_max",
 	"pause_scenes_min", "linear_run_max", "n_early_max", "paragraph_words_max", "screen_paragraphs_max",
 	"conditional_paragraphs_max", "prose_flags_max", "outcome_paragraphs_max", "past_options_max", "coda_paragraphs_max",
-	"path_enum_max",
+	"path_enum_max", "stake_max",
 ]
 ## Pairs low, high of LIMIT_KEYS, flat: low above high is DT-02.
 const RANGES: PackedStringArray = ["s_chapter_min", "s_chapter_max", "n_node_min", "n_node_max", "path_words_min", "path_words_max", "k_min", "k_budget"]
@@ -59,6 +59,8 @@ var coda_paragraphs_max: int = 3
 var path_enum_max: int = 5000
 ## BS-25: a warning in MVP, an error from Vertical Slice (O-2).
 var bs25_is_error: bool = false
+## L_ставка (chapter-goal.md, Formulas): most characters of a chapter stake; longer is an F4 warning.
+var stake_max: int = 120
 ## BS-20: the frame catalog; empty — the check does not run (O-18: no catalog yet).
 var frames: PackedStringArray = []
 ## BS-20: the character registry for `speaks` and `damage`; empty — the check does not run.

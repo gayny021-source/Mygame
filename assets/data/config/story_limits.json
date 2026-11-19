@@ -26,5 +26,6 @@
 	"past_options_max": 1,
 	"coda_paragraphs_max": 3,
 	"path_enum_max": 5000,
+	"stake_max": 120,
 	"bs25_is_error": false
 }

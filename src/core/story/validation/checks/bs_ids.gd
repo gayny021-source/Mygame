@@ -24,6 +24,8 @@ static func check_hero(hero: HeroData, usage: FlagUsage, options: ValidatorOptio
 		if chapter != null and not chapter.goal_fail_flag.is_empty():
 			var next: ChapterData = _chapter(hero, hero.chapter_ids[i + 1]) if i + 1 < hero.chapter_ids.size() else null
 			_goal_fail_flag(hero, chapter, next, usage, issues)
+	if hero.name.is_empty():
+		GraphValidator.report(issues, "BS-01", hero.id + "/name", hero.id, "у героя нет name: интерфейс покажет id", DataIssue.WARNING)
 	if not options.ending_frames.is_empty():
 		_ending_frames(hero, options, issues)
 

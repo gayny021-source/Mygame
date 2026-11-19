@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "id": "rovend",
+  "name": "сэр Ровенд Непоколебимый",
   "stats": [
     {"id": "strength", "name": "Сила", "bonus": 4},
     {"id": "charisma", "name": "Харизма", "bonus": 2},

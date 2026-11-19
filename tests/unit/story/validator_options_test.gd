@@ -76,6 +76,7 @@ func test_project_config_matches_the_gdd_limits() -> void:
 	assert_int(loaded.k_budget).is_equal(5)
 	assert_int(loaded.s_chapter_max).is_equal(defaults.s_chapter_max)
 	assert_int(loaded.paragraph_words_max).is_equal(60)
+	assert_int(loaded.stake_max).is_equal(120)
 
 
 func test_skipped_checks_name_every_check_without_input() -> void:
@@ -89,3 +90,13 @@ func test_skipped_checks_name_every_check_without_input() -> void:
 	# Assert
 	assert_int(skipped.size()).is_equal(3)
 	assert_array(options.skipped_checks()).is_empty()
+
+
+func test_from_dict_stake_max_is_read() -> void:
+	# Arrange
+	var issues: Array[DataIssue] = []
+	# Act
+	var options: ValidatorOptions = ValidatorOptions.from_dict({"schema_version": 1, "stake_max": 50}, "t", issues)
+	# Assert
+	assert_array(issues).is_empty()
+	assert_int(options.stake_max).is_equal(50)

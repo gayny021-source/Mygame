@@ -26,3 +26,9 @@ func test_rovend_hero_json_has_only_adr_keys_and_no_flags_file() -> void:
 		assert_bool(HeroLoader.HERO_KEYS.has(key)).is_true()
 	assert_str(data["id"]).is_equal("rovend")
 	assert_bool(FileAccess.file_exists(HeroLoader.DATA_ROOT + "/rovend/flags.json")).is_false()
+
+
+func test_rovend_has_the_display_name() -> void:
+	var issues: Array[DataIssue] = []
+	var data: Dictionary = ChapterLoader.read_object(PATH, issues)
+	assert_str(data["name"]).is_equal("сэр Ровенд Непоколебимый")

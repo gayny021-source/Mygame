@@ -2877,6 +2877,10 @@
   },
   {
    "source": "src/core/story/validation/validator_options.gd",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
+   "source": "src/core/story/validation/validator_options.gd",
    "target": "design/gdd/d20-checks.md"
   },
   {
@@ -2898,10 +2902,6 @@
   {
    "source": "src/ui/reading/reading_screen.gd",
    "target": "design/gdd/chapter-goal.md"
-  },
-  {
-   "source": "src/ui/reading/reading_screen.gd",
-   "target": "design/gdd/heroes.md"
   },
   {
    "source": "src/ui/reading/reading_screen.gd",

@@ -104,6 +104,7 @@ static func hero(data: Dictionary, flag_dicts: Array = [], chapter_ids: Array = 
 	last_issues = []
 	var result: HeroData = HeroData.new()
 	result.id = "hero_g"
+	result.name = "Тест"
 	var stat_ids: PackedStringArray = ["strength"]
 	result.flags = FlagLoader.parse(StoryFixtures.flags_file(flag_dicts), "test", stat_ids, last_issues)
 	var known: ConditionVocabulary = FlagLoader.vocabulary(result.flags)
