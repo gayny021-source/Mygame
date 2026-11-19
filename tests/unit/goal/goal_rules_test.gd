@@ -120,7 +120,7 @@ func test_normalize_chapter_without_milestones_keeps_zero() -> void:
 
 
 # Rows of States: [in_chapter, flag, pending, final_shown, mode]
-func test_mode_table(row: Array, test_parameters := [
+func test_mode_table(in_chapter: bool, flag: bool, pending: bool, final_shown: bool, expected: int, test_parameters := [
 	[false, false, false, false, MODE.NOT_STARTED],
 	[false, true, true, true, MODE.NOT_STARTED],
 	[true, false, false, false, MODE.RUNNING],
@@ -129,7 +129,7 @@ func test_mode_table(row: Array, test_parameters := [
 	[true, true, false, false, MODE.FROZEN],
 	[true, true, false, true, MODE.DONE_FAILED],
 ]) -> void:
-	assert_int(GoalRules.mode(row[0], row[1], row[2], row[3])).is_equal(row[4])
+	assert_int(GoalRules.mode(in_chapter, flag, pending, final_shown)).is_equal(expected)
 
 
 func test_impossible_combinations_do_not_break_the_view_and_are_named() -> void:
