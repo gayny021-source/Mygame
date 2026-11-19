@@ -51,15 +51,24 @@ func _init(declarations: Array[FlagDecl], log_error: Callable = Callable()) -> v
 	_log_error = log_error
 
 
-## Applies the `sets` then the `clears` of an outcome. An undeclared id is logged and
-## skipped; an id both set and cleared ends cleared.
-func apply_outcome(scene_id: String, outcome_id: String, sets: PackedStringArray, clears: PackedStringArray) -> void:
+## True while an outcome can be applied: the answer the Choice system asks before it takes a result.
+# shortcut: always true, the «Завершено» status comes with the endings story (run-state.md, States).
+func can_apply() -> bool:
+	return true
+
+
+## Applies the `sets` then the `clears` of an outcome; false («не применено») when it cannot be applied
+## and nothing changed. An undeclared id is logged and skipped; an id both set and cleared ends cleared.
+func apply_outcome(scene_id: String, outcome_id: String, sets: PackedStringArray, clears: PackedStringArray) -> bool:
+	if not can_apply():
+		return false
 	for id: String in sets:
 		if _declared(id):
 			_stand(id, scene_id, outcome_id)
 	for id: String in clears:
 		if _declared(id):
 			_drop(id, scene_id, outcome_id)
+	return true
 
 
 ## Clears every standing flag with scope `chapter`.

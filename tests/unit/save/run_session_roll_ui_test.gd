@@ -185,7 +185,7 @@ func test_flow_error_is_visible_and_load_or_a_new_run_is_the_way_out() -> void:
 	# Act: «В меню» → a new run
 	var screen: StoryScreen = _t.session.start_new()
 	# Assert
-	assert_bool(before).is_false()
+	assert_bool(before).is_true()
 	assert_bool(after).is_true()
 	assert_object(screen).is_not_null()
 	assert_bool(_t.session.flow_error()).is_false()

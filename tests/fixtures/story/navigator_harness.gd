@@ -16,9 +16,9 @@ class SpyRunState extends RunState:
 		_events = events
 
 
-	func apply_outcome(scene_id: String, outcome_id: String, sets: PackedStringArray, clears: PackedStringArray) -> void:
+	func apply_outcome(scene_id: String, outcome_id: String, sets: PackedStringArray, clears: PackedStringArray) -> bool:
 		applied += 1
-		super(scene_id, outcome_id, sets, clears)
+		return super(scene_id, outcome_id, sets, clears)
 
 
 	func end_chapter() -> void:

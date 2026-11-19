@@ -50,6 +50,8 @@ var _goal_pending: bool
 var _final_shown: bool
 ## The chapter signal came after the coda: the goal is «не начат» until the next start scene.
 var _chapter_done: bool
+## A refusal of the outcome («не применено», СВ Э-23): choices stay blocked until a load or a new run.
+var _flow_error: bool
 
 
 ## `captions` null reads assets/data/config/captions.json.
@@ -151,12 +153,15 @@ func load_saved() -> int:
 
 ## A plain option (transition 2): applies its outcome, then the outcome screen waits for the write.
 func apply_plain(option: OptionData) -> StoryScreen:
-	if _state == null or _waiting != 0 or option == null or option.check != null:
+	if _state == null or _waiting != 0 or _flow_error or option == null or option.check != null:
 		return null
 	var page: StoryScreen = _nav.screen()
 	if page == null or page.kind != StoryScreen.Kind.SCENE or not page.scene.options.has(option):
 		return null
-	if not _is_open(option) or not _can_apply(option.outcome):
+	if not _is_open(option):
+		return null
+	if not _can_apply(option.outcome):
+		_flow_error = true
 		return null
 	_turn = null
 	return _apply(option.outcome)
@@ -171,7 +176,7 @@ func advance() -> StoryScreen:
 
 ## A risky option of the scene on show; false when there is no such check.
 func choose_check(option: OptionData) -> bool:
-	if _state == null or _waiting != 0:
+	if _state == null or _waiting != 0 or _flow_error:
 		return false
 	if _turn != null and _turn.phase != CheckTurn.Phase.CANCELLED:
 		return false
@@ -193,9 +198,10 @@ func roll() -> D20Result:
 
 ## «Продолжить»: commit 7 inside (state before the outcome), then the outcome is applied once.
 func continue_check() -> StoryScreen:
-	if _waiting != 0 or _turn == null or _turn.phase != CheckTurn.Phase.ROLLED:
+	if _waiting != 0 or _flow_error or _turn == null or _turn.phase != CheckTurn.Phase.ROLLED:
 		return null
 	if not _can_apply(_turn.result.outcome_id):
+		_flow_error = true
 		return null
 	var result: D20Result = _turn.proceed()
 	if result == null:
@@ -227,13 +233,13 @@ func restored_result() -> D20Result:
 	return _turn.result if has_restored_turn() else null
 
 
-## Closes the Roll screen without an outcome after a flow error (СВ Э-23): only from ROLLED while no write
-## waits. Nothing is written or applied and the choice stays blocked (DD-011).
+## Closes the Roll screen without an outcome (СВ Э-23): only after «Продолжить» was refused in this check
+## and while no write waits. Nothing is written or applied and the choice stays blocked (DD-011). The
+## refusal logged the error already.
 func close_check() -> bool:
-	if _waiting != 0 or _turn == null or not _turn.close():
+	if _waiting != 0 or not _flow_error or _turn == null:
 		return false
-	_log.call("ошибка потока: Экран броска «%s» закрыт без исхода" % _turn.check.id)
-	return true
+	return _turn.close()
 
 
 ## True when the scene on show has no option that a hindrance has not closed (the fallback screen).
@@ -260,10 +266,10 @@ func report_stake_visible(scene_id: String) -> void:
 		_stake_read = true
 
 
-## True after a flow error closed the Roll screen (СВ Э-23): every option stays blocked, and the way out
-## is «В меню» (start_new) or a load, which both end the turn.
+## True after State refused an outcome, with or without a check (СВ Э-23): every option stays blocked, and
+## the way out is «В меню» (start_new) or a load, which both end the turn.
 func flow_error() -> bool:
-	return _turn != null and _turn.phase == CheckTurn.Phase.CLOSED
+	return _flow_error
 
 
 ## The cards of the scene on show (or of the option just taken on its outcome) with their states; copies,
@@ -409,6 +415,7 @@ func _begin(state: RunState) -> void:
 	_goal_pending = false
 	_final_shown = false
 	_chapter_done = false
+	_flow_error = false
 	_nav = StoryNavigator.new(_hero, _on_chapter_finished, _log)
 
 
@@ -525,8 +532,16 @@ func _can_apply(outcome_id: String) -> bool:
 		var plain: bool = option.outcome == outcome_id
 		var risky: bool = option.check != null and (option.check.success == outcome_id or option.check.failure == outcome_id)
 		if plain or risky:
-			return true
+			return _state_accepts(outcome_id)
 	_log.call("исход «%s» не применён: он не из вариантов сцены «%s»" % [outcome_id, page.scene.id])
+	return false
+
+
+# State is asked before a result is taken: its refusal logs once and nothing else happens.
+func _state_accepts(outcome_id: String) -> bool:
+	if _state.can_apply():
+		return true
+	_log.call("исход «%s» не применён: Состояние ответило «не применено»" % outcome_id)
 	return false
 
 
@@ -535,7 +550,10 @@ func _apply(outcome_id: String) -> StoryScreen:
 	var outcome: OutcomeData = _find_outcome(outcome_id)
 	var chapter: ChapterData = _chapter_of(_nav.position().chapter)
 	var failed_before: bool = chapter != null and _fail_flag_set(chapter)
-	_state.apply_outcome(scene_id, outcome_id, outcome.sets, outcome.clears)
+	if not _state.apply_outcome(scene_id, outcome_id, outcome.sets, outcome.clears):
+		_log.call("исход «%s» не применён: Состояние ответило «не применено»" % outcome_id)
+		_flow_error = true
+		return null
 	_goal_pending = chapter != null and not failed_before and _fail_flag_set(chapter)
 	return _after(_nav.outcome_applied(outcome_id))
 

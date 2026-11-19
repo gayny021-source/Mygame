@@ -926,6 +926,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/save/fixtures/refusing_state.gd",
+   "label": "refusing_state.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/save/fixtures/save_fixtures.gd",
    "label": "save_fixtures.gd",
    "group": "GDScript"
@@ -938,6 +943,11 @@
   {
    "id": "tests/unit/save/fixtures/writer_rig.gd",
    "label": "writer_rig.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/save/run_session_flow_error_test.gd",
+   "label": "run_session_flow_error_test.gd",
    "group": "GDScript"
   },
   {
@@ -2965,8 +2975,20 @@
    "target": "src/core/save/save_io.gd"
   },
   {
+   "source": "tests/unit/save/fixtures/refusing_state.gd",
+   "target": "src/core/state/run_state.gd"
+  },
+  {
    "source": "tests/unit/save/fixtures/save_fixtures.gd",
    "target": "design/gdd/save-system.md"
+  },
+  {
+   "source": "tests/unit/save/run_session_flow_error_test.gd",
+   "target": "design/gdd/choice-system.md"
+  },
+  {
+   "source": "tests/unit/save/run_session_flow_error_test.gd",
+   "target": "design/gdd/d20-checks.md"
   },
   {
    "source": "tests/unit/save/run_session_goal_test.gd",
