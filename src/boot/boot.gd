@@ -16,6 +16,7 @@ var services: BootServices
 @export_range(1.0, 2.0) var text_scale: float = 1.0
 
 var _started: bool = false
+var _screen: ReadingScreen
 var _quitting: bool = false
 
 @onready var _title: Label = %Title
@@ -36,10 +37,13 @@ func _ready() -> void:
 		return
 	services = BootServices.build(save.writer, _log)
 	_status.text = services.status
+	if not services.sessions.is_empty():
+		_open_reading(services.sessions.keys()[0])
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+	# the reading screen owns Back once it is shown (reading-screen.md: Back never quits there)
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and _screen == null:
 		_quit()
 
 
@@ -55,3 +59,13 @@ func _quit() -> void:
 
 func _log(line: String) -> void:
 	push_warning(line)
+
+
+# shortcut: the first hero by id; a hero choice screen comes with the menu story.
+func _open_reading(hero_id: String) -> void:
+	_screen = (load("res://src/ui/reading/reading_screen.tscn") as PackedScene).instantiate() as ReadingScreen
+	add_child(_screen)
+	_screen.theme = theme
+	_screen.setup(services.sessions[hero_id], services.heroes[hero_id])
+	_screen.resume()
+	$Safe.visible = false

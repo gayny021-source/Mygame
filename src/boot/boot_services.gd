@@ -12,6 +12,8 @@ var captions: CaptionTexts
 var d20: D20Check
 ## Hero id -> RunSession.
 var sessions: Dictionary[String, RunSession] = {}
+## Hero id -> HeroData of the same heroes (the screens draw the goal chain and the hero card).
+var heroes: Dictionary[String, HeroData] = {}
 ## Human-readable state for the boot screen; empty when the heroes loaded.
 var status: String = ""
 
@@ -39,6 +41,7 @@ func _load_heroes(writer: SaveWriter, log_line: Callable, root: String) -> void:
 		_log_issues(result.issues, log_line)
 		var hero: HeroData = result.data as HeroData
 		if hero != null:
+			heroes[id] = hero
 			sessions[id] = RunSession.new(hero, writer, d20, _new_run_id, log_line, captions)
 	if sessions.is_empty():
 		status = tr("Нет данных героев")

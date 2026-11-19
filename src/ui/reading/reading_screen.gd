@@ -52,16 +52,22 @@ var _milestone: int = -1
 @onready var _scrim: ColorRect = %Scrim
 @onready var _sheet_body: VBoxContainer = %SheetBody
 @onready var _close: Button = %Close
+@onready var _sheet: PanelContainer = %Sheet
 
 
 func _ready() -> void:
 	_goal.tapped.connect(goal_tapped)
 	_goal.add_theme_stylebox_override(&"panel", get_theme_stylebox(&"disabled", &"Button"))
+	# the theme has no PanelContainer style: the engine default is a dark slab
+	_hint.add_theme_stylebox_override(&"panel", get_theme_stylebox(&"disabled", &"Button"))
+	_sheet.add_theme_stylebox_override(&"panel", get_theme_stylebox(&"normal", &"Button"))
 	_goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint_label.text = tr("Дочитайте до конца")
 	_close.text = tr("Закрыть")
 	_close.pressed.connect(close_panel)
 	_scrim.gui_input.connect(_on_scrim_input)
+	# layout settles after the page is built and after a size change: look again then, not per frame
+	_flow.sort_children.connect(_check_stake)
 	_scroll.get_v_scroll_bar().changed.connect(_check_stake)
 	_scroll.get_v_scroll_bar().value_changed.connect(_check_stake.unbind(1))
 	_sheet_layer.visible = false
@@ -455,9 +461,8 @@ func _dot(done: bool, current: bool) -> Panel:
 
 func _fill_sheet() -> void:
 	for child: Node in _sheet_body.get_children():
-		if child != _close:
-			_sheet_body.remove_child(child)
-			child.queue_free()
+		_sheet_body.remove_child(child)
+		child.queue_free()
 	var chapter: ChapterData = _chapter()
 	_sheet_line(tr("Цель главы"), &"CaptionLabel")
 	_sheet_line(chapter.goal if chapter != null else "", &"Label")
@@ -468,7 +473,6 @@ func _fill_sheet() -> void:
 	for decl: FlagDecl in _hero.flags:
 		if decl.visible and _session.has_flag(decl.id):
 			_sheet_line(decl.title, &"CaptionLabel")
-	_sheet_body.move_child(_close, -1)
 
 
 func _sheet_line(text: String, variation: StringName) -> void:

@@ -162,25 +162,36 @@ grow_vertical = 2
 color = Color(0.09, 0.078, 0.059, 0.6)
 
 [node name="Sheet" type="PanelContainer" parent="SheetLayer"]
+unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 48.0
-offset_top = -96.0
+offset_top = 96.0
 offset_right = -48.0
 offset_bottom = -96.0
 grow_horizontal = 2
-grow_vertical = 0
+grow_vertical = 2
 
-[node name="SheetBody" type="VBoxContainer" parent="SheetLayer/Sheet"]
-unique_name_in_owner = true
+[node name="Column" type="VBoxContainer" parent="SheetLayer/Sheet"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 24
 
-[node name="Close" type="Button" parent="SheetLayer/Sheet/SheetBody"]
+[node name="SheetScroll" type="ScrollContainer" parent="SheetLayer/Sheet/Column"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+scroll_deadzone = 24
+
+[node name="SheetBody" type="VBoxContainer" parent="SheetLayer/Sheet/Column/SheetScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 24
+
+[node name="Close" type="Button" parent="SheetLayer/Sheet/Column"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 168)
 layout_mode = 2

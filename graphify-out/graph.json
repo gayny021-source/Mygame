@@ -731,6 +731,26 @@
    "group": "GDScript"
   },
   {
+   "id": "src/ui/reading/option_card.gd",
+   "label": "option_card.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/ui/reading/reading_screen.gd",
+   "label": "reading_screen.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/ui/reading/reading_screen.tscn",
+   "label": "reading_screen.tscn",
+   "group": "Scenes"
+  },
+  {
+   "id": "src/ui/reading/tap_panel.gd",
+   "label": "tap_panel.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/ui/safe_area_margins.gd",
    "label": "safe_area_margins.gd",
    "group": "GDScript"
@@ -739,6 +759,16 @@
    "id": "src/ui/theme_scale.gd",
    "label": "theme_scale.gd",
    "group": "GDScript"
+  },
+  {
+   "id": "tests/dev/reading_harness.gd",
+   "label": "reading_harness.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/dev/reading_harness.tscn",
+   "label": "reading_harness.tscn",
+   "group": "Scenes"
   },
   {
    "id": "tests/fixtures/checks/check_fixtures.gd",
@@ -1106,6 +1136,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/unit/ui/reading_screen_test.gd",
+   "label": "reading_screen_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/unit/ui/safe_area_margins_test.gd",
    "label": "safe_area_margins_test.gd",
    "group": "GDScript"
@@ -1372,10 +1407,6 @@
   },
   {
    "source": ".claude/skills/tscn-handcrafter/SKILL.md",
-   "target": ".claude/skills/tscn-handcrafter/templates/reading_screen.tscn"
-  },
-  {
-   "source": ".claude/skills/tscn-handcrafter/SKILL.md",
    "target": "CLAUDE.md"
   },
   {
@@ -1385,6 +1416,10 @@
   {
    "source": ".claude/skills/tscn-handcrafter/SKILL.md",
    "target": "design/accessibility-requirements.md"
+  },
+  {
+   "source": ".claude/skills/tscn-handcrafter/SKILL.md",
+   "target": "src/ui/reading/reading_screen.tscn"
   },
   {
    "source": ".claude/skills/tscn-handcrafter/SKILL.md",
@@ -2423,6 +2458,10 @@
    "target": "design/ux/reading-screen.md"
   },
   {
+   "source": "src/boot/boot.gd",
+   "target": "src/ui/reading/reading_screen.tscn"
+  },
+  {
    "source": "src/boot/boot.tscn",
    "target": "src/boot/boot.gd"
   },
@@ -2695,8 +2734,48 @@
    "target": "tools/validate_data.gd"
   },
   {
+   "source": "src/ui/reading/option_card.gd",
+   "target": "design/ux/reading-screen.md"
+  },
+  {
+   "source": "src/ui/reading/option_card.gd",
+   "target": "src/ui/reading/tap_panel.gd"
+  },
+  {
+   "source": "src/ui/reading/reading_screen.gd",
+   "target": "design/gdd/heroes.md"
+  },
+  {
+   "source": "src/ui/reading/reading_screen.gd",
+   "target": "design/ux/reading-screen.md"
+  },
+  {
+   "source": "src/ui/reading/reading_screen.tscn",
+   "target": "src/ui/reading/reading_screen.gd"
+  },
+  {
+   "source": "src/ui/reading/reading_screen.tscn",
+   "target": "src/ui/reading/tap_panel.gd"
+  },
+  {
+   "source": "src/ui/reading/reading_screen.tscn",
+   "target": "src/ui/safe_area_margins.gd"
+  },
+  {
+   "source": "src/ui/reading/tap_panel.gd",
+   "target": "design/ux/reading-screen.md"
+  },
+  {
    "source": "src/ui/theme_scale.gd",
    "target": "design/ux/reading-screen.md"
+  },
+  {
+   "source": "tests/dev/reading_harness.gd",
+   "target": "src/ui/reading/reading_screen.tscn"
+  },
+  {
+   "source": "tests/dev/reading_harness.tscn",
+   "target": "tests/dev/reading_harness.gd"
   },
   {
    "source": "tests/fixtures/checks/check_fixtures.gd",
@@ -2977,6 +3056,14 @@
   {
    "source": "tests/unit/story/validate_data_args_test.gd",
    "target": "tools/validate_data.gd"
+  },
+  {
+   "source": "tests/unit/ui/reading_screen_test.gd",
+   "target": "design/ux/reading-screen.md"
+  },
+  {
+   "source": "tests/unit/ui/reading_screen_test.gd",
+   "target": "src/ui/reading/reading_screen.tscn"
   },
   {
    "source": "tests/unit/ui/safe_area_margins_test.gd",

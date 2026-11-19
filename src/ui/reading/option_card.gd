@@ -10,6 +10,7 @@ var view: OptionView
 
 var _text: Label
 var _caption: Label
+var _restyling: bool = false
 
 
 func _init() -> void:
@@ -34,7 +35,7 @@ func bind(option_view: OptionView) -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_THEME_CHANGED and view != null:
+	if what == NOTIFICATION_THEME_CHANGED and view != null and not _restyling:
 		_restyle()
 
 
@@ -56,4 +57,8 @@ func _restyle() -> void:
 		item = &"pressed" if is_down() else &"normal"
 	elif view.state == OptionView.State.CHOSEN:
 		item = &"pressed"
+	# the override itself raises THEME_CHANGED: the flag stops the loop
+	_restyling = true
+	remove_theme_stylebox_override(&"panel")
 	add_theme_stylebox_override(&"panel", get_theme_stylebox(item, &"Button"))
+	_restyling = false
