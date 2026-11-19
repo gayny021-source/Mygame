@@ -108,6 +108,7 @@ static func view(chapter: ChapterData, scene: SceneData, start_id: String, miles
 	result.mode = mode(true, fail_flag_set, pending, final_shown)
 	result.milestones_total = chapter.milestones.size()
 	result.goal = goal_of(chapter, start_id)
+	result.stake = chapter.stake
 	if result.milestones_total > 0:
 		result.position = result.milestones_total if result.mode == GoalView.Mode.DONE_OK else clampi(milestone_max, 1, result.milestones_total)
 	match result.mode:

@@ -129,6 +129,14 @@ func test_load_hero_bad_fractional_bonus_returns_dt02() -> void:
 	assert_array(_paths(result, "DT-02")).is_equal([path])
 
 
+func test_load_hero_bonus_outside_range_returns_dt02_only_for_the_outside_stats() -> void:
+	# Act
+	var result: LoadResult = _load("hero_bonus_range")
+	# Assert
+	var base: String = StoryFixtures.DIR + "/hero_bonus_range/hero.json/stats/"
+	assert_array(_paths(result, "DT-02")).is_equal([base + "strength/bonus", base + "charisma/bonus"])
+
+
 func test_load_hero_bad_key_outside_adr_table_returns_dt04() -> void:
 	# Act
 	var result: LoadResult = _load("hero_bad")

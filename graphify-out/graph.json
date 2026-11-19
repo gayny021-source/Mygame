@@ -906,6 +906,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/integration/story/rovend_data_test.gd",
+   "label": "rovend_data_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/integration/story/story_file_engine_test.gd",
    "label": "story_file_engine_test.gd",
    "group": "GDScript"
@@ -2727,6 +2732,10 @@
    "target": "design/gdd/branching-story.md"
   },
   {
+   "source": "src/core/story/data/chapter_data.gd",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
    "source": "src/core/story/data/chapter_loader.gd",
    "target": "design/gdd/branching-story.md"
   },
@@ -2756,6 +2765,10 @@
   },
   {
    "source": "src/core/story/data/hero_data.gd",
+   "target": "design/gdd/heroes.md"
+  },
+  {
+   "source": "src/core/story/data/hero_loader.gd",
    "target": "design/gdd/heroes.md"
   },
   {
@@ -3025,6 +3038,14 @@
   {
    "source": "tests/integration/story/hero_loader_test.gd",
    "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/integration/story/rovend_data_test.gd",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/integration/story/rovend_data_test.gd",
+   "target": "design/gdd/heroes.md"
   },
   {
    "source": "tests/integration/story/story_file_engine_test.gd",

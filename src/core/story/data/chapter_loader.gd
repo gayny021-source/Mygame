@@ -5,7 +5,7 @@ extends RefCounted
 ## (DT-08, story S2); with a vocabulary of the hero's flags `if`, sets, clears and
 ## goal_fail_flag are checked against it (BS-01, story S3), without one only the syntax.
 
-const CHAPTER_KEYS: PackedStringArray = ["schema_version", "id", "title", "goal", "starts", "goal_fail_flag", "milestones", "scenes", "outcomes", "transitions"]
+const CHAPTER_KEYS: PackedStringArray = ["schema_version", "id", "title", "goal", "stake", "starts", "goal_fail_flag", "milestones", "scenes", "outcomes", "transitions"]
 const START_KEYS: PackedStringArray = ["id", "if", "scene", "goal"]
 const MILESTONE_KEYS: PackedStringArray = ["id", "step"]
 const SCENE_KEYS: PackedStringArray = ["id", "title", "paragraphs", "illustration", "options", "milestone", "node", "final", "deprecated"]
@@ -73,6 +73,7 @@ static func parse(data: Dictionary, source: String, issues: Array[DataIssue], kn
 	chapter.id = reader.id()
 	chapter.title = reader.text("title")
 	chapter.goal = reader.text("goal")
+	chapter.stake = reader.text("stake", false)
 	chapter.goal_fail_flag = reader.text("goal_fail_flag", false)
 	for item: DictReader in reader.children("starts", START_KEYS):
 		chapter.starts.append(_start(item))

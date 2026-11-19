@@ -5,6 +5,8 @@ extends RefCounted
 var id: String
 var title: String
 var goal: String
+## Optional chapter stake (panel line «Ставка», chapter-goal.md); empty when the data has none.
+var stake: String
 var goal_fail_flag: String
 var starts: Array[StartData] = []
 var milestones: Array[MilestoneData] = []

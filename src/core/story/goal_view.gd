@@ -18,6 +18,5 @@ var caption: Caption = Caption.NONE
 var caption_text: String
 ## The goal in force for the attempt; empty when undefined (Э-18, Э-21 г).
 var goal: String
-# shortcut: ChapterData has no stake field, so it stays empty; fill it when the data gets «ставка главы».
 ## The chapter stake (panel line «Ставка»).
 var stake: String

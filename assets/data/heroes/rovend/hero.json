@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "rovend",
+  "stats": [
+    {"id": "strength", "name": "Сила", "bonus": 4},
+    {"id": "charisma", "name": "Харизма", "bonus": 2},
+    {"id": "mind", "name": "Ум", "bonus": 0},
+    {"id": "faith", "name": "Вера", "bonus": -1}
+  ],
+  "chapters": [],
+  "endings": [],
+  "portrait": "portrait_rovend",
+  "accent": "carmine"
+}

@@ -220,5 +220,10 @@ func test_view_is_a_pure_function_of_its_inputs() -> void:
 	assert_str(one.caption_text).is_equal(two.caption_text)
 
 
-func test_view_stake_is_empty_until_the_data_has_one() -> void:
+func test_view_stake_is_empty_when_the_chapter_has_none() -> void:
 	assert_str(GoalRules.view(_g, _scene(_g, "s1"), "st_main", 1, false, false, false).stake).is_empty()
+
+
+func test_view_stake_is_the_chapter_stake() -> void:
+	_g.stake = "Склеп не отпустит чужака."
+	assert_str(GoalRules.view(_g, _scene(_g, "s1"), "st_main", 1, false, false, false).stake).is_equal("Склеп не отпустит чужака.")

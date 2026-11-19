@@ -256,6 +256,37 @@ func test_load_from_dict_empty_scene_id_returns_dt06_without_dt02() -> void:
 	assert_int(_count(result, "DT-02")).is_equal(0)
 
 
+# --- stake of the chapter (optional, ADR-0001 §1) ---
+
+func test_load_from_dict_stake_is_read_when_present() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["stake"] = "Склеп не отпустит чужака."
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_array(_lines(result)).is_empty()
+	assert_str((result.data as ChapterData).stake).is_equal("Склеп не отпустит чужака.")
+
+
+func test_load_from_dict_stake_absent_is_empty_without_issues() -> void:
+	# Act
+	var result: LoadResult = _load(StoryFixtures.minimal_chapter())
+	# Assert
+	assert_array(_lines(result)).is_empty()
+	assert_str((result.data as ChapterData).stake).is_empty()
+
+
+func test_load_from_dict_stake_not_a_string_returns_dt02() -> void:
+	# Arrange
+	var chapter: Dictionary = StoryFixtures.minimal_chapter()
+	chapter["stake"] = 5
+	# Act
+	var result: LoadResult = _load(chapter)
+	# Assert
+	assert_str(_first(result, "DT-02").path).is_equal("test/stake")
+
+
 # --- DT-03: required keys ---
 
 func test_load_from_dict_missing_goal_returns_dt03() -> void:

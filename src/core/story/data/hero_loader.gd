@@ -9,6 +9,9 @@ extends RefCounted
 
 const DATA_ROOT := "res://assets/data/heroes"
 const HERO_KEYS: PackedStringArray = ["schema_version", "id", "stats", "chapters", "endings", "portrait", "accent", "sum_exception"]
+## Bonus range of a stat (heroes.md, rule 1; DD-021).
+const BONUS_MIN := -1
+const BONUS_MAX := 5
 const STAT_KEYS: PackedStringArray = ["id", "name", "bonus"]
 
 
@@ -38,6 +41,8 @@ static func load_hero(hero_id: String, root: String = DATA_ROOT) -> LoadResult:
 		stat.id = stat_reader.id()
 		stat.name = stat_reader.text("name")
 		stat.bonus = stat_reader.integer("bonus")
+		if stat.bonus < BONUS_MIN or stat.bonus > BONUS_MAX:
+			stat_reader.issue("DT-02", "bonus", "бонус %d вне %d…%d" % [stat.bonus, BONUS_MIN, BONUS_MAX])
 		if not stat.id.is_empty() and stat_ids.has(stat.id):
 			stat_reader.issue("BS-01", "id", "характеристика «%s» повторяется" % stat.id)
 		stat_ids.append(stat.id)

@@ -1,0 +1,15 @@
+{
+  "_note": "Бонусы вне −1…+5 (heroes.md, правило 1; DD-021): Сила +6 и Харизма −2 ошибки, Ум +5 и Вера −1 границы допустимы.",
+  "schema_version": 1,
+  "id": "hero_bonus_range",
+  "stats": [
+    {"id": "strength", "name": "Сила", "bonus": 6},
+    {"id": "charisma", "name": "Харизма", "bonus": -2},
+    {"id": "mind", "name": "Ум", "bonus": 5},
+    {"id": "faith", "name": "Вера", "bonus": -1}
+  ],
+  "chapters": ["ch_f1"],
+  "endings": ["end_a"],
+  "portrait": "portrait_stub",
+  "accent": "carmine"
+}
