@@ -761,6 +761,16 @@
    "group": "GDScript"
   },
   {
+   "id": "src/ui/roll/roll_screen.gd",
+   "label": "roll_screen.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "src/ui/roll/roll_screen.tscn",
+   "label": "roll_screen.tscn",
+   "group": "Scenes"
+  },
+  {
    "id": "src/ui/safe_area_margins.gd",
    "label": "safe_area_margins.gd",
    "group": "GDScript"
@@ -1183,6 +1193,11 @@
   {
    "id": "tests/unit/ui/reading_screen_test.gd",
    "label": "reading_screen_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/ui/roll_screen_test.gd",
+   "label": "roll_screen_test.gd",
    "group": "GDScript"
   },
   {
@@ -2839,6 +2854,18 @@
    "target": "design/ux/reading-screen.md"
   },
   {
+   "source": "src/ui/roll/roll_screen.gd",
+   "target": "design/ux/roll-screen.md"
+  },
+  {
+   "source": "src/ui/roll/roll_screen.tscn",
+   "target": "src/ui/roll/roll_screen.gd"
+  },
+  {
+   "source": "src/ui/roll/roll_screen.tscn",
+   "target": "src/ui/safe_area_margins.gd"
+  },
+  {
    "source": "src/ui/theme_scale.gd",
    "target": "design/ux/reading-screen.md"
   },
@@ -3177,6 +3204,14 @@
   {
    "source": "tests/unit/ui/reading_screen_test.gd",
    "target": "src/ui/reading/reading_screen.tscn"
+  },
+  {
+   "source": "tests/unit/ui/roll_screen_test.gd",
+   "target": "design/ux/roll-screen.md"
+  },
+  {
+   "source": "tests/unit/ui/roll_screen_test.gd",
+   "target": "src/ui/roll/roll_screen.tscn"
   },
   {
    "source": "tests/unit/ui/safe_area_margins_test.gd",

@@ -1,0 +1,226 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://src/ui/reading_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://src/ui/safe_area_margins.gd" id="2_safe"]
+[ext_resource type="Script" path="res://src/ui/roll/roll_screen.gd" id="3_screen"]
+[ext_resource type="Texture2D" path="res://assets/art/roll/spotlight.svg" id="4_spot"]
+[ext_resource type="Texture2D" path="res://assets/art/roll/die_unknown.svg" id="5_die"]
+
+[node name="RollScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+script = ExtResource("3_screen")
+
+[node name="Field" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.8431373, 0.8, 0.698, 1)
+
+[node name="Safe" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 96
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 144
+mouse_filter = 2
+script = ExtResource("2_safe")
+base_bottom = 144
+
+[node name="Column" type="VBoxContainer" parent="Safe"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Top" type="HBoxContainer" parent="Safe/Column"]
+custom_minimum_size = Vector2(0, 168)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Back" type="Button" parent="Safe/Column/Top"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(168, 168)
+layout_mode = 2
+text = "Передумать"
+
+[node name="TopGap" type="Control" parent="Safe/Column/Top"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Reroll" type="Button" parent="Safe/Column/Top"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(168, 168)
+layout_mode = 2
+mouse_filter = 2
+disabled = true
+
+[node name="Slot" type="ScrollContainer" parent="Safe/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 520)
+layout_mode = 2
+mouse_filter = 1
+horizontal_scroll_mode = 0
+
+[node name="SlotBox" type="VBoxContainer" parent="Safe/Column/Slot"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="OptionText" type="Label" parent="Safe/Column/Slot/SlotBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Caption" type="Label" parent="Safe/Column/Slot/SlotBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"CaptionLabel"
+
+[node name="Verdict" type="Label" parent="Safe/Column/Slot/SlotBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+text = "Успех"
+
+[node name="Cartouche" type="PanelContainer" parent="Safe/Column/Slot/SlotBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CartoucheLabel" type="Label" parent="Safe/Column/Slot/SlotBox/Cartouche"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"TitleLabel"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Calc" type="Label" parent="Safe/Column/Slot/SlotBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Bonus" type="Label" parent="Safe/Column/Slot/SlotBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"CaptionLabel"
+
+[node name="SpacerTop" type="Control" parent="Safe/Column"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="NeedLabel" type="Label" parent="Safe/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="DiceZone" type="Control" parent="Safe/Column"]
+custom_minimum_size = Vector2(0, 380)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Spotlight" type="TextureRect" parent="Safe/Column/DiceZone"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -190.0
+offset_top = -190.0
+offset_right = 190.0
+offset_bottom = 190.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(190, 190)
+mouse_filter = 2
+texture = ExtResource("4_spot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Die" type="Control" parent="Safe/Column/DiceZone"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -170.0
+offset_top = -170.0
+offset_right = 170.0
+offset_bottom = 170.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(170, 170)
+mouse_filter = 2
+
+[node name="DieArt" type="TextureRect" parent="Safe/Column/DiceZone/Die"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_die")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DieLabel" type="Label" parent="Safe/Column/DiceZone/Die"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SpacerBottom" type="Control" parent="Safe/Column"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Action" type="Button" parent="Safe/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 168)
+layout_mode = 2
+text = "Бросить"
+
+[node name="Fade" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.9137255, 0.8745098, 0.7764706, 1)
