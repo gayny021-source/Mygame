@@ -64,6 +64,7 @@ GDD «Сохранение» оставляет ADR: `T_ожид`, поток и
 - `SaveWriter` — очередь, поколения, пара, тайм-ауты, загрузка. `SaveIo` — база из трёх методов (`start_write`, `start_read`, `poll`); `ThreadSaveIo` — одна задача `WorkerThreadPool` за раз; `FakeSaveIo` — фикстура тестов.
 - `RunSession` (сторона Истории) — владелец commit 1, 2, 6 (позже 4, 5), замыкание для 3 и 7. `SaveNode` (`Node`) — единственное место с `Time.get_ticks_msec` и `_process`, зовёт `pump(now_ms)`.
 - Навигатор и `CheckTurn` не меняются.
+- Composition root сохранения — autoload `SaveService` (`src/core/save/save_node.gd`): он собирает `ThreadSaveIo`, `SaveWriter` и конфиг; ядро об autoload не знает. Пересмотр при втором I/O-бэкенде (аудит RT1, G5).
 
 ### 2. Формат слота
 - Заголовок 48 байт: `KPSV` (4) + `format_version` u32 LE (4) + `gen` u64 LE (8) + SHA-256 (32) по байтам 4…15 и телу. Тело — UTF-8 JSON.
