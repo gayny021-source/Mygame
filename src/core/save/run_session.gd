@@ -476,16 +476,24 @@ func _restore_goal(position: StoryPosition) -> void:
 	if not context.issue.is_empty():
 		_log.call(context.issue)
 	var pending: OutcomeData = _find_outcome(position.pending_outcome)
-	_goal_pending = failed and pending != null and pending.sets.has(chapter.goal_fail_flag) and _set_by(chapter.goal_fail_flag, pending.id, position.scene)
+	_goal_pending = failed and pending != null and pending.sets.has(chapter.goal_fail_flag) and _set_by(chapter.goal_fail_flag, pending.id, position)
 
 
-# Э-24, AC-72: the flag was set by this very outcome on this scene (the journal has the record); a flag
-# that already stood is not set again and journals nothing, so live play and a load agree.
-func _set_by(flag_id: String, outcome_id: String, scene_id: String) -> bool:
-	for entry: RunState.Entry in _state.journal():
-		if entry.action == RunState.Entry.Action.SET and entry.flag == flag_id and entry.outcome == outcome_id and entry.scene == scene_id:
-			return true
-	return false
+# Э-24, AC-72: the flag was not standing when this scene was entered. A node scene has its entry snapshot
+# as the last schema snapshot: exact, also after a loop of the graph. Otherwise the last journal record
+# must be the SET of this very outcome on this scene (a flag that already stood journals nothing).
+# shortcut: a plain (non-node) scene revisited by a loop with no other journal record in between reads as pending
+# after a load; close it when the entry snapshot of every scene is kept.
+func _set_by(flag_id: String, outcome_id: String, position: StoryPosition) -> bool:
+	if not _schema.is_empty():
+		var entry_snapshot: RunBody.Snapshot = _schema.back()
+		if entry_snapshot.position.scene == position.scene and entry_snapshot.position.transition == position.transition:
+			return not entry_snapshot.state.has_flag(flag_id)
+	var records: Array[RunState.Entry] = _state.journal()
+	if records.is_empty():
+		return false
+	var last: RunState.Entry = records.back()
+	return last.action == RunState.Entry.Action.SET and last.flag == flag_id and last.outcome == outcome_id and last.scene == position.scene
 
 
 func _chapter_of(chapter_id: String) -> ChapterData:

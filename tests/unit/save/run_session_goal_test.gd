@@ -299,13 +299,32 @@ func test_report_without_an_outcome_on_screen_changes_nothing() -> void:
 	assert_int(_t.session.goal_view().mode).is_equal(MODE.RUNNING)
 
 
-func test_a_repeated_fail_outcome_is_not_pending_after_a_load_as_live_ac72() -> void:
+func test_ac72_a_flag_standing_since_an_earlier_scene_is_not_pending_after_a_load_and_p_is_two() -> void:
 	_t.started()
 	_take("a")
 	_next()
 	_take("x")
 	_next()
 	_take("y", false)
+	assert_int(_t.session.goal_view().mode).is_equal(MODE.FROZEN)
+	_reload()
+	assert_int(_t.session.screen().kind).is_equal(StoryScreen.Kind.OUTCOME)
+	assert_int(_t.session.goal_view().mode).is_equal(MODE.FROZEN)
+	assert_int(_t.session.goal_view().position).is_equal(2)
+	assert_int(_t.session.goal_view().caption).is_equal(CAPTION.FAILED)
+
+
+func test_a_graph_loop_back_into_a_node_does_not_make_the_repeated_fail_pending_after_a_load() -> void:
+	# s2 is a node: x sets f_fail and leads back into s2; the second x sets nothing (the flag stands)
+	var data: Dictionary = GoalFixtures.chapter_g()
+	GraphFixtures.find(data["transitions"], "t_s2")["to"] = "scene:s2"
+	_t = SessionRig.new(SessionRig.HERO_ID, [data, GoalFixtures.chapter_h()])
+	_t.started()
+	_take("a")
+	_next()
+	_take("x")
+	_next()
+	_take("x", false)
 	assert_int(_t.session.goal_view().mode).is_equal(MODE.FROZEN)
 	_reload()
 	assert_int(_t.session.screen().kind).is_equal(StoryScreen.Kind.OUTCOME)
