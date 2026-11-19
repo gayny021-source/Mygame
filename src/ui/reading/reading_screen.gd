@@ -517,13 +517,13 @@ func _error_load() -> void:
 func _error_menu() -> void:
 	if _blocked():
 		return
-	_say(tr("Меню появится позже. (текст пишет writer)"))
+	_say(tr("Меню появится позже."))
 	menu_requested.emit()
 
 
 func _load_failed() -> void:
 	_set_error_buttons(false)
-	_say(tr("Не удалось загрузить сохранение. (текст пишет writer)"))
+	_say(tr("Не удалось загрузить сохранение."))
 
 
 # One short message line under the explanation; the next one replaces it.
