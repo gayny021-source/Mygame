@@ -56,8 +56,11 @@ jobs:
       - name: Export debug APK
         run: |
           mkdir -p build/android
-          godot --headless --path . --export-debug "$EXPORT_PRESET" "build/android/$APK_NAME.apk"
+          # Godot 4.7.2 can crash on shutdown after "[ DONE ] export" (seen in CI:
+          # signal 11, exit 132, APK already signed). The APK on disk is the verdict.
+          godot --headless --path . --export-debug "$EXPORT_PRESET" "build/android/$APK_NAME.apk" || echo "godot exited with $? after export"
           test -s "build/android/$APK_NAME.apk"
+          jar tf "build/android/$APK_NAME.apk" | grep -q "^classes.dex$"
 
       - name: Upload APK to Artifacts
         uses: actions/upload-artifact@v4
