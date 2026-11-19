@@ -426,6 +426,11 @@
    "group": "Scenes"
   },
   {
+   "id": "src/boot/boot_services.gd",
+   "label": "boot_services.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "src/core/checks/check_brief.gd",
    "label": "check_brief.gd",
    "group": "GDScript"
@@ -731,6 +736,11 @@
    "group": "GDScript"
   },
   {
+   "id": "src/ui/theme_scale.gd",
+   "label": "theme_scale.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/fixtures/checks/check_fixtures.gd",
    "label": "check_fixtures.gd",
    "group": "GDScript"
@@ -823,6 +833,11 @@
   {
    "id": "tests/integration/story/story_file_engine_test.gd",
    "label": "story_file_engine_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/boot/boot_services_test.gd",
+   "label": "boot_services_test.gd",
    "group": "GDScript"
   },
   {
@@ -1088,6 +1103,11 @@
   {
    "id": "tests/unit/ui/safe_area_margins_test.gd",
    "label": "safe_area_margins_test.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/unit/ui/theme_scale_test.gd",
+   "label": "theme_scale_test.gd",
    "group": "GDScript"
   },
   {
@@ -2386,6 +2406,10 @@
    "target": "src/boot/boot.tscn"
   },
   {
+   "source": "project.godot",
+   "target": "src/core/save/save_node.gd"
+  },
+  {
    "source": "src/boot/boot.gd",
    "target": "design/accessibility-requirements.md"
   },
@@ -2660,6 +2684,10 @@
   {
    "source": "src/core/story/validation/validator_options.gd",
    "target": "tools/validate_data.gd"
+  },
+  {
+   "source": "src/ui/theme_scale.gd",
+   "target": "design/ux/reading-screen.md"
   },
   {
    "source": "tests/fixtures/checks/check_fixtures.gd",
@@ -2944,6 +2972,10 @@
   {
    "source": "tests/unit/ui/safe_area_margins_test.gd",
    "target": ".claude/skills/tscn-handcrafter/SKILL.md"
+  },
+  {
+   "source": "tests/unit/ui/theme_scale_test.gd",
+   "target": "design/ux/reading-screen.md"
   },
   {
    "source": "tools/validate_data.gd",
