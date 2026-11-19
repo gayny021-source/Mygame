@@ -39,8 +39,8 @@ var _cards: Array[OptionCard] = []
 var _tween: Tween
 var _milestone: int = -1
 var _menu_page: bool = false
-## Viewport height the goal-zone collapse looks at; 0 = the real viewport (a test sets it).
-var collapse_height: float = 0.0
+## Height of the hint line, measured once per build (shaping the text on every scroll tick is waste).
+var _hint_h: float = 0.0
 
 @onready var _goal: TapPanel = %Goal
 @onready var _accent: ColorRect = %Accent
@@ -70,11 +70,11 @@ func _ready() -> void:
 	_close.pressed.connect(close_panel)
 	_scrim.gui_input.connect(_on_scrim_input)
 	# layout settles after the page is built and after a size change: look again then, not per frame
+	_scroll.resized.connect(_on_scroll_resized)
 	_flow.sort_children.connect(_check_stake)
 	_scroll.get_v_scroll_bar().changed.connect(_check_stake)
 	# a scroll moves the children after the value changes: look again once they have moved
 	_scroll.sort_children.connect(_check_stake)
-	_scroll.get_v_scroll_bar().value_changed.connect(_on_scrolled)
 	_sheet_layer.visible = false
 	_hint.visible = false
 	_fade.visible = false
@@ -102,11 +102,13 @@ func setup(session: RunSession, hero: HeroData) -> void:
 	_disconnect()
 	_session = session
 	_hero = hero
+	_milestone = -1
 	_connect()
 
 
 ## A new run from chapter 1.
 func start() -> void:
+	_milestone = -1
 	_present(_session.start_new())
 
 
@@ -178,22 +180,19 @@ func close_panel() -> void:
 	_sheet_layer.visible = false
 
 
-## System Back: swallowed in the guard window, closes only the panel, on an ending, error or fallback page
-## it is «В меню» (TD C1), otherwise nothing (the game stays).
+## System Back: swallowed in the guard window, closes only the panel, otherwise nothing (the game stays;
+## an ending, error or fallback page too, until the menu story exists: TD round 2).
 func go_back() -> void:
 	if _now() < _guard_until:
 		return
-	if panel_open():
-		close_panel()
-	elif _menu_page:
-		menu_requested.emit()
+	close_panel()
 
 
 ## The session changed outside a touch of this screen (the Roll screen closed after a flow error):
 ## the cards take the new states and a flow error gets its way out.
 func refresh() -> void:
 	_refresh_cards()
-	if _session.flow_error() and _menu_page == false and _page != null and _page.kind == StoryScreen.Kind.SCENE:
+	if _session.flow_error() and not _menu_page and _page != null and _page.kind == StoryScreen.Kind.SCENE:
 		_add_menu_button()
 
 
@@ -201,7 +200,11 @@ func panel_open() -> bool:
 	return _sheet_layer.visible
 
 
-# ---- test-only getters (TD G4: no new ones; migrate tests to child nodes and signals when touched) ----
+# ---- test-only (TD G4: no new getters; migrate tests to child nodes and signals when touched) ----
+
+## Viewport height the goal-zone collapse looks at; 0 = the real viewport (a test sets it).
+var collapse_height: float = 0.0
+
 
 
 func hint_visible() -> bool:
@@ -251,7 +254,7 @@ func tween_running() -> bool:
 	return _tween != null and _tween.is_valid()
 
 
-# ---- end of test-only getters ----
+# ---- end of test-only ----
 
 
 ## Height of the bottom band: the strip (≈55 px at 100 %, scaled) plus the hint line; it carries the fade
@@ -311,13 +314,14 @@ func _hint_height() -> float:
 	var font: Font = _hint_label.get_theme_font(&"font")
 	var font_size: int = _hint_label.get_theme_font_size(&"font_size")
 	var margins: Vector2 = _hint.get_theme_stylebox(&"panel").get_minimum_size()
-	var width: float = maxf(_scroll.size.x - margins.x, 1.0)
+	var column: float = _scroll.size.x if _scroll.size.x > 0.0 else get_viewport().get_visible_rect().size.x
+	var width: float = maxf(column - margins.x, 1.0)
 	var text_height: float = font.get_multiline_string_size(_hint_label.text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size).y
 	return text_height + margins.y
 
 
 func _band() -> float:
-	return band(_scale(), _hint_height())
+	return band(_scale(), _hint_h)
 
 
 func _on_released() -> void:
@@ -349,8 +353,8 @@ func _on_scrim_input(event: InputEvent) -> void:
 		close_panel()
 
 
-func _on_scrolled(_value: float) -> void:
-	_check_stake.call_deferred()
+func _on_scroll_resized() -> void:
+	_hint_h = _hint_height()
 
 
 func _check_stake() -> void:
@@ -368,6 +372,7 @@ func _build() -> void:
 	_cards = []
 	_stake_label = null
 	_menu_page = false
+	_hint_h = _hint_height()
 	for child: Node in _flow.get_children():
 		_flow.remove_child(child)
 		child.queue_free()

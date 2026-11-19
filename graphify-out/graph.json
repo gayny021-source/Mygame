@@ -3063,6 +3063,10 @@
   },
   {
    "source": "tests/unit/ui/reading_screen_test.gd",
+   "target": "src/boot/boot.gd"
+  },
+  {
+   "source": "tests/unit/ui/reading_screen_test.gd",
    "target": "src/ui/reading/reading_screen.tscn"
   },
   {

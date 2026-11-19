@@ -250,16 +250,43 @@ func test_menu_button_asks_for_the_menu() -> void:
 	assert_int(asked.size()).is_equal(1)
 
 
-func test_back_on_an_ending_is_the_menu_and_on_a_scene_nothing() -> void:
+func test_back_on_an_ending_does_nothing_and_writes_nothing() -> void:
 	var asked: Array[bool] = []
 	_screen.menu_requested.connect(func() -> void: asked.append(true))
 	_started()
-	_screen.go_back()
-	assert_int(asked.size()).is_equal(0)
+	_t.settle()
+	var writes: int = _t.writes()
 	_screen.show_page(StoryScreen.new(StoryScreen.Kind.ENDING))
 	_open_guard()
 	_screen.go_back()
-	assert_int(asked.size()).is_equal(1)
+	assert_int(asked.size()).is_equal(0)
+	assert_int(_screen.page_kind()).is_equal(StoryScreen.Kind.ENDING)
+	assert_int(_t.writes()).is_equal(writes)
+
+
+func test_the_boot_menu_handler_leaves_the_save_and_the_screen_alone() -> void:
+	var boot: Control = auto_free((load("res://src/boot/boot.gd") as GDScript).new()) as Control
+	_screen.menu_requested.connect(func() -> void: boot.call("on_menu_requested"))
+	_started()
+	_t.settle()
+	var writes: int = _t.writes()
+	var journal: int = _t.session.journal_size()
+	_screen.show_page(StoryScreen.new(StoryScreen.Kind.ENDING))
+	_open_guard()
+	_menu_button().pressed.emit()
+	_t.settle()
+	assert_int(_t.writes()).is_equal(writes)
+	assert_int(_t.session.journal_size()).is_equal(journal)
+	assert_int(_screen.page_kind()).is_equal(StoryScreen.Kind.ENDING)
+
+
+func test_a_new_run_and_a_new_setup_reset_the_remembered_milestone() -> void:
+	_screen._milestone = 2
+	_screen.start()
+	assert_int(_screen._milestone).is_equal(-1)
+	_screen._milestone = 2
+	_screen.setup(_t.session, _t.hero)
+	assert_int(_screen._milestone).is_equal(-1)
 
 
 func test_band_is_the_strip_plus_the_hint_and_scales() -> void:

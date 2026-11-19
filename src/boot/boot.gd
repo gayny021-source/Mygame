@@ -67,7 +67,13 @@ func _open_reading(hero_id: String) -> void:
 	add_child(_screen)
 	_screen.theme = theme
 	_screen.setup(services.sessions[hero_id], services.heroes[hero_id])
-	# no menu screen yet: «В меню» starts a new run (the way out of a flow error or an ending)
-	_screen.menu_requested.connect(_screen.start)
+	_screen.menu_requested.connect(on_menu_requested)
 	_screen.resume()
 	$Safe.visible = false
+
+
+## «В меню» of the reading screen. No menu screen exists yet, so nothing happens and the save is not
+## touched (reading-screen.md, Interaction Map: the save stays); the screen stays where it is.
+## shortcut: a log line only, until the «Меню и пауза» story.
+func on_menu_requested() -> void:
+	push_warning("SCR1 «В меню»: меню-экрана ещё нет, ничего не происходит")
