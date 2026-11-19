@@ -891,6 +891,11 @@
    "group": "GDScript"
   },
   {
+   "id": "tests/integration/story/chapter_01_test.gd",
+   "label": "chapter_01_test.gd",
+   "group": "GDScript"
+  },
+  {
    "id": "tests/integration/story/chapter_loader_file_test.gd",
    "label": "chapter_loader_file_test.gd",
    "group": "GDScript"
@@ -3031,6 +3036,14 @@
   {
    "source": "tests/integration/story/bs_shape_test.gd",
    "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "tests/integration/story/chapter_01_test.gd",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "tests/integration/story/chapter_01_test.gd",
+   "target": "design/narrative/chapter-01-sheet.md"
   },
   {
    "source": "tests/integration/story/chapter_loader_file_test.gd",
