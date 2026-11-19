@@ -791,6 +791,16 @@
    "group": "Scenes"
   },
   {
+   "id": "tests/dev/roll_harness.gd",
+   "label": "roll_harness.gd",
+   "group": "GDScript"
+  },
+  {
+   "id": "tests/dev/roll_harness.tscn",
+   "label": "roll_harness.tscn",
+   "group": "Scenes"
+  },
+  {
    "id": "tests/fixtures/checks/check_fixtures.gd",
    "label": "check_fixtures.gd",
    "group": "GDScript"
@@ -2876,6 +2886,14 @@
   {
    "source": "tests/dev/reading_harness.tscn",
    "target": "tests/dev/reading_harness.gd"
+  },
+  {
+   "source": "tests/dev/roll_harness.gd",
+   "target": "src/ui/roll/roll_screen.tscn"
+  },
+  {
+   "source": "tests/dev/roll_harness.tscn",
+   "target": "tests/dev/roll_harness.gd"
   },
   {
    "source": "tests/fixtures/checks/check_fixtures.gd",
