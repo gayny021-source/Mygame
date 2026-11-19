@@ -42,7 +42,7 @@ func _ready() -> void:
 		"hint": _TO_BRIDGE + ["card:s02_risk"],
 		"bridgeend": _TO_BRIDGE + ["wait", "wait", "scroll", "wait"],
 		"bridgepanel": _TO_BRIDGE + ["panel"],
-		"cartouche": ["start", "wait", "wait", "scroll", "wait", "wait", "card:s01_go", "wait", "wait", "wait"],
+		"cartouche": ["start", "wait", "wait", "seen", "wait", "wait", "wait", "wait", "card:s01_go", "wait", "wait", "wait"],
 		"closed": ["start", "wait", "wait", "scroll", "wait", "wait", "card:s01_go", "next", "wait", "wait", "scroll", "wait", "wait"]}[state])
 	if _args.has("end") and state != "closed":
 		_steps.append_array(["wait", "wait", "scroll", "wait"])
@@ -52,6 +52,9 @@ func _cartouche(hero: HeroData, id: String) -> void:
 	for outcome: OutcomeData in hero.chapters[0].outcomes:
 		if outcome.id == "o_s01":
 			outcome.cartouche = id
+			var line: ParagraphData = ParagraphData.new()
+			line.text = "Настил хрустит, и Ровенд проходит насквозь."
+			outcome.paragraphs.append(line)
 
 
 func _wound(hero: HeroData) -> void:
@@ -82,6 +85,8 @@ func _process(_delta: float) -> void:
 			_session._state = RefusingState.new(_session._hero.flags, Callable())
 		"panel":
 			_screen.goal_tapped()
+		"seen":
+			_screen.stake_seen()
 		"wait":
 			pass
 		"next":
