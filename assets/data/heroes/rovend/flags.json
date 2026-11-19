@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "flags": [
+    {
+      "id": "candles_paid",
+      "category": "price",
+      "title": "Свечи оплачены",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "debt_candles",
+      "category": "debt",
+      "title": "Должен лавке",
+      "scope": "chapter",
+      "visible": true
+    },
+    {
+      "id": "price_toll_ten",
+      "category": "price",
+      "title": "Платит, не торгуется",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "guild_act",
+      "category": "reputation",
+      "title": "Акт Гильдии",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "companion_garzug",
+      "category": "companion",
+      "title": "Гарзуг рядом",
+      "scope": "run",
+      "visible": true
+    },
+    {
+      "id": "garzug_post",
+      "category": "story",
+      "title": "Гарзуг на мосту",
+      "scope": "run",
+      "visible": true
+    },
+    {
+      "id": "prayers_listed",
+      "category": "reputation",
+      "title": "В списке молящихся",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "census_fine",
+      "category": "price",
+      "title": "Штраф за неответ",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "village_believes",
+      "category": "story",
+      "title": "Кочки верят",
+      "scope": "chapter",
+      "visible": true
+    },
+    {
+      "id": "tickets",
+      "category": "item",
+      "title": "Выручка с выставки",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "price_boot_left",
+      "category": "price",
+      "title": "Левый сапог в залоге",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "guild_stamp",
+      "category": "item",
+      "title": "Печать Гильдии",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "side_door",
+      "category": "story",
+      "title": "Боковая дверь",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "price_detour",
+      "category": "price",
+      "title": "Обход оплачен",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "debt_guild",
+      "category": "debt",
+      "title": "Должен Гильдии",
+      "scope": "run",
+      "visible": true
+    },
+    {
+      "id": "form_refused",
+      "category": "reputation",
+      "title": "Ведомость возвращена",
+      "scope": "chapter",
+      "visible": false
+    },
+    {
+      "id": "witnesses",
+      "category": "story",
+      "title": "Свидетели веры",
+      "scope": "chapter",
+      "visible": true
+    },
+    {
+      "id": "end_buried",
+      "category": "story",
+      "title": "Олвантар захоронен",
+      "scope": "run",
+      "visible": true
+    },
+    {
+      "id": "end_shelf",
+      "category": "price",
+      "title": "Олвантар на полке",
+      "scope": "run",
+      "visible": true
+    },
+    {
+      "id": "end_witnessed",
+      "category": "story",
+      "title": "Похоронен по вере",
+      "scope": "run",
+      "visible": true
+    },
+    {
+      "id": "olvantar_walks",
+      "category": "companion",
+      "title": "Олвантар ходит",
+      "scope": "run",
+      "visible": true
+    },
+    {
+      "id": "goal_failed",
+      "category": "story",
+      "title": "Цель главы провалена",
+      "scope": "run",
+      "visible": false
+    }
+  ]
+}

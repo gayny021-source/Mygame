@@ -8,8 +8,8 @@
     {"id": "mind", "name": "Ум", "bonus": 0},
     {"id": "faith", "name": "Вера", "bonus": -1}
   ],
-  "chapters": [],
-  "endings": [],
+  "chapters": ["ch1"],
+  "endings": ["ending_buried", "ending_shelf", "ending_walks", "ending_witnessed"],
   "portrait": "portrait_rovend",
   "accent": "carmine"
 }
