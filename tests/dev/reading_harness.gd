@@ -1,9 +1,10 @@
 extends Control
 ## Dev harness of the Reading screen for screenshots (story SCR1): the hero_stub fixture over an
-## in-memory writer. Not game data. Args after `--`: scale=1|2, state=scene|unread|closed|panel,
+## in-memory writer. Not game data. Args after `--`: scale=1|2, state=scene|unread|closed|panel|bridge|hint|bridgeend|bridgepanel,
 ## end=1 (scroll to the end). `closed` gives the hero a wound that shuts Сила before s02.
 
 const ROOT := "res://tests/fixtures/story"
+const _TO_BRIDGE: Array[String] = ["start", "wait", "wait", "scroll", "wait", "wait", "card:s01_go", "next", "wait", "wait"]
 
 var _rig: WriterRig = WriterRig.new()
 var _screen: ReadingScreen
@@ -33,7 +34,12 @@ func _ready() -> void:
 		return _tick
 	add_child(_screen)
 	_screen.setup(_session, hero)
-	_steps.assign({"scene": ["start"], "unread": ["start"], "panel": ["start", "panel"], "closed": ["start", "scroll", "wait", "wait", "card:s01_go", "next", "wait", "scroll", "wait", "wait"]}[state])
+	_steps.assign({"scene": ["start"], "unread": ["start"], "panel": ["start", "panel"],
+		"bridge": _TO_BRIDGE,
+		"hint": _TO_BRIDGE + ["card:s02_risk"],
+		"bridgeend": _TO_BRIDGE + ["wait", "wait", "scroll", "wait"],
+		"bridgepanel": _TO_BRIDGE + ["panel"],
+		"closed": ["start", "wait", "wait", "scroll", "wait", "wait", "card:s01_go", "next", "wait", "wait", "scroll", "wait", "wait"]}[state])
 	if _args.has("end") and state != "closed":
 		_steps.append_array(["wait", "wait", "scroll", "wait"])
 

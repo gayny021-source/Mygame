@@ -196,3 +196,105 @@ func test_leaving_the_tree_kills_the_page_tween() -> void:
 	_screen.get_parent().remove_child(_screen)
 	assert_bool(_screen.tween_running()).is_false()
 	add_child(_screen)
+
+
+# --- audit round 1 (SCR1 TD decisions C1-C4, U1, U4, G1) ---
+
+func _menu_button() -> Button:
+	return _screen.find_child("Menu", true, false) as Button
+
+
+func _screen_links(connections: Array) -> int:
+	return connections.filter(func(link: Dictionary) -> bool: return (link["callable"] as Callable).get_object() == _screen).size()
+
+
+func test_setup_twice_keeps_one_subscription() -> void:
+	_screen.setup(_t.session, _t.hero)
+	assert_int(_screen_links(_t.session.show_released.get_connections())).is_equal(1)
+	assert_int(_screen_links(_t.session.loaded.get_connections())).is_equal(1)
+
+
+func test_reentering_the_tree_resubscribes_once() -> void:
+	remove_child(_screen)
+	assert_int(_screen_links(_t.session.show_released.get_connections())).is_equal(0)
+	add_child(_screen)
+	assert_int(_screen_links(_t.session.show_released.get_connections())).is_equal(1)
+
+
+func test_a_scene_without_text_raises_the_latch_at_once() -> void:
+	_t.started(false)
+	var page: StoryScreen = StoryScreen.new(StoryScreen.Kind.SCENE)
+	page.scene = _t.session.screen().scene
+	_screen.show_page(page)
+	assert_bool(_t.session.stake_read()).is_true()
+	assert_int(_card("a").view.state).is_equal(OptionView.State.OPEN)
+
+
+func test_a_flow_error_shows_the_menu_button() -> void:
+	_started()
+	_screen.card_tapped(_card("r"))
+	_t.session.roll()
+	_t.settle()
+	assert_bool(_t.session.close_check()).is_true()
+	_screen.refresh()
+	assert_object(_menu_button()).is_not_null()
+	assert_int(_card("a").view.state).is_not_equal(OptionView.State.OPEN)
+
+
+func test_menu_button_asks_for_the_menu() -> void:
+	var asked: Array[bool] = []
+	_screen.menu_requested.connect(func() -> void: asked.append(true))
+	_screen.show_page(StoryScreen.new(StoryScreen.Kind.ENDING))
+	_open_guard()
+	_menu_button().pressed.emit()
+	assert_int(asked.size()).is_equal(1)
+
+
+func test_back_on_an_ending_is_the_menu_and_on_a_scene_nothing() -> void:
+	var asked: Array[bool] = []
+	_screen.menu_requested.connect(func() -> void: asked.append(true))
+	_started()
+	_screen.go_back()
+	assert_int(asked.size()).is_equal(0)
+	_screen.show_page(StoryScreen.new(StoryScreen.Kind.ENDING))
+	_open_guard()
+	_screen.go_back()
+	assert_int(asked.size()).is_equal(1)
+
+
+func test_band_is_the_strip_plus_the_hint_and_scales() -> void:
+	assert_float(ReadingScreen.band(1.0, 70.0)).is_equal(125.0)
+	assert_float(ReadingScreen.band(2.0, 70.0)).is_equal(180.0)
+
+
+func test_goal_zone_collapses_only_at_200_percent_on_1920() -> void:
+	assert_bool(ReadingScreen.collapse_goal(2.0, 1920.0)).is_true()
+	assert_bool(ReadingScreen.collapse_goal(2.0, 2400.0)).is_false()
+	assert_bool(ReadingScreen.collapse_goal(1.0, 1920.0)).is_false()
+
+
+func test_collapsed_goal_zone_hides_the_caption_and_the_panel_keeps_it() -> void:
+	_screen.theme = ThemeScale.scaled(_screen.theme, 2.0)
+	_screen.collapse_height = 1920.0
+	_started()
+	_screen.rebuild()
+	assert_bool((_screen.get_node("%GoalLabel") as Label).visible).is_false()
+	_screen.goal_tapped()
+	assert_bool(_screen.panel_open()).is_true()
+
+
+func test_a_touch_reaches_the_tap_panel_once() -> void:
+	assert_bool(ProjectSettings.get_setting("input_devices/pointing/emulate_mouse_from_touch")).is_true()
+	var panel: TapPanel = auto_free(TapPanel.new()) as TapPanel
+	panel.size = Vector2(200, 200)
+	var taps: Array[bool] = []
+	panel.tapped.connect(func() -> void: taps.append(true))
+	var down: InputEventMouseButton = InputEventMouseButton.new()
+	down.button_index = MOUSE_BUTTON_LEFT
+	down.pressed = true
+	down.position = Vector2(50, 50)
+	var up: InputEventMouseButton = down.duplicate() as InputEventMouseButton
+	up.pressed = false
+	panel._gui_input(down)
+	panel._gui_input(up)
+	assert_int(taps.size()).is_equal(1)

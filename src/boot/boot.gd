@@ -67,5 +67,7 @@ func _open_reading(hero_id: String) -> void:
 	add_child(_screen)
 	_screen.theme = theme
 	_screen.setup(services.sessions[hero_id], services.heroes[hero_id])
+	# no menu screen yet: «В меню» starts a new run (the way out of a flow error or an ending)
+	_screen.menu_requested.connect(_screen.start)
 	_screen.resume()
 	$Safe.visible = false

@@ -38,6 +38,9 @@ var _stake_label: RichTextLabel
 var _cards: Array[OptionCard] = []
 var _tween: Tween
 var _milestone: int = -1
+var _menu_page: bool = false
+## Viewport height the goal-zone collapse looks at; 0 = the real viewport (a test sets it).
+var collapse_height: float = 0.0
 
 @onready var _goal: TapPanel = %Goal
 @onready var _accent: ColorRect = %Accent
@@ -75,11 +78,13 @@ func _ready() -> void:
 	_fade.visible = false
 
 
+func _enter_tree() -> void:
+	_connect()
+
+
 func _exit_tree() -> void:
 	_kill_tween()
-	if _session != null and _session.show_released.is_connected(_on_released):
-		_session.show_released.disconnect(_on_released)
-		_session.loaded.disconnect(on_loaded)
+	_disconnect()
 
 
 func _notification(what: int) -> void:
@@ -92,10 +97,10 @@ func _notification(what: int) -> void:
 
 ## Binds the screen to one run; the hero gives the goal chain and the hero card.
 func setup(session: RunSession, hero: HeroData) -> void:
+	_disconnect()
 	_session = session
 	_hero = hero
-	_session.show_released.connect(_on_released)
-	_session.loaded.connect(on_loaded)
+	_connect()
 
 
 ## A new run from chapter 1.
@@ -171,15 +176,30 @@ func close_panel() -> void:
 	_sheet_layer.visible = false
 
 
-## System Back: swallowed in the guard window, closes only the panel, otherwise nothing (the game stays).
+## System Back: swallowed in the guard window, closes only the panel, on an ending, error or fallback page
+## it is «В меню» (TD C1), otherwise nothing (the game stays).
 func go_back() -> void:
 	if _now() < _guard_until:
 		return
-	close_panel()
+	if panel_open():
+		close_panel()
+	elif _menu_page:
+		menu_requested.emit()
+
+
+## The session changed outside a touch of this screen (the Roll screen closed after a flow error):
+## the cards take the new states and a flow error gets its way out.
+func refresh() -> void:
+	_refresh_cards()
+	if _session.flow_error() and _menu_page == false and _page != null and _page.kind == StoryScreen.Kind.SCENE:
+		_add_menu_button()
 
 
 func panel_open() -> bool:
 	return _sheet_layer.visible
+
+
+# ---- test-only getters (TD G4: no new ones; migrate tests to child nodes and signals when touched) ----
 
 
 func hint_visible() -> bool:
@@ -212,6 +232,8 @@ func scene_id() -> String:
 
 
 func flow_mouse_filter() -> int:
+	if _stake_label == null:
+		return -1
 	return _stake_label.mouse_filter
 
 
@@ -227,7 +249,22 @@ func tween_running() -> bool:
 	return _tween != null and _tween.is_valid()
 
 
-## True when a line ends below the top of the view and above the free bottom (view minus the hint strip).
+# ---- end of test-only getters ----
+
+
+## Height of the bottom band: the strip (≈55 px at 100 %, scaled) plus the hint line; it carries the fade
+## and the hint, and the latch looks only above it (TD U1).
+static func band(text_scale: float, hint_height: float) -> float:
+	return BAND_PX * text_scale + hint_height
+
+
+## CEO Q2: at 200 % on 1080×1920 the goal zone shrinks to one row of dots, the caption goes to the panel.
+## shortcut: the rule is by size, not by a measured bridge line count; replace after a device measure.
+static func collapse_goal(text_scale: float, viewport_height: float) -> bool:
+	return text_scale >= 2.0 and viewport_height <= 1920.0
+
+
+## True when a line ends below the top of the view and above the free bottom (view minus the band).
 static func line_in_view(line_bottom: float, view_top: float, free_bottom: float) -> bool:
 	return line_bottom >= view_top and line_bottom <= free_bottom
 
@@ -253,6 +290,34 @@ func _present(page: StoryScreen) -> void:
 		show_page(page)
 
 
+func _connect() -> void:
+	if _session == null or _session.show_released.is_connected(_on_released):
+		return
+	_session.show_released.connect(_on_released)
+	_session.loaded.connect(on_loaded)
+
+
+func _disconnect() -> void:
+	if _session == null or not _session.show_released.is_connected(_on_released):
+		return
+	_session.show_released.disconnect(_on_released)
+	_session.loaded.disconnect(on_loaded)
+
+
+# Measured from the font, not read from the node: a hidden autowrapped label keeps a column-of-words size.
+func _hint_height() -> float:
+	var font: Font = _hint_label.get_theme_font(&"font")
+	var font_size: int = _hint_label.get_theme_font_size(&"font_size")
+	var margins: Vector2 = _hint.get_theme_stylebox(&"panel").get_minimum_size()
+	var width: float = maxf(_scroll.size.x - margins.x, 1.0)
+	var text_height: float = font.get_multiline_string_size(_hint_label.text, HORIZONTAL_ALIGNMENT_CENTER, width, font_size).y
+	return text_height + margins.y
+
+
+func _band() -> float:
+	return band(_scale(), _hint_height())
+
+
 func _on_released() -> void:
 	if _pending != null:
 		show_page(_pending)
@@ -260,6 +325,8 @@ func _on_released() -> void:
 
 func _choose(option: OptionData) -> void:
 	if option.check != null:
+		# shortcut (TD C5): a second tap after check_requested is ignored by the core guard; the Roll story
+		# decides whether this screen offers a way back
 		if _session.choose_check(option):
 			check_requested.emit(option)
 		return
@@ -281,10 +348,10 @@ func _on_scrim_input(event: InputEvent) -> void:
 
 
 func _check_stake() -> void:
-	if _stake_label == null or not is_instance_valid(_stake_label) or _session.stake_read():
+	if _stake_label == null or _session.stake_read():
 		return
 	var top: float = _scroll.global_position.y
-	var free_bottom: float = top + _scroll.size.y - BAND_PX * _scale()
+	var free_bottom: float = top + _scroll.size.y - _band()
 	var line_bottom: float = _stake_label.global_position.y + _stake_label.size.y
 	if line_in_view(line_bottom, top, free_bottom):
 		stake_seen()
@@ -294,6 +361,7 @@ func _build() -> void:
 	_kill_tween()
 	_cards = []
 	_stake_label = null
+	_menu_page = false
 	for child: Node in _flow.get_children():
 		_flow.remove_child(child)
 		child.queue_free()
@@ -305,11 +373,13 @@ func _build() -> void:
 		StoryScreen.Kind.CODA:
 			_add_paragraphs(_page.transition.coda)
 			_add_button("Next", tr("Дальше"), next_pressed)
+		StoryScreen.Kind.ENDING:
+			_add_note(tr("Конец главы"))
 		_:
-			_build_end()
-	_flow.add_child(_spacer(BAND_PX * _scale()))
+			_add_note(tr("Экран недоступен"))
+	_flow.add_child(_spacer(_band() + BAND_PX * _scale()))
 	_fill_goal()
-	_fade.custom_minimum_size.y = BAND_PX * _scale() * 2.0
+	_fade.custom_minimum_size.y = _band()
 	_fade.visible = _page.kind == StoryScreen.Kind.SCENE and not _session.stake_read()
 	_appear()
 	_check_stake.call_deferred()
@@ -328,7 +398,7 @@ func _build_scene() -> void:
 	for paragraph: ParagraphData in _page.paragraphs:
 		_stake_label = _paragraph(paragraph.text)
 	if _session.no_open_options():
-		_add_empty_choice()
+		_add_note(tr("Открытых вариантов нет."))
 		return
 	for view: OptionView in _session.option_views():
 		var card: OptionCard = OptionCard.new()
@@ -336,6 +406,11 @@ func _build_scene() -> void:
 		card.bind(view)
 		card.tapped.connect(card_tapped.bind(card))
 		_cards.append(card)
+	if _session.flow_error():
+		_add_menu_button()
+	if _stake_label == null:
+		# no bridge and no paragraph: there is no stake line to read, the cards open at once (TD C3)
+		stake_seen()
 
 
 func _build_outcome() -> void:
@@ -349,19 +424,16 @@ func _build_outcome() -> void:
 	_add_button("Next", tr("Дальше"), next_pressed)
 
 
-func _build_end() -> void:
+func _add_note(text: String) -> void:
 	var note: Label = Label.new()
-	note.text = tr("Конец главы") if _page.kind == StoryScreen.Kind.ENDING else tr("Экран недоступен")
+	note.text = text
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_flow.add_child(note)
-	_add_button("Menu", tr("В меню"), _menu_pressed)
+	_add_menu_button()
 
 
-func _add_empty_choice() -> void:
-	var note: Label = Label.new()
-	note.text = tr("Открытых вариантов нет.")
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_flow.add_child(note)
+func _add_menu_button() -> void:
+	_menu_page = true
 	_add_button("Menu", tr("В меню"), _menu_pressed)
 
 
@@ -428,6 +500,8 @@ func _fill_goal() -> void:
 	_accent.color = ACCENTS.get(_hero.accent, ACCENTS["carmine"])
 	if not shown:
 		return
+	var height: float = collapse_height if collapse_height > 0.0 else get_viewport().get_visible_rect().size.y
+	_goal_label.visible = not collapse_goal(_scale(), height)
 	_goal_label.text = tr("Цель: %s") % chapter.goal
 	for dot: Node in _dots.get_children():
 		_dots.remove_child(dot)
