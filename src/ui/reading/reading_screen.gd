@@ -555,9 +555,8 @@ func _fill_sheet() -> void:
 	_sheet_line(_hero.id, &"TitleLabel")
 	for stat: StatData in _hero.stats:
 		_sheet_line("%s %s" % [stat.name, _signed(stat.bonus)], &"Label")
-	for decl: FlagDecl in _hero.flags:
-		if decl.visible and _session.has_flag(decl.id):
-			_sheet_line(decl.title, &"CaptionLabel")
+	for decl: FlagDecl in _session.visible_flags():
+		_sheet_line(decl.title, &"CaptionLabel")
 
 
 func _sheet_line(text: String, variation: StringName) -> void:

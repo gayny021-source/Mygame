@@ -325,3 +325,19 @@ func test_a_touch_reaches_the_tap_panel_once() -> void:
 	panel._gui_input(down)
 	panel._gui_input(up)
 	assert_int(taps.size()).is_equal(1)
+
+
+func test_the_sheet_lists_the_visible_flags_the_session_gives() -> void:
+	# Arrange: oa sets f_b, which is visible; oc would set f_c, which is hidden
+	for decl: FlagDecl in _t.hero.flags:
+		decl.visible = decl.id == "f_b"
+		decl.title = "title_%s" % decl.id
+	_started()
+	_t.session.apply_plain(_t.option("a"))
+	_screen._fill_sheet()
+	var lines: Array[String] = []
+	for child: Node in _screen._sheet_body.get_children():
+		lines.append((child as Label).text)
+	# Assert
+	assert_bool(lines.has("title_f_b")).is_true()
+	assert_bool(lines.has("title_f_a")).is_false()

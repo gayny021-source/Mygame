@@ -74,6 +74,13 @@ func has_flag(id: String) -> bool:
 	return _state != null and _state.has_flag(id)
 
 
+## Standing flags the hero card shows, in the hero's declaration order; empty before a run.
+func visible_flags() -> Array[FlagDecl]:
+	if _state == null:
+		return []
+	return _state.visible_flags()
+
+
 func journal_size() -> int:
 	return _state.journal().size() if _state != null else 0
 
