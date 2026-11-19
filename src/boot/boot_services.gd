@@ -41,7 +41,7 @@ func _load_heroes(writer: SaveWriter, log_line: Callable, root: String) -> void:
 		if hero != null:
 			sessions[id] = RunSession.new(hero, writer, d20, _new_run_id, log_line, captions)
 	if sessions.is_empty():
-		status = "Нет данных героев"
+		status = tr("Нет данных героев")
 		log_line.call("RT-01 героев в %s нет: играть нечего" % root)
 
 

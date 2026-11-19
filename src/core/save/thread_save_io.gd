@@ -5,10 +5,13 @@ extends SaveIo
 ## `wait_for_task_completion`. WorkerThreadPool is NOT SOURCEABLE in docs/engine-reference: save_disk_test
 ## is its probe.
 
-## A task running longer than this is abandoned (TD C3): its thread cannot be stopped, so the
-## IO forgets it, reports a failed result and accepts the next start.
+## A task running longer than this is abandoned (TD C3): its thread cannot be stopped, so the IO
+## reports a failed result but keeps the task id and stays busy until the thread ends. Two threads
+## never write one slot; a late result is discarded.
 var watchdog_ms: int = 3000
-## Replaced by tests; ms on a monotonic clock.
+## After this many abandoned tasks in a row (none finished normally between) every start is refused.
+var max_abandoned: int = 3
+## Test seam only: tests replace the clock to move time without sleeping.
 var clock: Callable = Time.get_ticks_msec
 ## Tasks abandoned so far.
 var abandoned: int = 0
@@ -17,6 +20,8 @@ var _task: int = -1
 var _running: IoDone
 var _started_ms: int
 var _read_slots: int
+var _is_abandoned: bool = false
+var _strikes: int = 0
 
 
 ## False, with a warning, while a task runs: one task at a time, the running one is not lost.
@@ -40,38 +45,48 @@ func start_read(paths: PackedStringArray) -> bool:
 	return true
 
 
-## The finished operation once; null while the task runs or when none was started.
+## The finished operation once; null while the task runs or when none was started. The result of
+## an abandoned task is dropped; its thread is joined here, which cannot block (it is complete).
 func poll() -> IoDone:
 	if _task < 0:
 		return null
 	if not _is_done(_task):
-		return _abandon() if clock.call() - _started_ms >= watchdog_ms else null
+		return _abandon() if not _is_abandoned and clock.call() - _started_ms >= watchdog_ms else null
 	WorkerThreadPool.wait_for_task_completion(_task)
 	var done: IoDone = _running
+	var late: bool = _is_abandoned
 	_task = -1
 	_running = null
+	_is_abandoned = false
+	if late:
+		return null
+	_strikes = 0
 	return done
 
 
+## Test seam: HungIo in the watchdog test never reports completion without a real stuck thread.
 func _is_done(task: int) -> bool:
 	return WorkerThreadPool.is_task_completed(task)
 
 
-## Forgets the stuck task (no wait: it would hang too) and returns a failed result of its shape.
+## Returns a failed result of the stuck task's shape; the task itself stays, so `_busy` refuses starts.
 func _abandon() -> IoDone:
 	push_warning("ThreadSaveIo: задача висит больше %d мс, брошена" % watchdog_ms)
 	abandoned += 1
+	_strikes += 1
+	_is_abandoned = true
 	var done: IoDone = IoDone.new()
 	for slot: int in _read_slots:
 		done.statuses.append(IoDone.FileStatus.READ_ERROR)
 		done.reads.append(null)
 		done.failed.append(slot)
-	_task = -1
-	_running = null
 	return done
 
 
 func _busy() -> bool:
+	if _strikes >= max_abandoned:
+		push_warning("ThreadSaveIo: %d задач подряд зависли, запись отключена" % _strikes)
+		return true
 	if _task >= 0:
 		push_warning("ThreadSaveIo: задача уже идёт, новый запуск отклонён")
 	return _task >= 0

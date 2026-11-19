@@ -15,14 +15,18 @@ var services: BootServices
 ## Text scale of the theme: 1.0 = 100 %, 2.0 = 200 % (reading-screen.md; later a setting).
 @export_range(1.0, 2.0) var text_scale: float = 1.0
 
+var _started: bool = false
 var _quitting: bool = false
 
+@onready var _title: Label = %Title
 @onready var _status: Label = %Status
 
 
 func _ready() -> void:
-	if services != null:
+	if _started:
 		return
+	_started = true
+	_title.text = tr("Критический провал")
 	theme = ThemeScale.scaled(theme, text_scale)
 	var save: SaveNode = get_node_or_null("/root/SaveService") as SaveNode
 	if save == null:
@@ -31,7 +35,7 @@ func _ready() -> void:
 		push_error("RT-02 автозагрузка SaveService не найдена: сервисы не собраны")
 		return
 	services = BootServices.build(save.writer, _log)
-	_status.text = tr(services.status)
+	_status.text = services.status
 
 
 func _notification(what: int) -> void:
@@ -45,7 +49,7 @@ func _quit() -> void:
 	_quitting = true
 	var save: SaveNode = get_node_or_null("/root/SaveService") as SaveNode
 	if save != null:
-		save.flush()
+		save.flush(save.pause_flush_ms)
 	get_tree().quit()
 
 

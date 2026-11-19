@@ -5,10 +5,12 @@ extends GdUnitTestSuite
 const PATH := "user://rt1_watchdog.tmp"
 
 
-## A task that never reports completion.
+## A task that reports completion only after `hung` is cleared (the real thread ends at once).
 class HungIo extends ThreadSaveIo:
-	func _is_done(_task: int) -> bool:
-		return false
+	var hung: bool = true
+
+	func _is_done(task: int) -> bool:
+		return not hung and super._is_done(task)
 
 
 var _now: int = 0
@@ -31,7 +33,7 @@ func _io() -> HungIo:
 	return io
 
 
-func test_hung_write_is_abandoned_after_the_watchdog_and_the_next_start_is_accepted() -> void:
+func test_hung_write_is_abandoned_after_the_watchdog_and_the_next_start_is_refused() -> void:
 	# Arrange
 	var io: HungIo = _io()
 	io.start_write(PATH, PackedByteArray([1]))
@@ -43,7 +45,39 @@ func test_hung_write_is_abandoned_after_the_watchdog_and_the_next_start_is_accep
 	assert_object(done).is_not_null()
 	assert_bool(done.ok).is_false()
 	assert_int(io.abandoned).is_equal(1)
+	assert_bool(io.start_write(PATH, PackedByteArray([2]))).is_false()
+
+
+func test_late_result_of_an_abandoned_task_is_discarded_and_then_starts_are_accepted() -> void:
+	# Arrange
+	var io: HungIo = _io()
+	io.start_write(PATH, PackedByteArray([1]))
+	_now = 3000
+	io.poll()
+	io.hung = false
+	OS.delay_msec(50)
+	# Act
+	var late: SaveIo.IoDone = io.poll()
+	# Assert
+	assert_object(late).is_null()
 	assert_bool(io.start_write(PATH, PackedByteArray([2]))).is_true()
+
+
+func test_starts_are_refused_after_max_abandoned_tasks_in_a_row() -> void:
+	# Arrange
+	var io: HungIo = _io()
+	io.max_abandoned = 2
+	for round: int in 2:
+		io.hung = true
+		_now += 10000
+		io.start_write(PATH, PackedByteArray([1]))
+		_now += 3000
+		io.poll()
+		io.hung = false
+		OS.delay_msec(50)
+		io.poll()
+	# Act / Assert
+	assert_bool(io.start_write(PATH, PackedByteArray([2]))).is_false()
 
 
 func test_hung_read_is_abandoned_with_a_read_error_per_slot() -> void:

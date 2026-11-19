@@ -128,3 +128,18 @@ func test_flush_resets_the_guard_so_the_next_flush_runs() -> void:
 	# Assert
 	assert_bool(node._flushing).is_false()
 	assert_bool(node.flush()).is_true()
+
+
+func test_two_consecutive_close_requests_each_flush_once_and_write_nothing_new() -> void:
+	# Arrange
+	var rig: WriterRig = WriterRig.new()
+	var node: SaveNode = auto_free(SaveNode.new())
+	node.writer = rig.writer
+	rig.commit("R1")
+	# Act
+	node.notification(Node.NOTIFICATION_WM_CLOSE_REQUEST)
+	node.notification(Node.NOTIFICATION_WM_CLOSE_REQUEST)
+	# Assert
+	assert_int(rig.io.written.size()).is_equal(1)
+	assert_bool(node._flushing).is_false()
+	assert_bool(rig.writer.idle()).is_true()
