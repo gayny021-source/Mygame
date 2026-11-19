@@ -476,7 +476,16 @@ func _restore_goal(position: StoryPosition) -> void:
 	if not context.issue.is_empty():
 		_log.call(context.issue)
 	var pending: OutcomeData = _find_outcome(position.pending_outcome)
-	_goal_pending = failed and pending != null and pending.sets.has(chapter.goal_fail_flag)
+	_goal_pending = failed and pending != null and pending.sets.has(chapter.goal_fail_flag) and _set_by(chapter.goal_fail_flag, pending.id, position.scene)
+
+
+# Э-24, AC-72: the flag was set by this very outcome on this scene (the journal has the record); a flag
+# that already stood is not set again and journals nothing, so live play and a load agree.
+func _set_by(flag_id: String, outcome_id: String, scene_id: String) -> bool:
+	for entry: RunState.Entry in _state.journal():
+		if entry.action == RunState.Entry.Action.SET and entry.flag == flag_id and entry.outcome == outcome_id and entry.scene == scene_id:
+			return true
+	return false
 
 
 func _chapter_of(chapter_id: String) -> ChapterData:
@@ -557,13 +566,19 @@ func _snapshot_schema(page: StoryScreen, position: StoryPosition) -> void:
 		_schema = []
 		_schema_chapter = position.chapter
 	if page.scene.node or position.transition.is_empty():
-		_schema.append(RunBody.Snapshot.new(_frozen(_state), position))
+		var frozen: RunState = _frozen(_state)
+		if frozen != null:
+			_schema.append(RunBody.Snapshot.new(frozen, position))
 
 
-# A schema snapshot keeps its own state: the live one keeps changing.
+# A schema snapshot keeps its own state: the live one keeps changing. Null, with the findings logged,
+# when the copy does not read back: that snapshot is left out, nothing crashes.
 func _frozen(state: RunState) -> RunState:
 	var issues: Array[DataIssue] = []
-	return RunState.from_dict(state.to_dict(), "session", issues, _hero.flags, _log)
+	var copy: RunState = RunState.from_dict(state.to_dict(), "session", issues, _hero.flags, _log)
+	for issue: DataIssue in issues:
+		_log.call("снимок схемы: %s %s: %s" % [issue.code, issue.path, issue.message])
+	return copy
 
 
 func _commit_roll(transition: int, record: RollRecord) -> void:

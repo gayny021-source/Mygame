@@ -297,3 +297,35 @@ func test_report_without_an_outcome_on_screen_changes_nothing() -> void:
 	_t.session.report_outcome_text_shown()
 	assert_int(_changed).is_equal(before)
 	assert_int(_t.session.goal_view().mode).is_equal(MODE.RUNNING)
+
+
+func test_a_repeated_fail_outcome_is_not_pending_after_a_load_as_live_ac72() -> void:
+	_t.started()
+	_take("a")
+	_next()
+	_take("x")
+	_next()
+	_take("y", false)
+	assert_int(_t.session.goal_view().mode).is_equal(MODE.FROZEN)
+	_reload()
+	assert_int(_t.session.screen().kind).is_equal(StoryScreen.Kind.OUTCOME)
+	assert_int(_t.session.goal_view().mode).is_equal(MODE.FROZEN)
+
+
+# Rows of a damaged context: the load succeeds and the view is normalized (Э-21).
+func test_a_damaged_context_type_loads_and_is_normalized(milestone: Variant, start: Variant, test_parameters := [
+	["2", "st_main"], [1.5, "st_main"], [null, "st_main"], [2, 5], [2, null],
+]) -> void:
+	_t.started()
+	_take("a")
+	_next()
+	var body: Dictionary = _t.disk_body()
+	body["resume"]["state"]["milestone_max"] = milestone
+	body["resume"]["state"]["start"] = start
+	_t.rig.files.clear()
+	_t.rig.put(SessionRig.KEY, 1, body)
+	_reload()
+	assert_int(_t.loads[0][0]).is_equal(SaveWriter.LoadCode.OK)
+	var view: GoalView = _t.session.goal_view()
+	assert_int(view.position).is_equal(2)
+	assert_str(view.goal).is_equal(GoalFixtures.GOAL)

@@ -34,6 +34,8 @@ var _hero: HeroData
 var _page: StoryScreen
 var _pending: StoryScreen
 var _guard_until: int
+## True while this screen reports the outcome text to the core (see `_on_goal_changed`).
+var _reporting: bool
 var _stake_label: RichTextLabel
 var _cards: Array[OptionCard] = []
 var _tween: Tween
@@ -297,6 +299,14 @@ func _connect() -> void:
 		return
 	_session.show_released.connect(_on_released)
 	_session.loaded.connect(on_loaded)
+	_session.goal_changed.connect(_on_goal_changed)
+
+
+# The goal zone follows the «outcome text shown» event of this screen only: other changes of the view
+# wait for the page they belong to (chapter-goal.md, rule 5: the model sees the old value until the move ends).
+func _on_goal_changed() -> void:
+	if _reporting and _page != null:
+		_fill_goal()
 
 
 func _disconnect() -> void:
@@ -304,6 +314,7 @@ func _disconnect() -> void:
 		return
 	_session.show_released.disconnect(_on_released)
 	_session.loaded.disconnect(on_loaded)
+	_session.goal_changed.disconnect(_on_goal_changed)
 
 
 # Measured from the font, not read from the node: a hidden autowrapped label keeps a column-of-words size.
@@ -391,6 +402,10 @@ func _build() -> void:
 	_fade.visible = _page.kind == StoryScreen.Kind.SCENE and not _session.stake_read()
 	_appear()
 	_check_stake.call_deferred()
+	if _page.kind == StoryScreen.Kind.OUTCOME:
+		_reporting = true
+		_session.report_outcome_text_shown()
+		_reporting = false
 
 
 func _build_scene() -> void:
@@ -430,7 +445,6 @@ func _build_outcome() -> void:
 	_flow.add_child(context)
 	_add_paragraphs(_page.outcome.paragraphs)
 	_add_button("Next", tr("Дальше"), next_pressed)
-	_session.report_outcome_text_shown()
 
 
 func _add_note(text: String) -> void:
@@ -553,8 +567,12 @@ func _fill_sheet() -> void:
 		_sheet_body.remove_child(child)
 		child.queue_free()
 	var chapter: ChapterData = _chapter()
+	var view: GoalView = _session.goal_view()
+	if view.mode in [GoalView.Mode.FROZEN, GoalView.Mode.DONE_OK, GoalView.Mode.DONE_FAILED]:
+		_sheet_line(_caption_text(view), &"Label")
 	_sheet_line(tr("Цель главы"), &"CaptionLabel")
-	_sheet_line(chapter.goal if chapter != null else "", &"Label")
+	if not view.goal.is_empty():
+		_sheet_line(view.goal, &"Label")
 	# shortcut: heroes.md gives no display name yet; the id stands in for it
 	_sheet_line(_hero.id, &"TitleLabel")
 	for stat: StatData in _hero.stats:

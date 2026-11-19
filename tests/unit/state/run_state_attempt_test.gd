@@ -49,8 +49,22 @@ func test_an_unknown_extra_key_is_refused_dt04() -> void:
 	assert_str(issues[0].code).is_equal("DT-04")
 
 
-func test_a_wrong_type_of_a_field_is_refused() -> void:
+func test_a_wrong_type_of_a_field_is_read_as_absent_with_a_warning_e21() -> void:
 	var issues: Array[DataIssue] = []
-	var back: RunState = _from({"flags": [], "journal": [], "start": 5, "milestone_max": "2"}, issues)
-	assert_object(back).is_null()
-	assert_bool(issues.is_empty()).is_false()
+	var logs: Array[String] = []
+	var back: RunState = RunState.from_dict({"flags": [], "journal": [], "start": 5, "milestone_max": "2"}, "t", issues, _decls, func(line: String) -> void: logs.append(line))
+	assert_array(issues).is_empty()
+	assert_object(back).is_not_null()
+	assert_str(back.attempt_start()).is_empty()
+	assert_int(back.milestone_max()).is_equal(0)
+	assert_int(logs.size()).is_equal(2)
+
+
+func test_a_fraction_or_null_milestone_is_read_as_absent() -> void:
+	for value: Variant in [1.5, null]:
+		var issues: Array[DataIssue] = []
+		var logs: Array[String] = []
+		var back: RunState = RunState.from_dict({"flags": [], "journal": [], "milestone_max": value}, "t", issues, _decls, func(line: String) -> void: logs.append(line))
+		assert_array(issues).is_empty()
+		assert_int(back.milestone_max()).is_equal(0)
+		assert_int(logs.size()).is_equal(1)

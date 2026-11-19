@@ -164,10 +164,7 @@ static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], d
 	for key: Variant in raw:
 		if not KEYS.has(key):
 			reader.issue("DT-04", str(key), "неизвестный ключ")
-	if raw.has("start"):
-		state._attempt_start = reader.text("start", false)
-	if raw.has("milestone_max"):
-		state._milestone_max = reader.integer("milestone_max")
+	state._read_context(raw)
 	for id: String in reader.strings("flags"):
 		if state._declared(id):
 			state._active[id] = true
@@ -182,6 +179,23 @@ static func from_dict(raw: Dictionary, path: String, issues: Array[DataIssue], d
 		return null
 	state._one_per_group()
 	return state
+
+
+# Контекст попытки читается мягко (Э-21): неверный тип — как будто ключа нет, одно предупреждение;
+# значения чинит История (GoalRules.normalize_context).
+func _read_context(raw: Dictionary) -> void:
+	if raw.has("start"):
+		if raw["start"] is String:
+			_attempt_start = raw["start"]
+		else:
+			_report("контекст попытки: «start» не строка, поле сброшено")
+	if raw.has("milestone_max"):
+		var value: Variant = raw["milestone_max"]
+		var whole: bool = value is int or (value is float and value == floorf(value) and absf(value) < 1.0e9)
+		if whole:
+			_milestone_max = int(value)
+		else:
+			_report("контекст попытки: «milestone_max» не целое число, поле сброшено")
 
 
 # Группа вытесняет: прежний флаг снимается и пишется раньше нового (run-state.md, правило 10).

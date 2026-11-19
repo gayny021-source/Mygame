@@ -2802,6 +2802,10 @@
   },
   {
    "source": "src/ui/reading/reading_screen.gd",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
+   "source": "src/ui/reading/reading_screen.gd",
    "target": "design/gdd/heroes.md"
   },
   {
