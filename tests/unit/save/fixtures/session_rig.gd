@@ -24,6 +24,7 @@ func _init(hero_id: String = HERO_ID) -> void:
 	hero.id = hero_id
 	var stat: StatData = StatData.new()
 	stat.id = "strength"
+	stat.name = "Сила"
 	stat.bonus = 4
 	hero.stats.append(stat)
 	_build()
@@ -78,10 +79,12 @@ func disk_body() -> Dictionary:
 	return rig.read(KEY, pick.slot, hero.id).body
 
 
-## A start-to-"s1 shown" run, landed on disk.
-func started() -> StoryScreen:
+## A start-to-"s1 shown" run, landed on disk; the stake is read unless `stake_read` is false.
+func started(stake_read: bool = true) -> StoryScreen:
 	var screen: StoryScreen = session.start_new()
 	settle()
+	if stake_read:
+		session.report_stake_visible()
 	return screen
 
 

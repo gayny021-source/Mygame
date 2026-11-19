@@ -1,9 +1,9 @@
 {
-	"_about": "Option caption templates and names for the Reading and Roll screens (src/core/story/caption_texts.gd; design/ux/reading-screen.md, Dependencies; CEO decisions 2026-11-18). U+00A0 holds the pairs together. Placeholders: {stat} {bonus} {level} {dc} {chance} {price} {reason}.",
-	"risky": "{stat} {bonus} · {level} {dc} · шанс {chance} %",
+	"schema_version": 1,
+	"_about": "Option caption templates for the Reading and Roll screens (src/core/story/caption_texts.gd; design/ux/reading-screen.md, Dependencies; CEO decisions 2026-11-18, 2026-11-19). U+00A0 holds the pairs together. Placeholders: {stat} {bonus} {level} {dc} {chance} {price} {reason}. Stat names live in hero.json.",
+	"risky": "{stat}\u00a0{bonus} \u00b7 {level}\u00a0{dc} \u00b7 шанс\u00a0{chance}\u00a0%",
 	"plain": "Без броска",
-	"plain_price": "Без броска · {price}",
-	"closed": "{stat} закрыта: {reason}",
-	"levels": {"easy": "Легко", "medium": "Средне", "hard": "Трудно"},
-	"stats": {"strength": "Сила", "agility": "Ловкость", "mind": "Ум", "faith": "Вера", "luck": "Удача"}
+	"plain_price": "Без броска\u00a0\u00b7 {price}",
+	"closed": "Закрыто: {stat} \u2014 {reason}",
+	"levels": {"easy": "Легко", "medium": "Средне", "hard": "Трудно"}
 }

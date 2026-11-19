@@ -31,7 +31,7 @@ func test_brief_after_choose_has_numbers_and_caption_before_any_roll() -> void:
 	assert_int(brief.chance).is_equal(60)
 	assert_str(brief.stat_name).is_equal("Сила")
 	assert_str(brief.level_word).is_equal("Средне")
-	assert_str(brief.caption).is_equal("Сила +4 · Средне 13 · шанс 60 %")
+	assert_str(brief.caption).is_equal("Сила +4 · Средне 13 · шанс 60 %")
 
 
 func test_brief_without_a_turn_is_null() -> void:
@@ -169,3 +169,23 @@ func test_a_failed_roll_write_is_reported_and_logged_but_the_flow_goes_on() -> v
 	assert_int(_t.released).is_equal(released + 1)
 	assert_int(_t.logs.size()).is_greater(0)
 	assert_object(_t.session.continue_check()).is_not_null()
+
+
+func test_flow_error_is_visible_and_load_or_a_new_run_is_the_way_out() -> void:
+	# Arrange: the outcome is missing, so continue is a flow error
+	for outcome: OutcomeData in _t.hero.chapters[0].outcomes.duplicate():
+		if outcome.id == "ow":
+			_t.hero.chapters[0].outcomes.erase(outcome)
+	_rolled()
+	_t.settle()
+	_t.session.continue_check()
+	var before: bool = _t.session.flow_error()
+	_t.session.close_check()
+	var after: bool = _t.session.flow_error()
+	# Act: «В меню» → a new run
+	var screen: StoryScreen = _t.session.start_new()
+	# Assert
+	assert_bool(before).is_false()
+	assert_bool(after).is_true()
+	assert_object(screen).is_not_null()
+	assert_bool(_t.session.flow_error()).is_false()

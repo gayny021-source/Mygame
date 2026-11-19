@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "hero_flags_json",
-  "stats": [{"id": "strength", "bonus": 1}],
+  "stats": [{"id": "strength", "name": "Сила", "bonus": 1}],
   "chapters": ["m_cond"],
   "endings": ["end_a"],
   "portrait": "portrait_stub",

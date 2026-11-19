@@ -254,3 +254,11 @@ func test_load_hero_links_check_stat_outside_hero_stats_returns_bs01() -> void:
 	# Assert
 	var path: String = StoryFixtures.DIR + "/hero_links/chapters/m_alien.json/scenes/al_s1/options/al_risk/check/stat"
 	assert_array(_paths(result, "BS-01")).contains([path])
+
+
+func test_load_hero_stat_without_a_name_is_dt03() -> void:
+	# Act
+	var result: LoadResult = _load("hero_noname")
+	# Assert: the player never reads a raw stat id (story UI1)
+	var path: String = StoryFixtures.DIR + "/hero_noname/hero.json/stats/strength/name"
+	assert_array(_paths(result, "DT-03")).contains([path])

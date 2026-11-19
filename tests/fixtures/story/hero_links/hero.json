@@ -3,7 +3,7 @@
   "schema_version": 1,
   "id": "hero_links",
   "stats": [
-    {"id": "strength", "bonus": 0}
+    {"id": "strength", "name": "Сила", "bonus": 0}
   ],
   "chapters": ["m_alien", "m_alien"],
   "endings": [],

@@ -37,7 +37,7 @@ var _turn: CheckTurn
 var _waiting: int
 var _load_token: int
 var _captions: CaptionTexts
-## Options of the scene on show with their fixed captions; the states are set by `option_views`.
+## Options of the scene on show with their captions; the states are worked out by `_state_of`.
 var _views: Array[OptionView] = []
 ## The stake of the scene was seen (reading-screen.md, «защёлка»): reset by a new scene or a load.
 var _stake_read: bool
@@ -114,7 +114,7 @@ func apply_plain(option: OptionData) -> StoryScreen:
 	var page: StoryScreen = _nav.screen()
 	if page == null or page.kind != StoryScreen.Kind.SCENE or not page.scene.options.has(option):
 		return null
-	if not _can_apply(option.outcome):
+	if not _is_open(option) or not _can_apply(option.outcome):
 		return null
 	_turn = null
 	return _apply(option.outcome)
@@ -132,6 +132,8 @@ func choose_check(option: OptionData) -> bool:
 	if _state == null or _waiting != 0:
 		return false
 	if _turn != null and _turn.phase != CheckTurn.Phase.CANCELLED:
+		return false
+	if not _is_open(option):
 		return false
 	_turn = CheckTurn.choose(_nav.screen(), option, _hero, _d20, _commit_roll, _log)
 	return _turn != null
@@ -166,9 +168,9 @@ func check_brief() -> CheckBrief:
 	var data: CheckBrief = _turn.brief()
 	if data == null:
 		return null
-	data.stat_name = _captions.stat_name(data.stat_id)
+	data.stat_name = _stat_name(data.stat_id)
 	data.level_word = _captions.level_word(data.level)
-	data.caption = _captions.risky(data.stat_id, data.bonus, data.level, data.dc, data.chance)
+	data.caption = _captions.risky(data.stat_name, data.bonus, data.level, data.dc, data.chance)
 	return data
 
 
@@ -215,20 +217,45 @@ func report_stake_visible() -> void:
 		_stake_read = true
 
 
-## The cards of the scene on show (or of the option just taken on its outcome) with their states.
+## True after a flow error closed the Roll screen (СВ Э-23): every option stays blocked, and the way out
+## is «В меню» (start_new) or a load, which both end the turn.
+func flow_error() -> bool:
+	return _turn != null and _turn.phase == CheckTurn.Phase.CLOSED
+
+
+## The cards of the scene on show (or of the option just taken on its outcome) with their states; copies,
+## so the UI cannot change what the session keeps.
 func option_views() -> Array[OptionView]:
-	var page: StoryScreen = screen()
-	var taken: OptionData = _taken(page)
+	var taken: OptionData = _taken(screen())
+	var result: Array[OptionView] = []
 	for view: OptionView in _views:
-		if taken != null:
-			view.state = OptionView.State.CHOSEN if view.option == taken else OptionView.State.BLOCKED
-		elif not view.reason.is_empty():
-			view.state = OptionView.State.CLOSED
-		elif not _stake_read:
-			view.state = OptionView.State.INACTIVE
-		else:
-			view.state = OptionView.State.OPEN
-	return _views
+		var copy: OptionView = OptionView.new()
+		copy.option = view.option
+		copy.caption = view.caption
+		copy.reason = view.reason
+		copy.state = _state_of(view, taken)
+		result.append(copy)
+	return result
+
+
+# Rules 1, 7, 8: taken or blocked after a choice, closed by a hindrance, inactive until the stake is read.
+func _state_of(view: OptionView, taken: OptionData) -> OptionView.State:
+	if taken != null:
+		return OptionView.State.CHOSEN if view.option == taken else OptionView.State.BLOCKED
+	if not view.reason.is_empty():
+		return OptionView.State.CLOSED
+	if not _stake_read:
+		return OptionView.State.INACTIVE
+	return OptionView.State.OPEN
+
+
+# The core gate of a touch (rules 7-9): the option must be in the choice and OPEN now.
+func _is_open(option: OptionData) -> bool:
+	var taken: OptionData = _taken(screen())
+	for view: OptionView in _views:
+		if view.option == option:
+			return _state_of(view, taken) == OptionView.State.OPEN
+	return false
 
 
 # The option taken: the one of the outcome on show or of a live turn; null before a choice.
@@ -252,7 +279,7 @@ func _enter_views(page: StoryScreen) -> void:
 		if not _nav.holds(option.condition):
 			continue
 		if option.check != null and not _has_stat(option.check.stat):
-			_log.call("у героя нет характеристики «%s»: вариант «%s» скрыт" % [option.check.stat, option.id])
+			_log.call("у героя нет характеристики или её названия «%s»: вариант «%s» скрыт" % [option.check.stat, option.id])
 			continue
 		_views.append(_view_of(option))
 
@@ -266,25 +293,34 @@ func _view_of(option: OptionData) -> OptionView:
 	var hindrance: FlagDecl = _hindrance(option.check.stat)
 	if hindrance != null:
 		view.reason = hindrance.title
-		view.caption = _captions.closed(option.check.stat, hindrance.title)
+		view.caption = _captions.closed(_stat_name(option.check.stat), hindrance.title)
 		return view
 	var bonus: int = D20Check.bonus_of(_hero, option.check.stat)
 	var issues: Array[DataIssue] = []
 	var dc: int = _d20.config.dc(option.check.level, issues)
+	for issue: DataIssue in issues:
+		_log.call("%s %s (%s): %s" % [issue.code, issue.path, option.check.id, issue.message])
 	if dc >= 0:
-		view.caption = _captions.risky(option.check.stat, bonus, option.check.level, dc, D20Check.chance(dc, bonus))
+		view.caption = _captions.risky(_stat_name(option.check.stat), bonus, option.check.level, dc, D20Check.chance(dc, bonus))
 	return view
 
 
+# A stat the player can read: it exists and has a name (hero.json requires one).
 func _has_stat(stat_id: String) -> bool:
+	return not _stat_name(stat_id).is_empty()
+
+
+func _stat_name(stat_id: String) -> String:
 	for stat: StatData in _hero.stats:
 		if stat.id == stat_id:
-			return true
-	return false
+			return stat.name
+	return ""
 
 
 # The flag that closes `stat_id`, the one set first (heroes.md, «Помехи во время игры»).
 func _hindrance(stat_id: String) -> FlagDecl:
+	if _state == null:
+		return null
 	for entry: RunState.Entry in _state.journal():
 		if entry.action != RunState.Entry.Action.SET or not _state.has_flag(entry.flag):
 			continue

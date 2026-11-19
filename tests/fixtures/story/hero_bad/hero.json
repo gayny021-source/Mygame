@@ -4,7 +4,7 @@
   "id": "hero_bad",
   "name": "Ровенд",
   "stats": [
-    {"id": "strength", "bonus": 1.5}
+    {"id": "strength", "name": "Сила", "bonus": 1.5}
   ],
   "chapters": ["../hero_stub/chapters/ch_f1"],
   "endings": [],

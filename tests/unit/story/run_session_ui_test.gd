@@ -45,7 +45,7 @@ func _states() -> Array:
 
 func test_options_are_inactive_until_the_stake_is_read_then_open() -> void:
 	# Arrange
-	_t.started()
+	_t.started(false)
 	var before: Array = _states()
 	# Act
 	_t.session.report_stake_visible()
@@ -60,7 +60,7 @@ func test_captions_are_ready_lines() -> void:
 	_t.started()
 	# Assert
 	assert_str(_view("a").caption).is_equal("Без броска")
-	assert_str(_view("r").caption).is_equal("Сила +4 · Средне 13 · шанс 60 %")
+	assert_str(_view("r").caption).is_equal("Сила +4 · Средне 13 · шанс 60 %")
 
 
 func test_a_negative_bonus_is_written_with_the_true_minus() -> void:
@@ -68,7 +68,7 @@ func test_a_negative_bonus_is_written_with_the_true_minus() -> void:
 	_t.hero.stats[0].bonus = -1
 	_t.started()
 	# Assert: need 14, chance 35
-	assert_str(_view("r").caption).is_equal("Сила %s1 · Средне 13 · шанс 35 %%" % MINUS)
+	assert_str(_view("r").caption).is_equal("Сила %s1 · Средне 13 · шанс 35 %%" % MINUS)
 
 
 func test_a_safe_option_names_its_price() -> void:
@@ -78,7 +78,7 @@ func test_a_safe_option_names_its_price() -> void:
 	_t.hero.chapters[0].scenes[0].options[1].kind = OptionData.KIND_SAFE
 	_t.started()
 	# Assert
-	assert_str(_view("c").caption).is_equal("Без броска · потерянное время")
+	assert_str(_view("c").caption).is_equal("Без броска\u00a0· потерянное время")
 
 
 func test_a_hindrance_closes_the_risky_option_with_its_reason() -> void:
@@ -95,7 +95,7 @@ func test_a_hindrance_closes_the_risky_option_with_its_reason() -> void:
 	var view: OptionView = _view("r")
 	# Assert: closed stays closed after the latch
 	assert_int(view.state).is_equal(STATE.CLOSED)
-	assert_str(view.caption).is_equal("Сила закрыта: Сломана рука")
+	assert_str(view.caption).is_equal("Закрыто: Сила \u2014 Сломана рука")
 	assert_str(view.reason).is_equal("Сломана рука")
 	assert_bool(_t.session.no_open_options()).is_true()
 
@@ -123,6 +123,23 @@ func test_a_risky_option_of_an_unknown_stat_is_hidden_and_logged() -> void:
 	# Assert
 	assert_object(_view("r")).is_null()
 	assert_int(_t.logs.size()).is_equal(1)
+
+
+func test_a_stat_without_a_name_is_hidden_and_logged_never_shown_by_id() -> void:
+	# Arrange
+	_t.hero.stats[0].name = ""
+	_t.started()
+	# Assert
+	assert_object(_view("r")).is_null()
+	assert_int(_t.logs.size()).is_equal(1)
+
+
+func test_the_stat_name_comes_from_the_hero_data() -> void:
+	# Arrange
+	_t.hero.stats[0].name = "Мощь"
+	_t.started()
+	# Assert
+	assert_str(_view("r").caption).starts_with("Мощь\u00a0+4")
 
 
 func test_latch_survives_cancel_and_resets_on_a_new_scene() -> void:
@@ -202,3 +219,56 @@ func test_advance_twice_moves_once() -> void:
 	# Assert
 	assert_int(first.kind).is_equal(StoryScreen.Kind.SCENE)
 	assert_object(second).is_null()
+
+
+func test_core_refuses_a_touch_before_the_stake_is_read() -> void:
+	# Arrange
+	_t.started(false)
+	var writes: int = _t.writes()
+	# Act
+	var plain: StoryScreen = _t.session.apply_plain(_t.option("a"))
+	var risky: bool = _t.session.choose_check(_t.option("r"))
+	# Assert
+	assert_object(plain).is_null()
+	assert_bool(risky).is_false()
+	assert_int(_t.session.journal_size()).is_equal(0)
+	assert_int(_t.writes()).is_equal(writes)
+	assert_bool(_t.session.waiting()).is_false()
+
+
+func test_core_refuses_a_hindered_risky_option_even_after_the_latch() -> void:
+	# Arrange
+	_flag("f_b").blocks = PackedStringArray(["strength"])
+	_risky_in_s2()
+	_t.started()
+	_t.session.apply_plain(_t.option("a"))
+	_t.settle()
+	_t.session.advance()
+	_t.session.report_stake_visible()
+	var calls: int = _t.source.calls
+	# Act
+	var chosen: bool = _t.session.choose_check(_t.option("r"))
+	# Assert
+	assert_bool(chosen).is_false()
+	assert_object(_t.session.roll()).is_null()
+	assert_int(_t.source.calls).is_equal(calls)
+
+
+func test_core_refuses_an_option_that_is_not_in_the_choice() -> void:
+	# Arrange
+	_t.hero.chapters[0].scenes[0].options[0].condition = "f_d"
+	_t.started()
+	# Act
+	var screen: StoryScreen = _t.session.apply_plain(_t.hero.chapters[0].scenes[0].options[0])
+	# Assert
+	assert_object(screen).is_null()
+	assert_int(_t.session.journal_size()).is_equal(0)
+
+
+func test_option_views_are_copies_the_ui_cannot_use_to_open_a_card() -> void:
+	# Arrange
+	_t.started(false)
+	_t.session.option_views()[0].state = STATE.OPEN
+	# Assert
+	assert_array(_states()).is_equal([STATE.INACTIVE, STATE.INACTIVE, STATE.INACTIVE])
+	assert_object(_t.session.apply_plain(_t.option("a"))).is_null()

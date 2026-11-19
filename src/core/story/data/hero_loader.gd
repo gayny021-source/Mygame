@@ -9,7 +9,7 @@ extends RefCounted
 
 const DATA_ROOT := "res://assets/data/heroes"
 const HERO_KEYS: PackedStringArray = ["schema_version", "id", "stats", "chapters", "endings", "portrait", "accent", "sum_exception"]
-const STAT_KEYS: PackedStringArray = ["id", "bonus"]
+const STAT_KEYS: PackedStringArray = ["id", "name", "bonus"]
 
 
 ## Loads the hero `hero_id` from `<root>/<hero_id>/`; tests pass the fixtures folder as `root`.
@@ -36,6 +36,7 @@ static func load_hero(hero_id: String, root: String = DATA_ROOT) -> LoadResult:
 	for stat_reader: DictReader in reader.children("stats", STAT_KEYS):
 		var stat: StatData = StatData.new()
 		stat.id = stat_reader.id()
+		stat.name = stat_reader.text("name")
 		stat.bonus = stat_reader.integer("bonus")
 		if not stat.id.is_empty() and stat_ids.has(stat.id):
 			stat_reader.issue("BS-01", "id", "характеристика «%s» повторяется" % stat.id)

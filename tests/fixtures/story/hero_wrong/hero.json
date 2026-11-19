@@ -3,8 +3,8 @@
   "schema_version": 1,
   "id": "hero_other",
   "stats": [
-    {"id": "strength", "bonus": 1},
-    {"id": "strength", "bonus": 2}
+    {"id": "strength", "name": "Сила", "bonus": 1},
+    {"id": "strength", "name": "Сила", "bonus": 2}
   ],
   "chapters": [],
   "endings": [],

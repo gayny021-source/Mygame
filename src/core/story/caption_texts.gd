@@ -3,21 +3,23 @@ extends RefCounted
 ## Option captions of the Reading and Roll screens (reading-screen.md, Dependencies «готовая подпись»;
 ## choice-system.md, rule 4; d20-checks.md AC-07). The words live in `assets/data/config/captions.json`,
 ## the code only fills the templates and writes the sign (U+2212 for a minus, `+` for a plus).
-## A file that did not read whole is not `valid`: the captions are empty and the caller logs it.
+## A file that did not read whole gives empty captions and findings in `issues`; the caller logs them.
+## Stat names are not here: they come from the hero data (StatData.name).
 ##
-## Usage: [code]var line: String = texts.risky("strength", 4, "medium", 13, 60)[/code]
+## Usage: [code]var line: String = texts.risky("Сила", 4, "medium", 13, 60)[/code]
 
 const PATH := "res://assets/data/config/captions.json"
-const MINUS := "−"
-const TEMPLATES: PackedStringArray = ["risky", "plain", "plain_price", "closed"]
+const MINUS := "\u2212"
+const KEYS: PackedStringArray = ["schema_version", "risky", "plain", "plain_price", "closed", "levels"]
 
-var valid: bool = false
-var _templates: Dictionary[String, String] = {}
-var _levels: Dictionary = {}
-var _stats: Dictionary = {}
+var _risky: String
+var _plain: String
+var _plain_price: String
+var _closed: String
+var _levels: Dictionary[String, String] = {}
 
 
-## Reads the file at `path`; a finding goes to `issues` and leaves the texts invalid.
+## Reads the file at `path`; a finding goes to `issues`, and the texts stay empty.
 static func load_file(path: String, issues: Array[DataIssue]) -> CaptionTexts:
 	var before: int = issues.size()
 	var data: Dictionary = ChapterLoader.read_object(path, issues)
@@ -26,30 +28,28 @@ static func load_file(path: String, issues: Array[DataIssue]) -> CaptionTexts:
 	return from_dict(data, path, issues)
 
 
+## Texts from a parsed object; every template and every level word is required (DT-03, DT-02).
 static func from_dict(data: Dictionary, source: String, issues: Array[DataIssue]) -> CaptionTexts:
 	var texts: CaptionTexts = CaptionTexts.new()
-	for key: String in TEMPLATES:
-		if not data.get(key) is String:
-			issues.append(DataIssue.new("DT-03", source, key, "нет шаблона подписи"))
-			return texts
-		texts._templates[key] = data[key]
-	if not data.get("levels") is Dictionary or not data.get("stats") is Dictionary:
-		issues.append(DataIssue.new("DT-03", source, "levels", "нет таблицы уровней или характеристик"))
+	var reader: DictReader = DictReader.new(data, source, issues)
+	if not reader.schema_ok(KEYS):
 		return texts
-	texts._levels = data["levels"]
-	texts._stats = data["stats"]
-	texts.valid = true
+	texts._risky = reader.text("risky")
+	texts._plain = reader.text("plain")
+	texts._plain_price = reader.text("plain_price")
+	texts._closed = reader.text("closed")
+	var levels: DictReader = reader.child("levels", CheckData.LEVELS)
+	if levels == null:
+		reader.issue("DT-03", "levels", "нет таблицы слов уровней")
+		return texts
+	for level: String in CheckData.LEVELS:
+		texts._levels[level] = levels.text(level)
 	return texts
-
-
-## Name of a stat; its id when the file does not name it.
-func stat_name(stat_id: String) -> String:
-	return str(_stats.get(stat_id, stat_id))
 
 
 ## Word of a check level; its id when the file does not name it.
 func level_word(level: String) -> String:
-	return str(_levels.get(level, level))
+	return _levels.get(level, level)
 
 
 ## «+4», «0», «−1».
@@ -61,25 +61,25 @@ static func signed(bonus: int) -> String:
 	return "0"
 
 
-## «Сила +4 · Средне 13 · шанс 60 %».
-func risky(stat_id: String, bonus: int, level: String, dc: int, chance: int) -> String:
-	return _fill("risky", {"stat": stat_name(stat_id), "bonus": signed(bonus), "level": level_word(level), "dc": str(dc), "chance": str(chance)})
+## «Сила +4 · Средне 13 · шанс 60 %»; `stat_name` is the name from the hero data.
+func risky(stat_name: String, bonus: int, level: String, dc: int, chance: int) -> String:
+	return _fill(_risky, {"stat": stat_name, "bonus": signed(bonus), "level": level_word(level), "dc": str(dc), "chance": str(chance)})
 
 
 ## «Без броска», with the price «Без броска · цена» when there is one.
 func plain(price: String = "") -> String:
 	if price.is_empty():
-		return _fill("plain", {})
-	return _fill("plain_price", {"price": price})
+		return _plain
+	return _fill(_plain_price, {"price": price})
 
 
-## «Сила закрыта: причина».
-func closed(stat_id: String, reason: String) -> String:
-	return _fill("closed", {"stat": stat_name(stat_id), "reason": reason})
+## «Закрыто: Сила — причина» (CEO 2026-11-19).
+func closed(stat_name: String, reason: String) -> String:
+	return _fill(_closed, {"stat": stat_name, "reason": reason})
 
 
-func _fill(key: String, values: Dictionary) -> String:
-	var line: String = _templates.get(key, "")
-	for name: String in values:
-		line = line.replace("{%s}" % name, values[name])
+static func _fill(template: String, values: Dictionary) -> String:
+	var line: String = template
+	for key: String in values:
+		line = line.replace("{%s}" % key, values[key])
 	return line

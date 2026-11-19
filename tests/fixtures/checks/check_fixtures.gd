@@ -5,6 +5,7 @@ extends RefCounted
 const SUCCESS := "bridge_win"
 const FAILURE := "bridge_fall"
 const CRIT_SUCCESS := "Мост выдержал."
+const STAT_NAMES: Dictionary = {"strength": "Сила", "charisma": "Харизма", "mind": "Ум", "faith": "Вера"}
 const CRIT_FAILURE := "Доска треснула."
 
 
@@ -31,6 +32,7 @@ static func config() -> D20Config:
 static func hero(stat_id: String, bonus: int) -> HeroData:
 	var stat: StatData = StatData.new()
 	stat.id = stat_id
+	stat.name = STAT_NAMES.get(stat_id, stat_id)
 	stat.bonus = bonus
 	var data: HeroData = HeroData.new()
 	data.stats.append(stat)
