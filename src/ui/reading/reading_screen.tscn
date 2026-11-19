@@ -1,0 +1,186 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://src/ui/reading_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://src/ui/safe_area_margins.gd" id="2_safe"]
+[ext_resource type="Script" path="res://src/ui/reading/reading_screen.gd" id="3_screen"]
+[ext_resource type="Script" path="res://src/ui/reading/tap_panel.gd" id="4_tap"]
+
+[sub_resource type="Gradient" id="Gradient_fade"]
+colors = PackedColorArray(0.9137255, 0.8745098, 0.7764706, 0, 0.9137255, 0.8745098, 0.7764706, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fade"]
+gradient = SubResource("Gradient_fade")
+width = 4
+height = 64
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)
+
+[node name="ReadingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+mouse_filter = 2
+script = ExtResource("3_screen")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"ScreenBackground"
+
+[node name="Safe" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 96
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 72
+mouse_filter = 2
+script = ExtResource("2_safe")
+
+[node name="Column" type="VBoxContainer" parent="Safe"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Goal" type="PanelContainer" parent="Safe/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 168)
+layout_mode = 2
+script = ExtResource("4_tap")
+
+[node name="Row" type="HBoxContainer" parent="Safe/Column/Goal"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Accent" type="ColorRect" parent="Safe/Column/Goal/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 0)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.58, 0.1, 0.16, 1)
+
+[node name="Info" type="VBoxContainer" parent="Safe/Column/Goal/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Dots" type="HBoxContainer" parent="Safe/Column/Goal/Row/Info"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="GoalLabel" type="Label" parent="Safe/Column/Goal/Row/Info"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"CaptionLabel"
+autowrap_mode = 3
+
+[node name="Scroll" type="ScrollContainer" parent="Safe/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+scroll_deadzone = 24
+
+[node name="Flow" type="VBoxContainer" parent="Safe/Column/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 24
+
+[node name="Bottom" type="Control" parent="Safe"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Fade" type="TextureRect" parent="Safe/Bottom"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_fade")
+expand_mode = 1
+
+[node name="Hint" type="PanelContainer" parent="Safe/Bottom"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="HintLabel" type="Label" parent="Safe/Bottom/Hint"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"CaptionLabel"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="SheetLayer" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Scrim" type="ColorRect" parent="SheetLayer"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.09, 0.078, 0.059, 0.6)
+
+[node name="Sheet" type="PanelContainer" parent="SheetLayer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = -96.0
+offset_right = -48.0
+offset_bottom = -96.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="SheetBody" type="VBoxContainer" parent="SheetLayer/Sheet"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Close" type="Button" parent="SheetLayer/Sheet/SheetBody"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 168)
+layout_mode = 2
