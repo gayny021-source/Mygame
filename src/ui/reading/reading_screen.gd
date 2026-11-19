@@ -462,7 +462,7 @@ func _build_flow_error() -> void:
 	_error.add_child(title)
 	var note: Label = Label.new()
 	note.name = "Note"
-	note.text = tr("Заглушка, текст пишет writer: ход не продолжился.")
+	note.text = tr("Ход не прошёл. Последнее сохранение цело: загрузите его.")
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_error.add_child(note)
 	var fill: Control = Control.new()

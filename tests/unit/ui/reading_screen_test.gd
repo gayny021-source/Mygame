@@ -285,11 +285,11 @@ func test_the_error_buttons_are_big_stacked_and_apart() -> void:
 	assert_float(menu_button.position.y - (load_button.position.y + load_button.size.y)).is_greater_equal(24.0)
 
 
-func test_the_error_screen_has_a_title_and_a_writer_placeholder_line() -> void:
+func test_the_error_screen_has_a_title_and_the_approved_line() -> void:
 	_fail_plain()
 	var panel: Node = _screen.find_child("FlowError", true, false)
 	assert_str((panel.find_child("Title", true, false) as Label).text).is_equal("Не удалось продолжить")
-	assert_str((panel.find_child("Note", true, false) as Label).text).contains("writer")
+	assert_str((panel.find_child("Note", true, false) as Label).text).is_equal("Ход не прошёл. Последнее сохранение цело: загрузите его.")
 
 
 func test_error_buttons_ignore_touches_in_the_guard_window() -> void:
