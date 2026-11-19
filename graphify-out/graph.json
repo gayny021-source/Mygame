@@ -391,6 +391,11 @@
    "group": "GDD / Docs"
   },
   {
+   "id": "design/narrative/chapter-01-sheet.md",
+   "label": "chapter-01-sheet.md",
+   "group": "GDD / Docs"
+  },
+  {
    "id": "design/narrative/chapter-writing-rules.md",
    "label": "chapter-writing-rules.md",
    "group": "GDD / Docs"
@@ -2384,6 +2389,38 @@
   {
    "source": "design/gdd/systems-index.md",
    "target": "design/gdd/scene-illustrations.md"
+  },
+  {
+   "source": "design/narrative/chapter-01-sheet.md",
+   "target": "USER_PREFERENCES.md"
+  },
+  {
+   "source": "design/narrative/chapter-01-sheet.md",
+   "target": "design/gdd/branching-story.md"
+  },
+  {
+   "source": "design/narrative/chapter-01-sheet.md",
+   "target": "design/gdd/chapter-goal.md"
+  },
+  {
+   "source": "design/narrative/chapter-01-sheet.md",
+   "target": "design/gdd/d20-checks.md"
+  },
+  {
+   "source": "design/narrative/chapter-01-sheet.md",
+   "target": "design/gdd/heroes.md"
+  },
+  {
+   "source": "design/narrative/chapter-01-sheet.md",
+   "target": "design/gdd/run-state.md"
+  },
+  {
+   "source": "design/narrative/chapter-01-sheet.md",
+   "target": "design/narrative/chapter-writing-rules.md"
+  },
+  {
+   "source": "design/narrative/chapter-01-sheet.md",
+   "target": "design/narrative/voices/rovend.md"
   },
   {
    "source": "design/narrative/chapter-writing-rules.md",
